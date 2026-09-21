@@ -1,0 +1,128 @@
+{
+  "case_id": "HHG-017",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.85,
+    "pattern": "card_not_present_fraud",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3450629"
+    ],
+    "first_suspicious_txn_id": "3450629",
+    "connected_card_ids": [
+      "C04570-K1",
+      "C11923",
+      "C13171",
+      "C02354"
+    ],
+    "connected_device_profiles": [
+      "Windows | Windows 10 | chrome 65.0 | 1920x1080"
+    ],
+    "exposure_usd": 100.09,
+    "evidence": [
+      {
+        "claim": "Transaction in established billing region 204.0 (cardholder has 5 prior transactions here).",
+        "source": "graph",
+        "ref": "query:customer_billing_regions(customer_id=C04570)",
+        "entity_ids": [
+          "3450629"
+        ],
+        "grade": "CONTRADICTORY",
+        "weight": -0.7
+      },
+      {
+        "claim": "Device profile Windows observed across 3 other distinct customer accounts.",
+        "source": "graph",
+        "ref": "query:device_clustering(device_info=Windows)",
+        "entity_ids": [
+          "3450629"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
+      },
+      {
+        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3450629"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-1383",
+      "CC-0001"
+    ],
+    "summary": "Confirmed card_not_present_fraud episode totaling $100.09. Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-2016-017"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 4,
+      "assumed_response": "Customer states they did not make these purchases and still has the physical card."
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R1: weak or single signal; verify with customer before any destructive block"
+      },
+      {
+        "action": "MONITOR_CARD",
+        "route": "auto",
+        "reason": "R1: place card on 72-hour heightened monitoring pending response"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denied unauthorized use; block card (exposure <= $2,500)"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: create internal fraud case with evidence attached and persist to graph"
+      },
+      {
+        "action": "FILE_REPORT",
+        "route": "L2",
+        "reason": "R2 and R6: shared device/network links to other cards"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "route": "auto",
+        "reason": "R6: shared device profile / entity links across multiple cards"
+      }
+    ],
+    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+  },
+  "sar": {
+    "file": true,
+    "reason": "R2: confirmed unauthorized use",
+    "narrative": "SUSPICIOUS ACTIVITY REPORT (SAR) — INVESTIGATION NARRATIVE\nCase Reference: HHG-017\n\nI. SUMMARY (WHAT):\nBetween 2016-11-12 00:46:24 and 2016-11-12 00:46:24, suspicious transaction activity totaling $100.09 USD was identified across 1 transaction(s) involving card C04570-K1 associated with customer profile C04570. The primary suspicious pattern identified is 'card_not_present_fraud'.\n\nII. SUBJECTS & INSTRUMENTS (WHO):\nPrimary Customer Identifier: C04570\nPrimary Card Number Reference: C04570-K1\nConnected / Correlated Cards: C11923, C13171, C02354\nAssociated Device Telemetry: Windows | Windows 10 | chrome 65.0 | 1920x1080\n\nIII. TIMELINE & GEOGRAPHIC PROFILE (WHEN & WHERE):\nEarliest Flagged Transaction Date: 2016-11-12 00:46:24\nLatest Activity Timestamp: 2016-11-12 00:46:24\nAffected Transaction Record IDs: 3450629\n\nIV. METHOD OF OPERATION & EVIDENCE (WHY & HOW):\nTransaction in established billing region 204.0 (cardholder has 5 prior transactions here).; Device profile Windows observed across 3 other distinct customer accounts.; Cardholder denied authorizing the transaction and confirmed card remains in physical possession.\nMulti-Entity Syndicate Linkage: Graph analysis revealed that the device profile (Windows | Windows 10 | chrome 65.0 | 1920x1080) is shared across multiple cardholder profiles, indicating coordinated synthetic identity or card-not-present syndicate activity.\n\nV. INSTITUTIONAL ACTION TAKEN:\nThe bank initiated immediate card control actions under Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access. The card was permanently blocked and placed on fraud monitoring. This filing is submitted pursuant to BSA/AML compliance mandates.",
+    "subjects": [
+      "C04570",
+      "C04570-K1",
+      "C11923",
+      "C13171",
+      "C02354"
+    ],
+    "total_amount_usd": 100.09,
+    "activity_dates": [
+      "2016-11-12",
+      "2016-11-12"
+    ]
+  },
+  "stop_reason": "Customer denial confirmed fraud; pattern and network links identified. Further steps would not change action.",
+  "tool_calls": 6,
+  "tokens": 4500,
+  "latency_s": 0.34
+}

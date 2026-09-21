@@ -1,0 +1,141 @@
+# ==============================================================================
+# TigerGraph Agentic Fraud Detection - Comprehensive .gitignore
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Credentials, API Keys & Secrets (CRITICAL)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.cert
+secrets/
+credentials.json
+token.json
+
+# ------------------------------------------------------------------------------
+# 2. Large Datasets & Raw Telemetry (Exceeds GitHub size limits)
+# ------------------------------------------------------------------------------
+data/**/*.csv
+data/**/*.parquet
+data/**/*.tar.gz
+data/**/*.zip
+data/**/*.tsv
+data/**/*.jsonl
+
+# Explicit dataset files
+data/hhgoa_ieee/transactions.csv
+data/hhgoa_ieee/identity.csv
+data/hhgoa_ieee/closed_cases_history.csv
+
+# Keep benchmark cases definition, README and folder structure
+!data/hhgoa_ieee/case_pack.csv
+!data/hhgoa_ieee/README.md
+!data/**/.gitkeep
+
+# ------------------------------------------------------------------------------
+# 3. Python Bytecode, Caches & Builds
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+
+# ------------------------------------------------------------------------------
+# 4. Virtual Environments
+# ------------------------------------------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ------------------------------------------------------------------------------
+# 5. Testing & Code Coverage
+# ------------------------------------------------------------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# ------------------------------------------------------------------------------
+# 6. IDE, Workspace & Agent Artifacts
+# ------------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.claude/
+.cursor/
+.antigravity/
+.system_generated/
+# Agent Skills & Configurations (Do not track in git)
+.agents/
+skills-lock.json
+scratch/
+temp/
+tmp/
+
+# ------------------------------------------------------------------------------
+# 7. Operating System Metadata
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ------------------------------------------------------------------------------
+# 8. Logs & Runtime Output
+# ------------------------------------------------------------------------------
+*.log
+logs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ------------------------------------------------------------------------------
+# 9. Large Media & Demo Recordings
+# ------------------------------------------------------------------------------
+*.mp4
+*.mov
+*.avi
+*.wmv
+*.webm
+demo/*.mp4
+demo/*.mov
+
+TRACKING.md

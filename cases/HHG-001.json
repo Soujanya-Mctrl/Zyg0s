@@ -1,0 +1,87 @@
+{
+  "case_id": "HHG-001",
+  "case": {
+    "status": "closed_cleared",
+    "verdict": "cleared",
+    "fraud_probability": 0.05,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "3514030",
+    "connected_card_ids": [
+      "C12382-K1"
+    ],
+    "connected_device_profiles": [],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Transaction in established billing region 444.0 (cardholder has 10 prior transactions here).",
+        "source": "graph",
+        "ref": "query:customer_billing_regions(customer_id=C12382)",
+        "entity_ids": [
+          "3514030"
+        ],
+        "grade": "CONTRADICTORY",
+        "weight": -0.7
+      },
+      {
+        "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3514030"
+        ],
+        "grade": "CONTRADICTORY",
+        "weight": -0.9
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-1066",
+      "CC-1673"
+    ],
+    "summary": "Investigation concluded alert is legitimate. Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-2016-001"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 4,
+      "assumed_response": "Customer confirms they made this purchase and activity is authorized."
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R1: weak or single signal; verify with customer before any destructive block"
+      },
+      {
+        "action": "MONITOR_CARD",
+        "route": "auto",
+        "reason": "R1: place card on 72-hour heightened monitoring pending response"
+      }
+    ],
+    "final": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
+      }
+    ],
+    "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+  },
+  "sar": {
+    "file": false,
+    "reason": null,
+    "narrative": null,
+    "subjects": [],
+    "total_amount_usd": 0.0,
+    "activity_dates": []
+  },
+  "stop_reason": "Customer confirmation and established billing history cleared the alert as legitimate; no fraud.",
+  "tool_calls": 6,
+  "tokens": 4500,
+  "latency_s": 2.76
+}

@@ -1,0 +1,27 @@
+# Core Graph Database & MCP
+pyTigerGraph>=2.0.3
+pyTigerGraph-mcp>=1.0.1
+tigergraph-mcp>=1.0.0
+
+# Agent Orchestration & Reasoning
+langgraph>=1.0.8
+langgraph-checkpoint>=4.1.0
+langchain>=1.2.9
+langchain-core>=1.4.0
+langchain-community>=0.4.1
+groq>=1.7.0
+
+# Data Models & Utilities
+pydantic>=2.13.0
+pydantic-settings>=2.14.0
+python-dotenv>=1.2.0
+requests>=2.34.0
+networkx>=3.6.0
+pandas>=3.0.0
+
+# REST API & Telemetry Backend (For React Command Center)
+fastapi>=0.115.0
+uvicorn>=0.34.0
+
+# Testing & Quality
+pytest>=9.0.0

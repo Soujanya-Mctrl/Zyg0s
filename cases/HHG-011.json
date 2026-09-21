@@ -1,0 +1,104 @@
+{
+  "case_id": "HHG-011",
+  "case": {
+    "status": "closed_cleared",
+    "verdict": "cleared",
+    "fraud_probability": 0.05,
+    "pattern": "none",
+    "pattern_description": "",
+    "affected_txn_ids": [],
+    "first_suspicious_txn_id": "3583368",
+    "connected_card_ids": [
+      "C11923-K2"
+    ],
+    "connected_device_profiles": [
+      "SM-G610F Build/NRD90M | chrome 66.0 for android"
+    ],
+    "exposure_usd": 0.0,
+    "evidence": [
+      {
+        "claim": "Disputed transaction of $131.30 matches customer recurring charge history (seen 11 prior times).",
+        "source": "graph",
+        "ref": "query:customer_recurring_history(customer_id=C11923, amt=131.3)",
+        "entity_ids": [
+          "3583368"
+        ],
+        "grade": "CONTRADICTORY",
+        "weight": -0.8
+      },
+      {
+        "claim": "Transaction initiated from a newly observed device profile: SM-G610F Build/NRD90M | chrome 66.0 for android.",
+        "source": "telemetry",
+        "ref": "identity.csv:id_15(TransactionID=3583368)",
+        "entity_ids": [
+          "3583368"
+        ],
+        "grade": "CIRCUMSTANTIAL",
+        "weight": 0.6
+      },
+      {
+        "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3583368"
+        ],
+        "grade": "CONTRADICTORY",
+        "weight": -0.9
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-0031",
+      "CC-0290"
+    ],
+    "summary": "Investigation concluded alert is legitimate. Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-2016-011"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 4,
+      "assumed_response": "Customer confirms they made this purchase and activity is authorized."
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R7: transaction matches recurring pattern; create case for record"
+      },
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R7: verify recurring charge with customer"
+      },
+      {
+        "action": "WARN_CUSTOMER",
+        "route": "auto",
+        "reason": "R7: send informational reminder regarding subscription billing"
+      }
+    ],
+    "final": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
+      }
+    ],
+    "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+  },
+  "sar": {
+    "file": false,
+    "reason": null,
+    "narrative": null,
+    "subjects": [],
+    "total_amount_usd": 0.0,
+    "activity_dates": []
+  },
+  "stop_reason": "Customer confirmation and established billing history cleared the alert as legitimate; no fraud.",
+  "tool_calls": 6,
+  "tokens": 4500,
+  "latency_s": 0.34
+}

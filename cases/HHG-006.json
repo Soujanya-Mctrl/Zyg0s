@@ -1,0 +1,138 @@
+{
+  "case_id": "HHG-006",
+  "case": {
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.85,
+    "pattern": "card_not_present_new_device",
+    "pattern_description": "",
+    "affected_txn_ids": [
+      "3476682"
+    ],
+    "first_suspicious_txn_id": "3476682",
+    "connected_card_ids": [
+      "C07297-K1",
+      "C11923",
+      "C07987",
+      "C02354"
+    ],
+    "connected_device_profiles": [
+      "Trident/7.0 | Windows 7 | ie 11.0 for desktop | 1920x1080"
+    ],
+    "exposure_usd": 482.12,
+    "evidence": [
+      {
+        "claim": "Transaction in established billing region 264.0 (cardholder has 28 prior transactions here).",
+        "source": "graph",
+        "ref": "query:customer_billing_regions(customer_id=C07297)",
+        "entity_ids": [
+          "3476682"
+        ],
+        "grade": "CONTRADICTORY",
+        "weight": -0.7
+      },
+      {
+        "claim": "Device profile Trident/7.0 observed across 3 other distinct customer accounts.",
+        "source": "graph",
+        "ref": "query:device_clustering(device_info=Trident/7.0)",
+        "entity_ids": [
+          "3476682"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
+      },
+      {
+        "claim": "Transaction initiated from a newly observed device profile: Trident/7.0 | Windows 7 | ie 11.0 for desktop | 1920x1080.",
+        "source": "telemetry",
+        "ref": "identity.csv:id_15(TransactionID=3476682)",
+        "entity_ids": [
+          "3476682"
+        ],
+        "grade": "CIRCUMSTANTIAL",
+        "weight": 0.6
+      },
+      {
+        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3476682"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
+      }
+    ],
+    "similar_prior_cases": [
+      "CC-0011",
+      "CC-0018"
+    ],
+    "summary": "Confirmed card_not_present_new_device episode totaling $482.12. Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
+    "written_to_graph": true,
+    "graph_case_id": "CASE-2016-006"
+  },
+  "evidence_requests": [
+    {
+      "type": "customer_validation",
+      "asked_after_step": 4,
+      "assumed_response": "Customer states they did not make these purchases and still has the physical card."
+    }
+  ],
+  "next_best_actions": {
+    "initial": [
+      {
+        "action": "DECLINE_TRANSACTION",
+        "route": "L1",
+        "reason": "Customer report initiated; hold pending transactions"
+      },
+      {
+        "action": "VERIFY_WITH_CUSTOMER",
+        "route": "auto",
+        "reason": "R1: verify card possession and transaction details with customer"
+      }
+    ],
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denied unauthorized use; block card (exposure <= $2,500)"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: create internal fraud case with evidence attached and persist to graph"
+      },
+      {
+        "action": "FILE_REPORT",
+        "route": "L2",
+        "reason": "R2 and R6: shared device/network links to other cards"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "route": "auto",
+        "reason": "R6: shared device profile / entity links across multiple cards"
+      }
+    ],
+    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+  },
+  "sar": {
+    "file": true,
+    "reason": "R2: confirmed unauthorized use",
+    "narrative": "SUSPICIOUS ACTIVITY REPORT (SAR) — INVESTIGATION NARRATIVE\nCase Reference: HHG-006\n\nI. SUMMARY (WHAT):\nBetween 2016-11-22 02:30:00 and 2016-11-22 02:30:00, suspicious transaction activity totaling $482.12 USD was identified across 1 transaction(s) involving card C07297-K1 associated with customer profile C07297. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\nII. SUBJECTS & INSTRUMENTS (WHO):\nPrimary Customer Identifier: C07297\nPrimary Card Number Reference: C07297-K1\nConnected / Correlated Cards: C11923, C07987, C02354\nAssociated Device Telemetry: Trident/7.0 | Windows 7 | ie 11.0 for desktop | 1920x1080\n\nIII. TIMELINE & GEOGRAPHIC PROFILE (WHEN & WHERE):\nEarliest Flagged Transaction Date: 2016-11-22 02:30:00\nLatest Activity Timestamp: 2016-11-22 02:30:00\nAffected Transaction Record IDs: 3476682\n\nIV. METHOD OF OPERATION & EVIDENCE (WHY & HOW):\nTransaction in established billing region 264.0 (cardholder has 28 prior transactions here).; Device profile Trident/7.0 observed across 3 other distinct customer accounts.; Transaction initiated from a newly observed device profile: Trident/7.0 | Windows 7 | ie 11.0 for desktop | 1920x1080.; Cardholder denied authorizing the transaction and confirmed card remains in physical possession.\nMulti-Entity Syndicate Linkage: Graph analysis revealed that the device profile (Trident/7.0 | Windows 7 | ie 11.0 for desktop | 1920x1080) is shared across multiple cardholder profiles, indicating coordinated synthetic identity or card-not-present syndicate activity.\n\nV. INSTITUTIONAL ACTION TAKEN:\nThe bank initiated immediate card control actions under Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access. The card was permanently blocked and placed on fraud monitoring. This filing is submitted pursuant to BSA/AML compliance mandates.",
+    "subjects": [
+      "C07297",
+      "C07297-K1",
+      "C11923",
+      "C07987",
+      "C02354"
+    ],
+    "total_amount_usd": 482.12,
+    "activity_dates": [
+      "2016-11-22",
+      "2016-11-22"
+    ]
+  },
+  "stop_reason": "Customer denial confirmed fraud; pattern and network links identified. Further steps would not change action.",
+  "tool_calls": 6,
+  "tokens": 4500,
+  "latency_s": 0.32
+}
