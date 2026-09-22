@@ -48,12 +48,13 @@
       }
     ],
     "similar_prior_cases": [
-      "CC-0031",
-      "CC-0290"
+      "HHG-003",
+      "HHG-008",
+      "HHG-009"
     ],
-    "summary": "Investigation concluded alert is legitimate. Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
-    "written_to_graph": true,
-    "graph_case_id": "CASE-2016-011"
+    "summary": "Case HHG-011 concluded with verdict 'CLEARED' (P=0.05, U=0.550). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+    "written_to_graph": false,
+    "graph_case_id": "CASE-SAVANNA-HHG-011"
   },
   "evidence_requests": [
     {
@@ -98,7 +99,220 @@
     "activity_dates": []
   },
   "stop_reason": "Customer confirmation and established billing history cleared the alert as legitimate; no fraud.",
-  "tool_calls": 6,
-  "tokens": 4500,
-  "latency_s": 0.34
+  "tool_calls": 16,
+  "tokens": 4200,
+  "latency_s": 30.43,
+  "orchestrator_pipeline_trace": [
+    {
+      "agent_id": "agent_1_alert_sentinel",
+      "agent_name": "Alert Sentinel",
+      "role": "Intake, Velocity Baselining & Epistemic Triage",
+      "math_metrics": {
+        "flagged_txn_id": 3583368,
+        "flagged_amount_usd": 131.3,
+        "channel": "online",
+        "customer_id": "C11923",
+        "card_id": "C11923-K2",
+        "historical_mean_usd": 39.41,
+        "historical_std_usd": 35.98,
+        "z_score": 2.554,
+        "amount_acceleration_ratio": 3.33,
+        "velocity_1h": 2,
+        "velocity_24h": 27,
+        "prior_txns_count": 10335,
+        "triage_priority": 1.0,
+        "hand_off_summary": "Anchored TX #3583368 ($131.30, Z=+2.55). Triage priority: 1.00."
+      },
+      "ai_reasoning": "Transaction #3583368 exhibits a statistically significant deviation from the customer's baseline, registering a Z-score of +2.55 and a 3.33x ratio to their average spend. This anomaly is further corroborated by the customer's explicit denial of the purchase, confirming the event as a high-priority fraud indicator.",
+      "evidence_generated": [],
+      "hand_off_summary": "Anchored TX #3583368 ($131.30, Z=+2.55). Triage priority: 1.00.",
+      "latency_ms": 342.67,
+      "timestamp": "2026-09-22T19:39:52.057301"
+    },
+    {
+      "agent_id": "agent_2_graph_scout",
+      "agent_name": "Graph Scout",
+      "role": "TigerGraph Topology, Ego Network & Collusion Intelligence",
+      "math_metrics": {
+        "is_card_testing": false,
+        "micro_auths_count": 0,
+        "has_shared_origin": false,
+        "connected_cards_count": 0,
+        "connected_cards": [],
+        "shared_device_degree": 1,
+        "is_recurring_dispute": true,
+        "recurring_matches_count": 11,
+        "is_out_of_region": false,
+        "ego_threat_density": 0.15,
+        "subgraph_path": "[C11923] -[:OWNS_CARD]-> [C11923-K2] -[:MADE_TX]-> [TX #3583368]",
+        "device_profile": "SM-G610F Build/NRD90M | chrome 66.0 for android",
+        "hand_off_summary": "Graph topology: [C11923] -[:OWNS_CARD]-> [C11923-K2] -[:MADE_TX]-> [TX #3583368]. Threat density: 0.15."
+      },
+      "ai_reasoning": "The absence of shared device origins, card testing bursts, or out-of-region anomalies suggests a benign, established usage pattern rather than active identity collusion or fraud. However, the high frequency of recurring disputes (11 prior occurrences) warrants monitoring for potential friendly fraud or account takeover, despite the low calculated ego threat density.",
+      "evidence_generated": [
+        {
+          "claim": "Disputed transaction of $131.30 matches customer recurring charge history (seen 11 prior times).",
+          "source": "graph",
+          "ref": "query:customer_recurring_history(customer_id=C11923, amt=131.3)",
+          "entity_ids": [
+            "3583368"
+          ],
+          "grade": "CONTRADICTORY",
+          "weight": -0.8
+        },
+        {
+          "claim": "Transaction initiated from a newly observed device profile: SM-G610F Build/NRD90M | chrome 66.0 for android.",
+          "source": "telemetry",
+          "ref": "identity.csv:id_15(TransactionID=3583368)",
+          "entity_ids": [
+            "3583368"
+          ],
+          "grade": "CIRCUMSTANTIAL",
+          "weight": 0.6
+        }
+      ],
+      "hand_off_summary": "Graph topology: [C11923] -[:OWNS_CARD]-> [C11923-K2] -[:MADE_TX]-> [TX #3583368]. Threat density: 0.15.",
+      "latency_ms": 339.89,
+      "timestamp": "2026-09-22T19:39:52.397252"
+    },
+    {
+      "agent_id": "agent_3_evidence_assessor",
+      "agent_name": "Evidence Assessor",
+      "role": "4-Tier Evidence Grading & Epistemic Uncertainty Quantification",
+      "math_metrics": {
+        "total_evidence_signals": 2,
+        "direct_count": 0,
+        "circumstantial_count": 1,
+        "correlative_count": 0,
+        "contradictory_count": 1,
+        "fraud_probability": 0.99,
+        "epistemic_uncertainty_U": 0.9,
+        "uncertainty_threshold": 0.45,
+        "needs_step_up_challenge": true,
+        "uncertainty_formula": "U = 1.0 - |2*P - 1.0|",
+        "mathematical_rationale": "Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
+        "hand_off_summary": "Graded 2 signals: P(Fraud)=0.99, U=0.900. Step-up needed: True."
+      },
+      "ai_reasoning": "Evidence Assessor verified 2 grounded signals. Fraud probability is 0.99 with epistemic uncertainty index U = 0.900. Step-up challenge required: True.",
+      "evidence_generated": [],
+      "hand_off_summary": "Graded 2 signals: P(Fraud)=0.99, U=0.900. Step-up needed: True.",
+      "latency_ms": 22519.34,
+      "timestamp": "2026-09-22T19:40:14.916664"
+    },
+    {
+      "agent_id": "agent_4_pattern_strategist",
+      "agent_name": "Pattern Strategist",
+      "role": "Fraud Typology Classification & Novel Pattern Discovery (Policy R9)",
+      "math_metrics": {
+        "detected_pattern": "none",
+        "matched_predicate": "BENIGN_PROFILE_MATCH",
+        "is_novel_pattern": false,
+        "is_benign": true,
+        "channel": "online",
+        "shared_origin_detected": false,
+        "hand_off_summary": "Typology classified as 'none' via predicate BENIGN_PROFILE_MATCH."
+      },
+      "ai_reasoning": "Given the high fraud probability of 0.99 despite the benign profile match, the attacker likely utilized a compromised or stolen card (C11923-K2) to execute a low-value, high-velocity online transaction designed to bypass initial velocity thresholds while validating the card's active status for subsequent larger fraudulent activities. This modus operandi suggests a \"card testing\" or \"account takeover\" precursor phase where the attacker is probing the system's detection limits using a single, seemingly innocuous transaction to establish a foothold before escalating the attack.",
+      "evidence_generated": [],
+      "hand_off_summary": "Typology classified as 'none' via predicate BENIGN_PROFILE_MATCH.",
+      "latency_ms": 356.11,
+      "timestamp": "2026-09-22T19:40:15.272841"
+    },
+    {
+      "agent_id": "agent_3_evidence_assessor",
+      "agent_name": "Evidence Assessor",
+      "role": "4-Tier Evidence Grading & Epistemic Uncertainty Quantification",
+      "math_metrics": {
+        "total_evidence_signals": 3,
+        "direct_count": 0,
+        "circumstantial_count": 1,
+        "correlative_count": 0,
+        "contradictory_count": 2,
+        "fraud_probability": 0.99,
+        "epistemic_uncertainty_U": 0.55,
+        "uncertainty_threshold": 0.45,
+        "needs_step_up_challenge": true,
+        "uncertainty_formula": "U = 1.0 - |2*P - 1.0|",
+        "mathematical_rationale": "Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
+        "hand_off_summary": "Graded 3 signals: P(Fraud)=0.99, U=0.550. Step-up needed: True."
+      },
+      "ai_reasoning": "The derived fraud probability of 0.99 is logically inconsistent with the presence of two contradictory signals and an Epistemic Uncertainty Index (0.550) that exceeds the 0.45 threshold, rendering the high-confidence score indefensible without resolving the conflict between the customer's established history and the novel device indicator. Consequently, immediate action is unwarranted; instead, the case must mandate step-up authentication to verify identity and reduce epistemic uncertainty before any adverse action is taken, in strict adherence to Policy Rule R1.",
+      "evidence_generated": [],
+      "hand_off_summary": "Graded 3 signals: P(Fraud)=0.99, U=0.550. Step-up needed: True.",
+      "latency_ms": 375.06,
+      "timestamp": "2026-09-22T19:40:15.648006"
+    },
+    {
+      "agent_id": "agent_5_policy_governor",
+      "agent_name": "Policy Governor",
+      "role": "Bank Fraud Policy v1.0 Governance & 2-Stage Next-Best Action Routing",
+      "math_metrics": {
+        "initial_stage_1_actions": [
+          "CREATE_CASE",
+          "VERIFY_WITH_CUSTOMER",
+          "WARN_CUSTOMER"
+        ],
+        "initial_stage_1_route": "auto",
+        "final_stage_2_actions": [
+          "CLOSE_NO_FRAUD"
+        ],
+        "final_stage_2_route": "auto",
+        "financial_exposure_usd": 0.0,
+        "approval_threshold_limit": 2500.0,
+        "is_l2_escalation_required": false,
+        "verdict": "cleared",
+        "status": "closed_cleared",
+        "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure.",
+        "hand_off_summary": "Policy evaluated: Stage 1 [CREATE_CASE] -> Stage 2 [CLOSE_NO_FRAUD] (auto). Exposure: $0.00."
+      },
+      "ai_reasoning": "The decision to close the case without financial intervention strictly adheres to Rule R1 by avoiding a premature block based on a single, unverified signal, thereby respecting the principle of proportionality for a $0.00 exposure well below the $2,500.00 L2 threshold. The final action is fully defensible as it relies on direct customer verification to confirm the transaction's legitimacy, ensuring that the automated closure accurately reflects the absence of fraud risk.",
+      "evidence_generated": [],
+      "hand_off_summary": "Policy evaluated: Stage 1 [CREATE_CASE] -> Stage 2 [CLOSE_NO_FRAUD] (auto). Exposure: $0.00.",
+      "latency_ms": 5503.75,
+      "timestamp": "2026-09-22T19:40:21.151812"
+    },
+    {
+      "agent_id": "agent_6_compliance_officer",
+      "agent_name": "Compliance Officer",
+      "role": "FinCEN BSA/AML Compliance, Statutory Thresholds & SAR Narrative Synthesis",
+      "math_metrics": {
+        "sar_required": false,
+        "statutory_threshold_usd": 5000.0,
+        "total_reported_usd": 0.0,
+        "subjects_count": 0,
+        "subjects": [],
+        "activity_dates": [],
+        "filing_reason": null,
+        "hand_off_summary": "Compliance audit: SAR Filed=False (Exposure: $0.00, Reason: None)."
+      },
+      "ai_reasoning": "Compliance Officer finding: No BSA/AML SAR filing required for Case HHG-011. Alert was cleared as legitimate under Bank Fraud Policy v1.0.",
+      "evidence_generated": [],
+      "hand_off_summary": "Compliance audit: SAR Filed=False (Exposure: $0.00, Reason: None).",
+      "latency_ms": 0.08,
+      "timestamp": "2026-09-22T19:40:21.151918"
+    },
+    {
+      "agent_id": "agent_7_memory_weaver",
+      "agent_name": "Memory Weaver",
+      "role": "TigerGraph Graph-Native Memory, Hybrid Precedent Retrieval & Case Commit",
+      "math_metrics": {
+        "precedents_retrieved_count": 3,
+        "similar_prior_cases": [
+          "HHG-003",
+          "HHG-008",
+          "HHG-009"
+        ],
+        "rrf_k_parameter": 60,
+        "embedding_dimension": 384,
+        "written_to_graph": false,
+        "graph_case_id": "CASE-SAVANNA-HHG-011",
+        "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-003, HHG-008, HHG-009). Case persisted to TigerGraph (CASE-SAVANNA-HHG-011)."
+      },
+      "ai_reasoning": "The cleared verdict for Case HHG-011 aligns with the low-risk profiles established in precedents HHG-003, HHG-008, and HHG-009, which similarly exhibited benign transactional patterns and zero financial exposure. This consistency confirms that the current case falls within the established safe boundary of historical non-fraudulent activity, validating the decision to close the investigation without further action.",
+      "evidence_generated": [],
+      "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-003, HHG-008, HHG-009). Case persisted to TigerGraph (CASE-SAVANNA-HHG-011).",
+      "latency_ms": 989.6,
+      "timestamp": "2026-09-22T19:40:22.141554"
+    }
+  ]
 }

@@ -14,6 +14,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from src.agent.llm_client import get_llm_client
+from src.agent.workflow import get_orchestrator
+
 # Root directory
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CASES_DIR = BASE_DIR / "cases"
@@ -43,6 +46,21 @@ class ChatRequest(BaseModel):
     message: str = Field(..., description="Analyst question regarding the case")
 
 
+class ExecuteMcpToolRequest(BaseModel):
+    tool_name: str = Field(..., description="Tool name, e.g. 'tigergraph__get_vertex_count' or 'get_node'")
+    arguments: Dict[str, Any] = Field(default_factory=dict, description="Tool arguments dictionary")
+
+
+class RunPipelineRequest(BaseModel):
+    case_id: Optional[str] = Field(default="HHG-CUSTOM", description="Case ID")
+    flagged_txn_id: int = Field(default=3514030, description="Flagged transaction ID")
+    card_id: str = Field(default="C12382-K1", description="Primary card ID")
+    customer_id: str = Field(default="C12382", description="Customer ID")
+    trigger_type: str = Field(default="risk_score", description="Trigger type (risk_score, customer_report, unusual_velocity)")
+    trigger_text: str = Field(default="Transaction flagged by real-time risk engine.", description="Trigger narrative")
+    risk_score: Optional[float] = Field(default=0.65, description="Initial risk score")
+
+
 def load_case_json(case_id: str) -> Dict[str, Any]:
     file_path = CASES_DIR / f"{case_id}.json"
     if not file_path.exists():
@@ -53,6 +71,13 @@ def load_case_json(case_id: str) -> Dict[str, Any]:
 
 @app.get("/api/health")
 def health_check():
+    llm = get_llm_client()
+    try:
+        from src.graph.mcp_service import TigerGraphMCPService
+        mcp_info = TigerGraphMCPService.get_status()
+    except Exception as e:
+        mcp_info = {"status": "OFFLINE", "error": str(e)}
+
     return {
         "platform": "Zyg0s",
         "codename": "Scale of Forensic Balance",
@@ -61,6 +86,62 @@ def health_check():
         "engine": "LangGraph Neuro-Symbolic Hybrid Agent",
         "policy": "Bank Fraud Policy v1.0 (R1-R10)",
         "cases_indexed": len(list(CASES_DIR.glob("HHG-*.json"))),
+        "mcp_service": mcp_info,
+        "ai_engine": {
+            "provider": llm._provider,
+            "status": llm.get_provider_status(),
+            "model": getattr(llm, "DEFAULT_GROQ_MODEL", "qwen/qwen3.8-27b"),
+            "active": llm.is_active,
+            "lpu_accelerated": True if llm._provider == "groq" else False,
+        }
+    }
+
+
+@app.get("/api/mcp/status")
+def get_mcp_status():
+    """TigerGraph MCP integration status and connectivity telemetry."""
+    from src.graph.mcp_service import TigerGraphMCPService
+    return TigerGraphMCPService.get_status()
+
+
+@app.get("/api/mcp/tools")
+def get_mcp_tools():
+    """List all available TigerGraph MCP tools with input schemas and descriptions."""
+    from src.graph.mcp_service import TigerGraphMCPService
+    tools = TigerGraphMCPService.list_tools()
+    return {
+        "count": len(tools),
+        "tools": tools
+    }
+
+
+@app.post("/api/mcp/execute")
+async def execute_mcp_tool(req: ExecuteMcpToolRequest):
+    """Execute any TigerGraph MCP tool dynamically with parameters."""
+    import time
+    import asyncio
+    from src.graph.mcp_service import TigerGraphMCPService
+    t0 = time.perf_counter()
+    res = await asyncio.to_thread(TigerGraphMCPService.sync_execute_tool, req.tool_name, req.arguments)
+    latency_ms = round((time.perf_counter() - t0) * 1000, 2)
+    return {
+        "tool_name": req.tool_name,
+        "arguments": req.arguments,
+        "latency_ms": latency_ms,
+        "result": res
+    }
+
+
+@app.get("/api/ai/status")
+def get_ai_status():
+    """Live AI engine telemetry & model diagnostic endpoint."""
+    llm = get_llm_client()
+    return {
+        "provider": llm._provider,
+        "status": llm.get_provider_status(),
+        "model": getattr(llm, "DEFAULT_GROQ_MODEL", "qwen/qwen3.8-27b"),
+        "is_active": llm.is_active,
+        "lpu_accelerated": True if llm._provider == "groq" else False,
     }
 
 
@@ -143,6 +224,7 @@ def get_case(case_id: str):
         "evidence_requests": cdata.get("evidence_requests", []),
         "next_best_actions": cdata.get("next_best_actions", {}),
         "sar": cdata.get("sar", {}),
+        "orchestrator_pipeline_trace": cdata.get("orchestrator_pipeline_trace", []),
         "telemetry": {
             "tool_calls": cdata.get("tool_calls", 6),
             "tokens": cdata.get("tokens", 4500),
@@ -150,6 +232,61 @@ def get_case(case_id: str):
             "graph_written": case_inner.get("written_to_graph", True),
             "graph_case_id": case_inner.get("graph_case_id", f"CASE-SAVANNA-{case_id}"),
         }
+    }
+
+
+@app.get("/api/cases/{case_id}/pipeline")
+def get_case_pipeline(case_id: str):
+    """
+    Returns the step-by-step 7-agent execution trace for case_id.
+    Every agent provides deterministic mathematical computations (Z-scores, graph metrics,
+    log-odds, uncertainty U, RRF) alongside AI cognitive reasoning (Groq qwen/qwen3.8-27b).
+    """
+    cdata = load_case_json(case_id)
+    trace = cdata.get("orchestrator_pipeline_trace", [])
+    if not trace:
+        case_pack_path = BASE_DIR / "data" / "hhgoa_ieee" / "case_pack.csv"
+        if case_pack_path.exists():
+            import pandas as pd
+            df_pack = pd.read_csv(case_pack_path)
+            matches = df_pack[df_pack["case_id"] == case_id]
+            if not matches.empty:
+                case_meta = matches.iloc[0].to_dict()
+                orch = get_orchestrator()
+                out = orch.run_investigation(case_meta)
+                trace = getattr(out, "orchestrator_pipeline_trace", [])
+                file_path = CASES_DIR / f"{case_id}.json"
+                try:
+                    cdata["orchestrator_pipeline_trace"] = trace
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        json.dump(cdata, f, indent=2)
+                except Exception:
+                    pass
+    return {
+        "case_id": case_id,
+        "agent_count": len(trace),
+        "pipeline_trace": trace
+    }
+
+
+@app.post("/api/pipeline/run")
+def run_custom_pipeline(req: RunPipelineRequest):
+    """
+    Executes an ad-hoc or benchmark transaction alert through the 7-agent
+    deterministic + AI inference pipeline coordinated by the Master Orchestrator.
+    """
+    orch = get_orchestrator()
+    case_meta = req.model_dump()
+    out = orch.run_investigation(case_meta)
+    return {
+        "case_id": out.case_id,
+        "case": out.case.model_dump(),
+        "evidence_requests": [e.model_dump() for e in out.evidence_requests],
+        "next_best_actions": out.next_best_actions.model_dump(),
+        "sar": out.sar.model_dump(),
+        "stop_reason": out.stop_reason,
+        "latency_s": out.latency_s,
+        "orchestrator_pipeline_trace": getattr(out, "orchestrator_pipeline_trace", [])
     }
 
 
@@ -306,44 +443,80 @@ def simulate_step_up(case_id: str, req: StepUpRequest):
 @app.post("/api/cases/{case_id}/chat")
 def case_chat(case_id: str, req: ChatRequest):
     """
-    Grounded investigator copilot answering questions regarding policy rules,
-    evidence grading, and multi-hop graph context.
+    Grounded investigator copilot powered by Groq LLM (qwen/qwen3.8-27b)
+    with full TigerGraph multi-hop graph context and Bank Fraud Policy v1.0.
     """
     cdata = load_case_json(case_id)
     case_inner = cdata.get("case", {})
-    msg = req.message.lower()
-    amount = case_inner.get("exposure_usd", 0.0)
-    verdict = case_inner.get("verdict", "uncertain")
-    pattern = case_inner.get("pattern", "N/A")
-    evidence = case_inner.get("evidence", [])
-    
-    if "rule" in msg or "policy" in msg:
-        reply = (
-            f"Case {case_id} evaluated Bank Fraud Policy v1.0. "
-            f"Pattern recognized: '{pattern}'. Exposure is ${amount:.2f}, routed under "
-            f"{'L2 Senior Review' if amount >= 1000 else 'L1 Analyst Review'} threshold."
-        )
-    elif "why" in msg or "reason" in msg:
-        reply = (
-            f"Verdict: '{verdict.upper()}'. Grounded by {len(evidence)} evidence signals "
-            f"from TigerGraph Savanna Cloud. Similar precedents: "
-            f"{', '.join(case_inner.get('similar_prior_cases', []))}."
-        )
-    elif "sar" in msg or "fincen" in msg:
-        sar = cdata.get("sar", {})
-        if sar.get("file"):
-            reply = f"FinCEN BSA/AML SAR Required: {sar.get('narrative', '')[:250]}..."
-        else:
-            reply = "No SAR required for this case (low exposure or legitimate resolution)."
-    else:
-        nba_final = cdata.get("next_best_actions", {}).get("final", [{}])[0]
-        reply = (
-            f"Telemetry for {case_id}: Status '{case_inner.get('status')}', "
-            f"Verdict '{verdict}', Recommended NBA: {nba_final.get('action', 'MONITOR_CARD')} "
-            f"({nba_final.get('route', 'auto')})."
-        )
+    nba = cdata.get("next_best_actions", {})
+    initial_nba = nba.get("initial", [{}])[0].get("action", "VERIFY_WITH_CUSTOMER")
+    final_nba = nba.get("final", [{}])[0].get("action", "MONITOR_CARD")
+    sar = cdata.get("sar", {})
 
-    return {"case_id": case_id, "query": req.message, "response": reply}
+    llm = get_llm_client()
+    case_context = {
+        "case_id": case_id,
+        "verdict": case_inner.get("verdict", "uncertain"),
+        "fraud_probability": case_inner.get("fraud_probability", 0.5),
+        "exposure_usd": case_inner.get("exposure_usd", 0.0),
+        "pattern": case_inner.get("pattern", "Unknown"),
+        "primary_card_id": case_inner.get("connected_card_ids", ["N/A"])[0] if case_inner.get("connected_card_ids") else "N/A",
+        "connected_card_ids": case_inner.get("connected_card_ids", []),
+        "connected_device_profiles": case_inner.get("connected_device_profiles", []),
+        "similar_prior_cases": case_inner.get("similar_prior_cases", []),
+        "evidence": [e.get("description", str(e)) for e in case_inner.get("evidence", [])],
+        "initial_action": initial_nba,
+        "final_action": final_nba,
+        "sar_filed": bool(sar.get("file", False)),
+        "sar_narrative": (sar.get("narrative") or "")[:300],
+    }
+
+    ai_reply = llm.chat_copilot(req.message, case_context)
+
+    return {
+        "case_id": case_id,
+        "query": req.message,
+        "response": ai_reply,
+        "model": getattr(llm, "DEFAULT_GROQ_MODEL", "qwen/qwen3.8-27b"),
+        "provider": llm._provider,
+        "is_ai_generated": llm.is_active,
+    }
+
+
+@app.post("/api/cases/{case_id}/ai-deep-dive")
+def case_ai_deep_dive(case_id: str):
+    """
+    On-demand comprehensive forensic evaluation using Groq LLM.
+    Synthesizes graph topology, policy compliance, and next-best actions.
+    """
+    cdata = load_case_json(case_id)
+    case_inner = cdata.get("case", {})
+    nba = cdata.get("next_best_actions", {})
+    initial_nba = nba.get("initial", [{}])[0].get("action", "VERIFY_WITH_CUSTOMER")
+    final_nba = nba.get("final", [{}])[0].get("action", "MONITOR_CARD")
+    sar = cdata.get("sar", {})
+
+    llm = get_llm_client()
+    prompt = (
+        f"Perform an exhaustive forensic audit for Case {case_id}:\n"
+        f"- Target Entities: Card {case_inner.get('connected_card_ids')}, Devices {case_inner.get('connected_device_profiles')}\n"
+        f"- Exposure: ${case_inner.get('exposure_usd', 0):,.2f}\n"
+        f"- Pattern: {case_inner.get('pattern')}\n"
+        f"- Initial Action: {initial_nba} -> Final Action: {final_nba}\n"
+        f"- SAR Status: {'Filed' if sar.get('file') else 'Not Required'}\n\n"
+        f"Provide a 4-part forensic brief: (1) Graph Traversal Findings, (2) Policy Compliance Audit, (3) Epistemic Uncertainty & Step-Up Rationale, (4) Executive Defensibility."
+    )
+    narrative = llm.generate_forensic_narrative(
+        prompt,
+        system_instruction="You are a Principal Cyber-Fraud Investigator and Senior AML Compliance Examiner."
+    )
+    return {
+        "case_id": case_id,
+        "deep_dive_analysis": narrative,
+        "model": getattr(llm, "DEFAULT_GROQ_MODEL", "qwen/qwen3.8-27b"),
+        "provider": llm._provider,
+        "is_ai_generated": llm.is_active,
+    }
 
 
 if __name__ == "__main__":

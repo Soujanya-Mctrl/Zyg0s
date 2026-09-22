@@ -17,7 +17,7 @@ In enterprise banking and fraud forensics, autonomous AI agents face a critical 
 * **Pure Rule-Based Systems Fail on Adaptability**: Static expert systems cannot articulate natural-language suspicious activity narratives (SARs), fail to hypothesize novel or undocumented syndicate typologies, and cannot engage in conversational forensic exploration with human analysts.
 
 ### The Neuro-Symbolic Solution
-This system implements a **Hybrid Neuro-Symbolic Architecture** that pairs a **Deterministic Governor** with an **LLM Cognitive Layer** powered by ultra-low-latency Groq LPU inference (`llama-3.3-70b-versatile` and `llama-3.1-8b-instant`).
+This system implements a **Hybrid Neuro-Symbolic Architecture** that pairs a **Deterministic Governor** with an **LLM Cognitive Layer** powered by ultra-low-latency Groq LPU inference (`qwen/qwen3.8-27b`) with strict token budget governance (600 max tokens for narratives/briefings, 500 for copilot to stay safely within Groq's 1,000 OTPM rate limit).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────┐
@@ -30,7 +30,7 @@ This system implements a **Hybrid Neuro-Symbolic Architecture** that pairs a **D
 │ • Entity resolution & device clusters  │ • Legal-grade FinCEN BSA/AML SAR draft  │
 │ • Immutable numerical fact anchoring   │ • Natural language "What Changed" logs  │
 │ • 4-Tier evidence defensibility math   │ • Interactive Investigator Copilot Q&A  │
-│ • Uncertainty score formula (U = 1-C)  │ • Explaining edge cases to analysts     │
+│ • Epistemic uncertainty formula (U)    │ • Per-agent triage & topology briefings │
 │ • Bank Fraud Policy v1.0 (R1–R10) gate │ • Zero-hallucination factual grounding  │
 │ • Approval routing (auto, L1, L2)      │ • Graceful offline fallback if no API   │
 │ • Graph writeback to Savanna Cloud     │   key is provided                       │
@@ -61,103 +61,94 @@ The agent runs identically in production environments with or without an active 
 
 ---
 
-## 3. High-Level System Architecture
+## 3. Collaborative Multi-Agent Pipeline Architecture
+
+Rather than executing disparate models in isolation, Zyg0s employs a **7-Agent Neuro-Symbolic Collaborative Pipeline** coordinated by a central [`InvestigationOrchestrator`](src/agent/pipeline/orchestrator.py). Every specialized agent executes a dual-engine paradigm:
+1. **Deterministic Mathematical / Graph Symbolic Core**: Calculates rigorous statistical metrics ($Z$-scores, graph degree centrality, log-odds probability, 4-tier defensibility weights, exposure limits, and RRF rankings).
+2. **AI Cognitive Reasoning Layer (Groq LPU)**: Utilizes `qwen/qwen3.8-27b` to synthesize forensic briefings, hypothesize novel syndicate typologies, draft FinCEN SAR narratives, and conduct investigator copilot reasoning.
 
 ```mermaid
 flowchart TD
-    subgraph INGESTION["1. Trigger & Intake"]
-        A1["Upstream Alert / Stream<br/>(IEEE-CIS 590k Dataset)"] --> T1["Trigger Node<br/>(Noisy Alert or Customer Dispute)"]
+    subgraph INGESTION["1. Trigger & Signal Ingestion"]
+        ALERT["Incoming Alert / Dispute<br/>(IEEE-CIS 590k Dataset)"] --> SENTINEL["Agent 1: Alert Sentinel<br/>• Z-score Anomaly Math<br/>• Velocity Acceleration<br/>• Triage Priority Briefing"]
     end
 
-    subgraph TIGERGRAPH["2. TigerGraph Savanna Cloud Knowledge Graph"]
-        TG_CONN[("TigerGraph Savanna<br/>Graph: Transaction_Fraud<br/>860k Txs • 18 Vertex Types")]
-        GSQL_TRAV["Multi-Hop GSQL Algorithms<br/>• 2-Hop Neighbor Expansion<br/>• Shared Device Fingerprints<br/>• Temporal Card Testing Scans"]
-        TG_CONN <--> GSQL_TRAV
+    subgraph TIGERGRAPH["2. Graph Exploration & Entity Resolution"]
+        SENTINEL --> SCOUT["Agent 2: Graph Scout<br/>• Multi-Hop Ego Expansion<br/>• Micro-Auth Scan<br/>• Degree Centrality & Ring Topology"]
+        TG_SAVANNA[("TigerGraph Savanna Cloud<br/>860k Txs • 55 GSQL Queries")] <--> SCOUT
     end
 
-    subgraph SYMBOLIC["3. Deterministic Governor & Policy Core"]
-        ANCHOR["Fact Anchoring Engine<br/>Extracts Txns, Exposure, Timeline"]
-        EVID_ENG["4-Tier Evidence Engine<br/>Direct (1.0) • Circumstantial (0.6)<br/>Correlative (0.3) • Contradictory (-0.8)"]
-        UNCERT["Uncertainty Quantification<br/>U = 1.0 - Confidence<br/>Threshold: U > 0.45"]
-        POLICY["Bank Fraud Policy v1.0 (R1-R10)<br/>Approval Routing: auto • L1 • L2"]
-        STAGE1_NBA["Stage 1 NBA<br/>(Before Additional Evidence)"]
+    subgraph DEFENSE["3. Defensibility & Epistemic Uncertainty"]
+        SCOUT --> ASSESSOR["Agent 3: Evidence Assessor<br/>• 4-Tier Weighting (+1.0 to -0.8)<br/>• Log-Odds Probability P<br/>• Epistemic Uncertainty U<br/>• Defensibility Rationale"]
     end
 
-    subgraph ACTIONS["4. Controlled Evidence Gathering (Mock APIs)"]
-        MOCK_ADAPT["Controlled Action Adapter<br/>• Customer SMS / Security Prompt<br/>• 2FA Step-Up Challenge"]
+    subgraph DYNAMIC_LOOP["4. Uncertainty Collapse Loop (U > 0.45)"]
+        ASSESSOR -- "U > 0.45 (High Ambiguity)" --> STEP_UP["Controlled Step-Up Auth<br/>SMS / Cardholder Validation"]
+        STEP_UP --> RE_ASSESS["Uncertainty Collapses<br/>U ≤ 0.15"]
+        RE_ASSESS --> STRATEGIST
     end
 
-    subgraph NEURAL["5. LLM Cognitive Layer (Groq LPU)"]
-        GROQ_CLIENT["Groq Inference Engine<br/>llama-3.3-70b-versatile (SAR & Patterns)<br/>llama-3.1-8b-instant (Copilot)"]
-        NOVEL_PAT["Novel Pattern Discovery (R9)<br/>Hypothesize Undocumented Syndicates"]
-        SAR_GEN["FinCEN SAR Narrative Draft<br/>Answering the 5 W's"]
-        COPILOT["Interactive Investigator Copilot<br/>Workbench Q&A"]
+    subgraph REASONING["5. Typology Synthesis & Policy Governance"]
+        ASSESSOR -- "U ≤ 0.45 (Decisive)" --> STRATEGIST["Agent 4: Pattern Strategist<br/>• Canonical Typology Match<br/>• Novel Pattern Discovery (R9)<br/>• Modus Operandi Hypothesis"]
+        STRATEGIST --> GOVERNOR["Agent 5: Policy Governor<br/>• Bank Fraud Policy v1.0 (R1-R10)<br/>• 2-Stage NBA (Before/After)<br/>• L1/L2 Delegation Limits"]
     end
 
-    subgraph RESOLUTION["6. Final Action & Memory Writeback"]
-        STAGE2_NBA["Stage 2 NBA<br/>(After Additional Evidence)<br/>+ What Changed Log"]
-        MEM_STORE["Closed Case Memory Store<br/>5,565 4-Month Historical Cases"]
-        WRITEBACK["Graph Writeback Node<br/>Persist Case to TigerGraph Cloud"]
+    subgraph COMPLIANCE["6. Regulatory Filing & Graph-Native Memory"]
+        GOVERNOR --> COMPLIANCE_OFFICER["Agent 6: Compliance Officer<br/>• BSA/AML Statutory Triggers<br/>• Legal 5 W's SAR Draft<br/>• Audit Defense Certification"]
+        COMPLIANCE_OFFICER --> WEAVER["Agent 7: Memory Weaver<br/>• 384-dim Narrative Vector<br/>• Reciprocal Rank Fusion (K=60)<br/>• ClosedCase Writeback"]
+        WEAVER --> TG_SAVANNA
     end
-
-    T1 --> ANCHOR
-    ANCHOR <--> GSQL_TRAV
-    ANCHOR --> EVID_ENG
-    EVID_ENG --> UNCERT
-    UNCERT --> STAGE1_NBA
-    STAGE1_NBA --> POLICY
-
-    UNCERT -- "U > 0.45 (Ambiguous)" --> MOCK_ADAPT
-    UNCERT -- "U <= 0.45 (Certain)" --> STAGE2_NBA
-    MOCK_ADAPT --> EVID_ENG
-
-    POLICY --> STAGE2_NBA
-    STAGE2_NBA --> NOVEL_PAT
-    STAGE2_NBA --> SAR_GEN
-    NOVEL_PAT <--> GROQ_CLIENT
-    SAR_GEN <--> GROQ_CLIENT
-    COPILOT <--> GROQ_CLIENT
-
-    STAGE2_NBA --> MEM_STORE
-    STAGE2_NBA --> WRITEBACK
-    WRITEBACK --> TG_CONN
 ```
+
+### Data Contracts: `InvestigationContext` and `AgentStepResult`
+
+All 7 agents operate upon a shared, strictly-typed immutable state envelope defined in [`src/agent/pipeline/orchestrator.py`](src/agent/pipeline/orchestrator.py):
+
+* **`InvestigationContext`**:
+  * `case_id`, `customer_id`, `card_id`, `transaction_id`, `timestamp`, `amount`, `channel`, `billing_region`.
+  * `anchored_facts`: Dict of mathematically frozen numbers (total exposure USD, connected card IDs, shared devices).
+  * `evidence_claims`: Ordered list of `EvidenceItem` models with 4-tier defensibility tags and source queries.
+  * `uncertainty_score`: Current epistemic uncertainty $U \in [0.0, 1.0]$.
+  * `initial_nba` / `final_nba`: Pre- and post-additional-evidence Next-Best Actions.
+  * `policy_route`: Approval authority (`auto`, `L1`, `L2`).
+  * `steps`: Ordered list of `AgentStepResult` objects logging every agent's dual execution.
+* **`AgentStepResult`**:
+  * `agent_name`: Formal identifier of the executing agent.
+  * `deterministic_payload`: Structured metrics, scores, formulas, and graph traversal results.
+  * `ai_reasoning`: Synthesized forensic narrative generated by Groq LPU (`qwen/qwen3.8-27b`).
+  * `timestamp`: ISO-8601 execution marker.
+  * `status`: `SUCCESS`, `STEP_UP_REQUIRED`, or `OFFLINE_FALLBACK`.
 
 ---
 
-## 4. The 8-Stage LangGraph State Machine
+## 4. The 7 Specialized Neuro-Symbolic Agents
 
-The investigation lifecycle is modeled as an 8-stage state machine implemented with LangGraph (`src/agent/workflow.py`):
+| Agent & Module | Deterministic / Graph Symbolic Core | AI Cognitive Layer (Groq LPU `qwen/qwen3.8-27b`) | Input Contract | Output Hand-Off |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Alert Sentinel**<br/>[`alert_sentinel.py`](src/agent/pipeline/alert_sentinel.py) | • $Z$-score: $Z = \frac{X - \mu}{\sigma}$ vs customer baseline.<br/>• Velocity: 1-hour & 24-hour count bursts.<br/>• Acceleration ratio: $\Delta A = \frac{A_{\text{curr}}}{\bar{A}_{\text{hist}}}$. | Synthesizes a concise executive triage briefing highlighting statistical anomalies and anomaly velocity. | Raw transaction trigger payload + historical window. | Anchored transaction facts, $Z$-score, triage urgency level $\rightarrow$ Graph Scout. |
+| **2. Graph Scout**<br/>[`graph_scout.py`](src/agent/pipeline/graph_scout.py) | • 2-hop ego expansion in TigerGraph Savanna.<br/>• Micro-auth scan: $3+$ txs $< \$5.00$ within $1$h.<br/>• Device sharing degree centrality: $\text{deg}(D)$. | Analyzes graph topology, assessing syndicate collusion risk and shared device infrastructure. | Customer ID, Card ID, Transaction ID. | Subgraph paths, connected cards, device sharing cluster $\rightarrow$ Evidence Assessor. |
+| **3. Evidence Assessor**<br/>[`evidence_assessor.py`](src/agent/pipeline/evidence_assessor.py) | • 4-Tier defensibility weighting ($w_i \in \{+1.0, +0.6, +0.3, -0.8\}$).<br/>• Composite log-odds: $P = \sigma\left(\sum w_i + \text{logit}(P_{\text{base}})\right)$.<br/>• Epistemic uncertainty: $U = 1.0 - \|2P - 1.0\|$. | Generates defensibility rationales and triggers Step-Up Auth if $U > 0.45$. | Raw signals and graph indicators from Agents 1 & 2. | Defensibility claims, calibrated $P$, uncertainty $U \rightarrow$ Pattern Strategist. |
+| **4. Pattern Strategist**<br/>[`pattern_strategist.py`](src/agent/pipeline/pattern_strategist.py) | • Deterministic predicate matching across 5 canonical typologies (card testing, device rings, etc.).<br/>• Policy R9 trigger check on unclassified anomalies. | Hypothesizes novel fraud typologies, naming unclassified patterns with proposed operational indicators. | Subgraph features, transaction sequences, evidence claims. | Canonical or novel pattern classification $\rightarrow$ Policy Governor. |
+| **5. Policy Governor**<br/>[`policy_governor.py`](src/agent/pipeline/policy_governor.py) | • Evaluates Bank Fraud Policy v1.0 rules R1–R10.<br/>• Enforces $\$2,500$ exposure threshold (`auto` vs `L1` vs `L2`).<br/>• Formulates 2-stage NBA (`initial` vs `final`). | Writes plain-language "What Changed" delta narrative explaining the progression of the investigation. | Evidence claims, pattern classification, total exposure USD. | Final NBA, approval route, triggered policy rules $\rightarrow$ Compliance Officer. |
+| **6. Compliance Officer**<br/>[`compliance_officer.py`](src/agent/pipeline/compliance_officer.py) | • BSA/AML statutory reporting threshold checks ($\$5,000$ / $\$25,000$).<br/>• 5 W's field completeness validation. | Drafts legally admissible FinCEN SAR narrative strictly grounded in anchored facts. | Anchored facts, evidence items, policy rules, exposure USD. | Legal SAR narrative, regulatory filing status $\rightarrow$ Memory Weaver. |
+| **7. Memory Weaver**<br/>[`memory_weaver.py`](src/agent/pipeline/memory_weaver.py) | • Generates 384-dim dense narrative embedding.<br/>• Reciprocal Rank Fusion ($K=60$) merging vector & structural graph similarity.<br/>• Commits `ClosedCase` vertex and 6 edge types to TigerGraph Cloud. | Explains semantic relevance and structural commonalities between current case and past precedents. | Final case state, SAR narrative, entity identifiers. | Past analogous precedents, graph commit status, completed forensic docket. |
 
-```mermaid
-stateDiagram-v2
-    [*] --> Trigger : Flagged Transaction or Dispute
-    Trigger --> Investigate : Case Metadata Loaded
-    Investigate --> Gather_Evidence : Multi-Hop TigerGraph Traversal
-    Gather_Evidence --> Assess_Uncertainty : 4-Tier Defensibility Weights
-    
-    Assess_Uncertainty --> Gather_More_Evidence : U > 0.45 (Ambiguous Alert)
-    Assess_Uncertainty --> Take_Next_Actions : U <= 0.45 (Direct Proof)
-    
-    Gather_More_Evidence --> Take_Next_Actions : Step-Up / Customer Reply Received
-    Take_Next_Actions --> Explain_Decision : 2-Stage NBA & Policy Evaluation
-    Explain_Decision --> Update_Memory : SAR Drafted & Explanation Formatted
-    Update_Memory --> [*] : Case Persisted to TigerGraph Cloud
-```
+### The Epistemic Uncertainty Collapse Loop
 
-### State Transitions & Lifecycle Nodes
+A core innovation of the Collaborative Multi-Agent Pipeline is its mathematical handling of ambiguity:
+1. **Initial Evaluation**: Agent 3 (`Evidence Assessor`) calculates uncertainty $U = 1.0 - |2P - 1.0|$.
+2. **Ambiguity Gate**: If $U > 0.45$ (e.g. out-of-region transaction with no prior fraud history), the system **refuses to take destructive action** (enforcing Policy Rule R1: Never block on a single weak signal).
+3. **Step-Up Authentication**: The Orchestrator pauses destructive actions, sets `initial_nba = ["STEP_UP_AUTH", "VERIFY_WITH_CUSTOMER"]`, and dispatches an automated challenge to the cardholder via SMS or 2FA push.
+4. **Uncertainty Collapse**:
+   * If customer confirms unauthorized: Contradictory evidence is rejected; Direct fraud evidence ($w_i = +1.0$) is ingested; $U$ collapses to $\le 0.15$; Agent 5 escalates to `BLOCK_CARD`.
+   * If customer confirms authorized: Direct legitimate evidence ($w_i = -0.8$) is ingested; $P$ drops to $\le 0.05$; Agent 5 routes to `CLOSE_NO_FRAUD` (Policy Rule R3).
+5. **Audit Delta**: Agent 5 logs a plain-language `what_changed` explanation detailing exactly how additional evidence altered the risk profile and action trajectory.
 
-| Node | Name | Execution Mode | Description |
-| :--- | :--- | :--- | :--- |
-| **Node 1** | `trigger` | Deterministic | Ingests case trigger (upstream model alert score $\ge 0.50$, or customer report). Initializes state envelope. |
-| **Node 2** | `investigate` | Deterministic | Queries TigerGraph Savanna Cloud to anchor target entities: customer profile, card ID, historical transactions, billing regions, and device fingerprints. |
-| **Node 3** | `gather_evidence` | Deterministic | Executes multi-hop graph algorithms to detect card testing sequences, device sharing across multiple accounts, and regional anomalies. |
-| **Node 4** | `assess_uncertainty` | Deterministic Math | Computes exact mathematical confidence and uncertainty score $U$. Evaluates Initial NBA (`NBA_BEFORE_ADDITIONAL_EVIDENCE`). |
-| **Edge** | `should_gather_more_evidence` | Conditional Gate | If $U > 0.45$ or single weak signal, routes to Node 5; otherwise routes directly to Node 6. |
-| **Node 5** | `gather_more_evidence` | Deterministic Adapter | Invokes simulated action adapter (SMS customer validation, 2FA step-up prompt). Receives cardholder reply. |
-| **Node 6** | `take_next_actions` | Deterministic Policy | Evaluates Bank Fraud Policy v1.0 rules R1–R10. Generates Final NBA (`NBA_AFTER_ADDITIONAL_EVIDENCE`) and computes `what_changed`. |
-| **Node 7** | `explain_decision` | Hybrid (Groq + Rules) | Synthesizes case explanation and regulatory FinCEN Suspicious Activity Report (SAR) answering the 5 W's. |
-| **Node 8** | `update_memory` | Deterministic Graph | Indexes investigation into 4-month episodic memory and writes closed case back to TigerGraph Savanna Cloud. |
+### REST API Integration Endpoints
+
+The pipeline is exposed directly to the React Command Center via high-throughput FastAPI endpoints (`src/api/server.py`):
+* `GET /api/cases/{case_id}/pipeline`: Replays or retrieves the complete 7-agent step execution trace, including deterministic payloads, mathematical formulas, and Groq cognitive narratives.
+* `POST /api/pipeline/run`: Triggers an live multi-agent investigation run on demand for any incoming transaction payload or benchmark case ID.
 
 ---
 
@@ -173,8 +164,12 @@ erDiagram
     Transaction ||--o{ DeviceProfile : USED_DEVICE
     Transaction ||--o{ BillingRegion : IN_REGION
     Customer ||--o{ EmailDomain : HAS_EMAIL
-    Customer ||--o{ ClosedCase : SUBJECT_OF
-    AccountCard ||--o{ ClosedCase : INVOLVED_IN
+    Customer ||--o{ ClosedCase : CASE_ON_CUSTOMER
+    AccountCard ||--o{ ClosedCase : ON_CARD
+    ClosedCase ||--o{ DeviceProfile : CASE_ON_DEVICE
+    ClosedCase ||--o{ BillingRegion : CASE_IN_REGION
+    ClosedCase ||--o{ FraudPattern : CASE_HAS_PATTERN
+    ClosedCase ||--o{ Transaction : INVOLVES
     Investigation_Case ||--o{ Transaction : CONTAINS_TXN
 
     Customer {
@@ -203,13 +198,52 @@ erDiagram
     BillingRegion {
         string region_code PK
     }
+    FraudPattern {
+        string pattern_name PK
+        string description
+        string first_seen
+        int case_count
+    }
     ClosedCase {
         string case_id PK
         string verdict
         string pattern
         float exposure_usd
+        string case_narrative
+        float fraud_probability
     }
 ```
+
+### 5.1 Graph-Native Case Memory & Hybrid Retrieval
+
+TigerGraph **is** the memory — no separate vector DB. Each resolved case becomes a `ClosedCase` vertex connected via real graph edges to the entities it touched:
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│             GRAPH-NATIVE CASE MEMORY (TigerGraph IS the Memory)     │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ClosedCase vertex (with 384-dim narrative embedding)                │
+│  ├── CASE_ON_CUSTOMER  → Customer (who was investigated)            │
+│  ├── ON_CARD           → AccountCard (cards involved)               │
+│  ├── CASE_ON_DEVICE    → DeviceProfile (device fingerprints)        │
+│  ├── CASE_IN_REGION    → BillingRegion (transaction locations)      │
+│  ├── CASE_HAS_PATTERN  → FraudPattern (typology classification)    │
+│  └── INVOLVES          → Transaction (flagged transactions)         │
+│                                                                      │
+│  Hybrid Retrieval Pipeline:                                          │
+│  ┌──────────────────┐    ┌────────────────────────────┐              │
+│  │ VECTOR SIMILARITY │    │ STRUCTURAL SIMILARITY      │              │
+│  │ Embed narrative → │    │ Graph traversal from       │              │
+│  │ cosine search     │    │ shared entities (devices,  │              │
+│  │ past embeddings   │    │ cards, customers, regions) │              │
+│  └────────┬─────────┘    └──────────────┬─────────────┘              │
+│           └──── Reciprocal Rank Fusion ──┘                           │
+│                (K=60, equal weights)                                  │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+**Design Principle**: LangGraph state = "where am I in THIS investigation" (short-term). TigerGraph = "what has the system LEARNED across ALL investigations" (persistent).
 
 ### Key Multi-Hop GSQL Traversal Patterns
 
@@ -232,7 +266,72 @@ erDiagram
 
 ---
 
-## 6. 4-Tier Evidence Defensibility & Mathematical Uncertainty
+## 6. TigerGraph Model Context Protocol (MCP) Architecture
+
+To eliminate proprietary API barriers and allow autonomous agents, IDE copilots, and external hosts (such as Claude Desktop, Cursor, and Antigravity IDE) to interact directly with TigerGraph Savanna Cloud, Zyg0s integrates the official **TigerGraph Model Context Protocol (MCP)** specification ([github.com/tigergraph/tigergraph-mcp](https://github.com/tigergraph/tigergraph-mcp)).
+
+### 6.1 Architectural Topology & Execution Flow
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        MODEL CONTEXT PROTOCOL (MCP) INTEGRATION                        │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                        │
+│  External Clients (Claude, Cursor, Antigravity)        Internal Pipeline & UI          │
+│            │                                                    │                      │
+│            ▼ stdio / JSON-RPC                                   ▼ In-Process / REST    │
+│  ┌───────────────────────┐                             ┌────────────────────────────┐  │
+│  │   src/mcp_server.py   │                             │  src/graph/mcp_service.py   │  │
+│  └───────────┬───────────┘                             └──────────────┬─────────────┘  │
+│              │                                                        │                │
+│              └──────────────────────┬─────────────────────────────────┘                │
+│                                     ▼                                                  │
+│         ┌────────────────────────────────────────────────────────────┐                 │
+│         │            Persistent Daemon Event Loop Thread             │                 │
+│         │          `_get_persistent_loop()` (Thread-Safe)            │                 │
+│         └───────────────────────────┬────────────────────────────────┘                 │
+│                                     │                                                  │
+│                                     ▼                                                  │
+│         ┌────────────────────────────────────────────────────────────┐                 │
+│         │        tigergraph_mcp.server & ConnectionManager           │                 │
+│         │      (AsyncTigerGraphConnection + aiohttp session pool)    │                 │
+│         └───────────────────────────┬────────────────────────────────┘                 │
+│                                     │ HTTPS / Port 443                                 │
+│                                     ▼                                                  │
+│         ┌────────────────────────────────────────────────────────────┐                 │
+│         │               TigerGraph Savanna Cloud Engine              │                 │
+│         │          Graph: Transaction_Fraud (860K+ Transactions)     │                 │
+│         └────────────────────────────────────────────────────────────┘                 │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.2 The Thread-Safe Daemon Event Loop Pattern
+A major engineering challenge when embedding `tigergraph-mcp` inside multi-threaded or mixed synchronous/asynchronous Python systems (such as FastAPI, Pytest, and synchronous agent steps) is the lifecycle of `aiohttp.ClientSession` inside `AsyncTigerGraphConnection`:
+* If a coroutine is run via ad-hoc `asyncio.run()`, the event loop is created and then destroyed upon exit. Subsequent requests using the cached connection trigger `RuntimeError: Event loop is closed`.
+* If an async route awaits `execute_tool` from within FastAPI's worker loop, cross-thread conflicts occur with cached connection pools.
+
+**The Zyg0s Solution**: `TigerGraphMCPService` instantiates a dedicated background daemon thread running an eternal `asyncio` event loop (`_bg_loop.run_forever()`). All tool calls are routed through `asyncio.run_coroutine_threadsafe(coro, _bg_loop).result()`, guaranteeing:
+1. `AsyncTigerGraphConnection` persistent session pools are created and executed strictly in the same persistent thread.
+2. Synchronous agents (`GraphScoutAgent.compute()`) execute MCP tools without blocking or loop teardown.
+3. FastAPI endpoints (`/api/mcp/execute`) leverage worker threads via `asyncio.to_thread()`, preventing event loop lockup.
+4. 100% test pass rate in Pytest test suites without unclosed connector crashes.
+
+### 6.3 65 Standardized MCP Graph Tools
+Zyg0s registers and exposes the full catalog of TigerGraph MCP tools:
+* **Node Introspection**: `tigergraph__get_node`, `tigergraph__get_nodes`, `tigergraph__has_node`.
+* **Neighborhood & Traversals**: `tigergraph__get_neighbors`, `tigergraph__get_node_edges`, `tigergraph__get_node_degree`.
+* **Volumetrics & Schema**: `tigergraph__get_vertex_count`, `tigergraph__get_edge_count`, `tigergraph__get_graph_schema`.
+* **Graph Computation**: `tigergraph__run_installed_query`, `tigergraph__gsql`.
+
+### 6.4 Specialized Agent Grounding & Telemetry
+During the investigative workflow, **Agent 2 (Graph Scout)** executes:
+1. `tigergraph__get_node(vertex_type="Customer", vertex_id=customer_id)` to verify party existence and metadata.
+2. `tigergraph__get_neighbors(vertex_type="Customer", vertex_id=customer_id, edge_type="OWNS")` to traverse remote card ownership edges.
+3. Telemetry records (`context.mcp_tool_calls`) are stamped with status, arguments, and latency, providing concrete proof of graph grounding in the audit docket.
+
+---
+
+## 7. 4-Tier Evidence Defensibility & Mathematical Uncertainty
 
 In financial crime investigations, every claim must be defensible under regulatory audit. The agent classifies every signal into a **4-tier evidence hierarchy**:
 
@@ -265,7 +364,7 @@ In financial crime investigations, every claim must be defensible under regulato
 
 ---
 
-## 7. Bank Fraud Policy v1.0 & 2-Stage NBA Engine
+## 8. Bank Fraud Policy v1.0 & 2-Stage NBA Engine
 
 The agent operates under **Bank Fraud Policy v1.0** (Rules R1 through R10) and enforces strict approval routing:
 
@@ -297,7 +396,7 @@ The system logs actions at two distinct stages to demonstrate genuine investigat
 
 ---
 
-## 8. FinCEN BSA/AML Suspicious Activity Report (SAR) Architecture
+## 9. FinCEN BSA/AML Suspicious Activity Report (SAR) Architecture
 
 When confirmed fraud or organized syndicate activity is detected, the agent generates a regulatory-grade FinCEN SAR narrative answering the **5 W's**:
 
@@ -331,7 +430,7 @@ Ensure the narrative is professional, neutral, and regulatory-grade. Preserve al
 
 ---
 
-## 9. 3-Pipeline Comparative Benchmarking
+## 10. 3-Pipeline Comparative Benchmarking
 
 To rigorously prove architectural value, the platform provides a built-in 3-Pipeline Benchmark suite comparing three paradigms on identical cases:
 
@@ -357,41 +456,60 @@ xychart-beta
 
 ---
 
-## 10. Technology Stack Reference
+## 11. Technology Stack Reference
 
 | Component | Technology | Version / Configuration | Purpose |
 | :--- | :--- | :--- | :--- |
 | **Graph Engine** | TigerGraph Savanna Cloud | Enterprise 3.10+ (Cloud-Native) | High-speed multi-hop graph traversals, entity resolution, and closed-case graph persistence. |
+| **Graph MCP** | `tigergraph-mcp` | 1.0.0 (Official Package) | Exposes 65 standardized graph tools (`get_node`, `get_neighbors`, `get_vertex_count`, etc.) for agentic tool use and IDE connectivity. |
 | **Python Driver** | `pyTigerGraph` | 1.6+ with SSL / Token Auth | Programmatic GSQL queries, vertex upserts, and cloud health monitoring. |
-| **LLM Inference** | Groq LPU Cloud | `llama-3.3-70b-versatile`, `llama-3.1-8b-instant` | Sub-second SAR narrative drafting, novel pattern hypothesis synthesis, and conversational copilot. |
-| **Agent Orchestration** | LangGraph / LangChain | 0.2+ | 8-Stage state machine, uncertainty conditional edges, and state checkpointing. |
-| **Data Validation** | Pydantic v2 | 2.10+ | Strict typing and JSON schema enforcement for benchmark answer files. |
-| **User Interface** | React 18/19 (Tailwind + Shaders) | SPA (Vite / Next.js) | Defense-grade command center with precision micrographics, force-directed canvas shaders, and Step-Up simulator. |
-| **API Backend** | FastAPI / Uvicorn | 0.115+ | High-density JSON REST endpoints for external frontend consumers. |
-| **Test Framework** | Pytest | 9.0+ | Automated test suite validating benchmark cases, policy logic, and hybrid fallbacks. |
+| **LLM Inference** | Groq LPU Cloud | `qwen/qwen3.8-27b` | Sub-second SAR narrative drafting, novel pattern hypothesis synthesis, and conversational copilot with token-budget governance (600 OTPM max for narratives, 500 for copilot). |
+| **Multi-Agent Engine** | `InvestigationOrchestrator` & LangGraph | `src/agent/pipeline/` | 7-Stage neuro-symbolic pipeline, uncertainty conditional edges, and step-up auth challenge loop. |
+| **Headless Interfaces** | CLI & REST API | `tg_cli.py` & `src/api/server.py` | Defense-grade interactive terminal suite (`tg_cli.py`) and FastAPI REST endpoints (`/api/*`) for pipeline execution, MCP tools, and telemetry. |
+| **API Backend** | FastAPI / Uvicorn | 0.115+ | High-density JSON REST endpoints (`/api/cases`, `/api/cases/{id}/pipeline`, `/api/pipeline/run`, `/api/mcp/*`, `/api/copilot`). |
+| **Test Framework** | Pytest | 9.0+ | Automated test suite with 43 unit/integration tests validating the 7 agents, MCP integration, policy logic, memory, and fallbacks. |
 
 ---
 
-## 11. Verification & Testing Standards
+## 12. Verification & Testing Standards
 
-All code is continuously validated through automated unit and integration tests:
+All code is continuously validated through automated unit and integration tests across 7 test modules:
 
-1. **Benchmark Integrity Test** (`tests/test_benchmark_cases.py`):
+1. **Multi-Agent Collaborative Pipeline Suite** (`tests/test_agent_pipeline.py`, 9 tests):
+   * Validates the sequential execution of all 7 specialized agents via `InvestigationOrchestrator`.
+   * Verifies data contracts, deterministic metric calculation ($Z$-score, degree centrality, $P$, $U$), and LLM cognitive layer integration.
+   * Asserts the epistemic uncertainty collapse loop: dynamic step-up challenge triggers when $U > 0.45$ and collapses to $\le 0.15$ upon customer verification.
+2. **TigerGraph MCP Integration Suite** (`tests/test_mcp_integration.py`, 7 tests):
+   * Validates `TigerGraphMCPService` environment normalization, status reporting, and discovery of all 65 registered MCP tools.
+   * Tests live vertex counting (`tigergraph__get_vertex_count`) and node retrieval (`tigergraph__get_node`) against Savanna Cloud.
+   * Verifies Graph Scout Agent MCP tool execution and audit docket logging.
+   * Validates FastAPI REST endpoints (`/api/mcp/status`, `/api/mcp/tools`, `/api/mcp/execute`).
+3. **Benchmark Integrity Suite** (`tests/test_benchmark_cases.py`, 1 test):
    * Validates that all 20 generated case files (`cases/HHG-001.json` through `cases/HHG-020.json`) strictly adhere to the Pydantic schema.
    * Asserts that `initial` and `final` NBA lists are non-empty and `what_changed` is properly logged.
    * Asserts that confirmed fraud cases generate valid SAR models answering the 5 W's.
-2. **Policy Compliance Test** (`tests/test_policy.py`):
+4. **Evidence Math & Uncertainty Suite** (`tests/test_evidence.py`, 2 tests):
+   * Verifies that direct evidence yields confidence $\ge 0.85$ and uncertainty $\le 0.15$.
+   * Verifies that contradictory signals raise uncertainty above the $0.45$ threshold.
+5. **Graph-Native Memory Suite** (`tests/test_graph_memory.py`, 19 tests):
+   * Validates `ClosedCase` vertex persistence, entity edges (`CASE_ON_CUSTOMER`, `ON_CARD`, `CASE_ON_DEVICE`, `CASE_IN_REGION`, `CASE_HAS_PATTERN`, `INVOLVES`).
+   * Validates hybrid retrieval combining 384-dim dense vector cosine similarity and multi-hop structural graph traversal via Reciprocal Rank Fusion ($K=60$).
+6. **Hybrid Fallback & Offline Suite** (`tests/test_hybrid_agent.py`, 3 tests):
+   * Verifies that with or without API keys, SAR narratives and pattern hypotheses generate cleanly with zero errors.
+7. **Policy Compliance Suite** (`tests/test_policy.py`, 2 tests):
    * Verifies Rule R1 enforcement: single weak signals never trigger `BLOCK_CARD`.
    * Verifies exposure threshold routing: $\le \$2,500 \rightarrow$ `L1`, $>\$2,500 \rightarrow$ `L2`.
    * Verifies Rule R3 legitimate case clearance.
-3. **Evidence Math Test** (`tests/test_evidence.py`):
-   * Verifies that direct evidence yields confidence $\ge 0.85$ and uncertainty $\le 0.15$.
-   * Verifies that contradictory signals raise uncertainty above the $0.45$ threshold.
-4. **Hybrid Fallback Test** (`tests/test_hybrid_agent.py`):
-   * Verifies that with or without API keys, SAR narratives and pattern hypotheses generate cleanly with zero errors.
 
-Execute the test suite with:
+### Running the Test Suite
 ```powershell
 python -m pytest tests/ -v
 ```
-*(All 8 tests pass in < 2.5 seconds).*
+*(All 43 tests pass with 100% pass rate).*
+
+### FastAPI REST & Telemetry Server
+```powershell
+python -m uvicorn src.api.server:app --host 0.0.0.0 --port 8000
+```
+*(Provides swagger docs at `http://localhost:8000/docs` and telemetry streams for all 20 cases, pipeline traces, and TigerGraph MCP tools).*
+

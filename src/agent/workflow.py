@@ -1,19 +1,16 @@
 """
 LangGraph 8-Stage Investigation State Machine for TigerGraph Fraud Investigation Agent.
-Orchestrates the canonical 8-step lifecycle:
-Trigger -> Investigate -> Gather Evidence -> Assess Uncertainty ->
-Gather More Evidence (Conditional) -> Take Actions (NBA) -> Explain & SAR -> Memory Loop.
+Orchestrates the collaborative multi-agent pipeline:
+Trigger (Alert Sentinel) -> Investigate (Graph Scout) -> Evidence (Evidence Assessor) ->
+Uncertainty Assessment (Pattern Strategist) -> [Conditional Step-Up Challenge] ->
+Next Actions (Policy Governor) -> Explain & SAR (Compliance Officer) -> Memory Commit (Memory Weaver).
 """
 
-from typing import Dict, Any, List, Optional, TypedDict, Annotated
+from typing import Dict, Any, List, Optional, TypedDict
 from langgraph.graph import StateGraph, END
 
-from src.agent.models import (
-    BenchmarkCaseOutput, CaseRecord, EvidenceItem, EvidenceRequest,
-    NextBestActions, SARModel, ActionRecommendation, ActionEnum, ApprovalRouteEnum
-)
-from src.agent.reasoning import FraudReasoningEngine
-from src.graph.client import get_tg_connection
+from src.agent.models import BenchmarkCaseOutput
+from src.agent.pipeline.orchestrator import InvestigationOrchestrator
 
 
 class InvestigationState(TypedDict):
@@ -30,56 +27,55 @@ class InvestigationState(TypedDict):
     what_changed: str
     sar_model: Dict[str, Any]
     final_output: Optional[Dict[str, Any]]
+    pipeline_trace: List[Dict[str, Any]]
 
 
-# Singleton engine instance
-_engine: Optional[FraudReasoningEngine] = None
+# Singleton orchestrator instance
+_orchestrator: Optional[InvestigationOrchestrator] = None
 
-def get_engine() -> FraudReasoningEngine:
-    global _engine
-    if _engine is None:
-        _engine = FraudReasoningEngine()
-    return _engine
+def get_orchestrator() -> InvestigationOrchestrator:
+    global _orchestrator
+    if _orchestrator is None:
+        _orchestrator = InvestigationOrchestrator()
+    return _orchestrator
 
 
-# Node 1: Trigger
+# Node 1: Trigger (Alert Sentinel)
 def node_trigger(state: InvestigationState) -> Dict[str, Any]:
     case_meta = state["case_meta"]
     case_id = str(case_meta.get("case_id", "UNKNOWN"))
     return {
         "case_id": case_id,
         "stage": "TRIGGER",
-        "evidence_items": []
     }
 
 
-# Node 2: Investigate (Anchor target entities)
+# Node 2: Investigate (Graph Scout)
 def node_investigate(state: InvestigationState) -> Dict[str, Any]:
     return {
         "stage": "INVESTIGATE"
     }
 
 
-# Node 3: Gather Evidence (Traverse graph and telemetry)
+# Node 3: Gather Evidence & Multi-Agent Deliberation
 def node_gather_evidence(state: InvestigationState) -> Dict[str, Any]:
-    # Delegate to reasoning engine
-    engine = get_engine()
+    orchestrator = get_orchestrator()
     case_meta = state["case_meta"]
-    # We perform the full investigation analysis
-    output: BenchmarkCaseOutput = engine.investigate_case(case_meta)
-    
-    # Store intermediate evaluation
+    output: BenchmarkCaseOutput = orchestrator.run_investigation(case_meta)
+    traces = getattr(output, "orchestrator_pipeline_trace", [])
+
     return {
         "stage": "GATHER_EVIDENCE",
         "evidence_items": [e.model_dump() for e in output.case.evidence],
-        "uncertainty_score": 0.20 if output.case.verdict in ("fraud", "cleared") else 0.65,
+        "uncertainty_score": round(output.case.fraud_probability if output.case.verdict == "cleared" else (1.0 - output.case.fraud_probability), 3),
         "fraud_probability": output.case.fraud_probability,
         "needs_secondary_evidence": len(output.evidence_requests) > 0,
         "initial_nba": [a.model_dump() for a in output.next_best_actions.initial],
         "final_nba": [a.model_dump() for a in output.next_best_actions.final],
         "what_changed": output.next_best_actions.what_changed,
         "sar_model": output.sar.model_dump(),
-        "final_output": output.model_dump()
+        "final_output": output.model_dump(),
+        "pipeline_trace": traces,
     }
 
 
@@ -118,32 +114,15 @@ def node_explain_decision(state: InvestigationState) -> Dict[str, Any]:
     }
 
 
-# Node 8: Memory & Graph Writeback
+# Node 8: Memory & Graph Writeback (Graph-Native Case Memory)
 def node_update_memory(state: InvestigationState) -> Dict[str, Any]:
-    # Persist case to TigerGraph Savanna Cloud if possible
-    case_id = state["case_id"]
-    try:
-        conn = get_tg_connection()
-        # Upsert TestVertex or Concept vertex representing the closed case
-        conn.upsertVertex(
-            "Concept",
-            f"CASE_{case_id}",
-            attributes={
-                "concept_type": "CLOSED_INVESTIGATION_CASE",
-                "description": f"Closed fraud investigation case {case_id}."
-            }
-        )
-    except Exception as e:
-        # Non-blocking graceful fallback
-        pass
-
     return {
         "stage": "UPDATE_MEMORY"
     }
 
 
 # Build LangGraph workflow
-def build_investigation_graph() -> StateGraph:
+def build_investigation_graph():
     workflow = StateGraph(InvestigationState)
 
     workflow.add_node("trigger", node_trigger)
@@ -199,9 +178,13 @@ class FraudAgentWorkflow:
             "final_nba": [],
             "what_changed": "",
             "sar_model": {},
-            "final_output": None
+            "final_output": None,
+            "pipeline_trace": []
         }
 
         final_state = self.graph.invoke(initial_state)
         output_dict = final_state.get("final_output")
-        return BenchmarkCaseOutput.model_validate(output_dict)
+        output = BenchmarkCaseOutput.model_validate(output_dict)
+        if "pipeline_trace" in final_state:
+            output.orchestrator_pipeline_trace = final_state["pipeline_trace"]
+        return output

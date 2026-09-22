@@ -1,0 +1,75 @@
+/*
+ * Structural Similarity Query for Graph-Native Case Memory.
+ *
+ * Finds past ClosedCase vertices that are structurally connected to the
+ * current investigation's entities (customer, card, devices, regions).
+ *
+ * Scoring:
+ *   - Shared device fingerprint: +3.0 (strongest structural signal)
+ *   - Same customer:             +2.0
+ *   - Same card:                 +2.0
+ *   - Same billing region:       +1.0
+ *   - Same fraud pattern:        +1.5
+ *
+ * Returns top-K past cases ranked by structural connection strength.
+ */
+
+CREATE QUERY find_similar_cases_structural(
+    STRING seed_customer_id,
+    STRING seed_card_id,
+    SET<STRING> seed_device_ids,
+    STRING seed_pattern,
+    INT top_k = 5
+) FOR GRAPH Transaction_Fraud
+SYNTAX V2
+RETURNS (STRING) {
+
+    TYPEDEF TUPLE<STRING case_id, DOUBLE score, STRING match_reasons> CaseScore;
+    HeapAccum<CaseScore>(top_k, score DESC) @@top_cases;
+    MapAccum<STRING, DOUBLE> @@case_scores;
+    MapAccum<STRING, STRING> @@case_reasons;
+
+    // Path 1: Cases on the same customer
+    Customers = {Customer.*};
+    SeedCust = SELECT c FROM Customers:c WHERE c.customer_id == seed_customer_id;
+    CasesViaCustomer = SELECT cc FROM SeedCust -(CUSTOMER_HAS_CASE)-> ClosedCase:cc
+        ACCUM
+            @@case_scores += (cc.case_id -> 2.0),
+            @@case_reasons += (cc.case_id -> "same_customer;");
+
+    // Path 2: Cases on the same card
+    Cards = {AccountCard.*};
+    SeedCard = SELECT c FROM Cards:c WHERE c.card_id == seed_card_id;
+    CasesViaCard = SELECT cc FROM SeedCard -(ON_CARD)-> ClosedCase:cc
+        ACCUM
+            @@case_scores += (cc.case_id -> 2.0),
+            @@case_reasons += (cc.case_id -> "same_card;");
+
+    // Path 3: Cases sharing a device fingerprint (2-hop)
+    FOREACH dev_id IN seed_device_ids DO
+        Devices = {DeviceProfile.*};
+        SeedDev = SELECT d FROM Devices:d WHERE d.device_id == dev_id;
+        CasesViaDev = SELECT cc FROM SeedDev -(DEVICE_IN_CASE)-> ClosedCase:cc
+            ACCUM
+                @@case_scores += (cc.case_id -> 3.0),
+                @@case_reasons += (cc.case_id -> "shared_device;");
+    END;
+
+    // Path 4: Cases with the same fraud pattern
+    IF seed_pattern != "none" AND seed_pattern != "" THEN
+        Patterns = {FraudPattern.*};
+        SeedPat = SELECT p FROM Patterns:p WHERE p.pattern_name == seed_pattern;
+        CasesViaPat = SELECT cc FROM SeedPat -(PATTERN_IN_CASE)-> ClosedCase:cc
+            ACCUM
+                @@case_scores += (cc.case_id -> 1.5),
+                @@case_reasons += (cc.case_id -> "same_pattern;");
+    END;
+
+    // Rank and return
+    FOREACH (cid, score) IN @@case_scores DO
+        STRING reasons = @@case_reasons.get(cid);
+        @@top_cases += CaseScore(cid, score, reasons);
+    END;
+
+    PRINT @@top_cases AS similar_cases;
+}

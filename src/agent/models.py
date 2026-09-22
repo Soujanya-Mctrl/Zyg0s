@@ -105,6 +105,8 @@ class CaseRecord(BaseModel):
 
 class BenchmarkCaseOutput(BaseModel):
     """The exact official output format for all 20 HHGOA benchmark cases."""
+    model_config = {"extra": "allow"}
+
     case_id: str
     case: CaseRecord
     evidence_requests: List[EvidenceRequest] = Field(default_factory=list)
@@ -114,3 +116,4 @@ class BenchmarkCaseOutput(BaseModel):
     tool_calls: int = Field(default=0)
     tokens: int = Field(default=0)
     latency_s: float = Field(default=0.0)
+    orchestrator_pipeline_trace: List[Dict[str, Any]] = Field(default_factory=list, description="Step-by-step trace of 7 specialized pipeline agents")

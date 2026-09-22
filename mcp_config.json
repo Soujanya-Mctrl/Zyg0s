@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "tigergraph": {
+      "command": "python",
+      "args": ["src/mcp_server.py"],
+      "env": {
+        "TG_GRAPHNAME": "Transaction_Fraud",
+        "TG_TGCLOUD": "true",
+        "TG_RESTPP_PORT": "443"
+      }
+    }
+  }
+}

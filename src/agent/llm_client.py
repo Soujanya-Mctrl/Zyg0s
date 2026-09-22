@@ -19,8 +19,8 @@ class HybridLLMClient:
     with transparent deterministic fallback.
     """
 
-    DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile"
-    FAST_GROQ_MODEL = "llama-3.1-8b-instant"
+    DEFAULT_GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
+    FAST_GROQ_MODEL = os.getenv("GROQ_FAST_MODEL", "qwen/qwen3.8-27b")
 
     def __init__(self):
         self.groq_api_key = os.getenv("GROQ_API_KEY")
@@ -31,10 +31,34 @@ class HybridLLMClient:
         self._init_client()
 
     def _init_client(self):
+        PREFERRED_MODELS = [
+            "qwen/qwen3.8-27b",
+            "openai/gpt-oss-20b",
+            "openai/gpt-oss-120b",
+            "allam-2-7b",
+            "llama-3.3-70b-versatile",
+            "llama-3.1-8b-instant",
+        ]
+
         if self.groq_api_key:
             try:
                 from groq import Groq
                 self._client = Groq(api_key=self.groq_api_key)
+                configured = os.getenv("GROQ_MODEL")
+                try:
+                    available = [m.id for m in self._client.models.list().data]
+                    if configured and configured in available:
+                        self.DEFAULT_GROQ_MODEL = configured
+                        self.FAST_GROQ_MODEL = os.getenv("GROQ_FAST_MODEL", configured)
+                    else:
+                        for pref in PREFERRED_MODELS:
+                            if pref in available:
+                                self.DEFAULT_GROQ_MODEL = pref
+                                self.FAST_GROQ_MODEL = pref
+                                break
+                except Exception:
+                    if configured:
+                        self.DEFAULT_GROQ_MODEL = configured
                 self._provider = "groq"
                 return
             except Exception as e:
@@ -46,18 +70,26 @@ class HybridLLMClient:
                 self._client = OpenAI(api_key=self.openai_api_key)
                 self._provider = "openai"
                 return
-            except Exception as e:
+            except Exception:
                 pass
 
         self._provider = "deterministic"
 
+    @property
+    def is_active(self) -> bool:
+        return self._provider == "groq" and self._client is not None
+
+    @property
+    def model_name(self) -> str:
+        return self.DEFAULT_GROQ_MODEL if self._provider == "groq" else "deterministic"
+
     def get_provider_status(self) -> str:
         """Returns human-readable status for UI dashboard and audit logs."""
         if self._provider == "groq":
-            return f"⚡ Groq Active ({self.DEFAULT_GROQ_MODEL})"
+            return f"Groq Active ({self.DEFAULT_GROQ_MODEL})"
         elif self._provider == "openai":
             return "OpenAI Active"
-        return "🛡️ Deterministic Mode (Offline Safe)"
+        return "Deterministic Mode (Offline Safe)"
 
     def generate_forensic_narrative(
         self,
@@ -78,7 +110,7 @@ class HybridLLMClient:
                     ],
                     model=self.DEFAULT_GROQ_MODEL,
                     temperature=0.2,
-                    max_tokens=1024
+                    max_tokens=600
                 )
                 content = chat_completion.choices[0].message.content
                 if content and len(content.strip()) > 50:
@@ -160,29 +192,69 @@ class HybridLLMClient:
         """
         Powers the interactive 'Ask the Investigator AI' copilot in the React Command Center.
         """
+        # Check for live TigerGraph MCP tool queries
+        mcp_context_line = ""
+        q = user_query.lower()
+        try:
+            from src.graph.mcp_service import TigerGraphMCPService
+            if "vertex" in q or "count" in q:
+                res = TigerGraphMCPService.sync_get_vertex_count()
+                if res.get("success"):
+                    counts = res.get("data", {}).get("counts_by_type", {})
+                    active_counts = {k: v for k, v in counts.items() if v > 0}
+                    mcp_context_line = f"- Live TigerGraph MCP Telemetry: Total Vertices: {res.get('data', {}).get('total', 0):,}, Active Counts: {active_counts}\n"
+            elif "mcp" in q:
+                mcp_status = TigerGraphMCPService.get_status()
+                mcp_context_line = f"- TigerGraph MCP Protocol: Status={mcp_status.get('status')}, Tools={mcp_status.get('total_tools_exposed')}, Graph={mcp_status.get('graph_name')}\n"
+        except Exception:
+            pass
+
         if self._provider == "groq" and self._client:
+            evidence_summary = "\n".join([f"- {e}" for e in case_context.get("evidence", [])[:6]])
             prompt = (
-                f"Case Context:\n{case_context}\n\n"
-                f"Analyst Question: {user_query}\n\n"
-                f"Answer concisely and authoritatively. Reference specific evidence, graph paths, "
-                f"and Bank Fraud Policy v1.0 rules (R1-R10) where applicable."
+                f"You are the Lead Financial Crime Investigator Copilot on Zyg0s, an autonomous fraud detection command center grounded in TigerGraph Savanna Cloud.\n\n"
+                f"CASE INVESTIGATION CONTEXT:\n"
+                f"- Case ID: {case_context.get('case_id')}\n"
+                f"- Verdict: {case_context.get('verdict')}\n"
+                f"- Assessed Fraud Probability: {case_context.get('fraud_probability')}\n"
+                f"- Financial Exposure: ${case_context.get('exposure_usd', 0):,.2f}\n"
+                f"- Fraud Pattern: {case_context.get('pattern')}\n"
+                f"- Primary Card: {case_context.get('primary_card_id', 'N/A')}\n"
+                f"- Connected Cards: {case_context.get('connected_card_ids', [])}\n"
+                f"- Connected Device Telemetry: {case_context.get('connected_device_profiles', [])}\n"
+                f"- Similar Precedents in TigerGraph Memory: {case_context.get('similar_prior_cases', [])}\n"
+                f"{mcp_context_line}"
+                f"- Stage 1 Action (Verification): {case_context.get('initial_action', 'N/A')}\n"
+                f"- Stage 2 Action (Mitigation): {case_context.get('final_action', 'N/A')}\n"
+                f"- FinCEN SAR Status: {'Filed' if case_context.get('sar_filed') else 'Not Required'}\n"
+                f"- Key Anchored Evidence:\n{evidence_summary if evidence_summary else '- Standard baseline telemetry.'}\n\n"
+                f"ANALYST QUESTION: {user_query}\n\n"
+                f"INVESTIGATOR GUIDANCE:\n"
+                f"1. Structure your reply clearly with bold section titles and concise bullet points.\n"
+                f"2. Cite Bank Fraud Policy v1.0 rules (R1 to R10), TigerGraph graph topology (nodes and edges), and mathematical uncertainty where relevant.\n"
+                f"3. Maintain an executive cyber-fraud & AML compliance officer perspective."
             )
             try:
                 chat_completion = self._client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "You are Antigravity Fraud Copilot, an expert cyber-fraud investigator grounded in TigerGraph."},
+                        {"role": "system", "content": "You are Zyg0s Forensic Copilot, an elite cyber-fraud intelligence agent."},
                         {"role": "user", "content": prompt}
                     ],
                     model=self.FAST_GROQ_MODEL,
-                    temperature=0.3,
-                    max_tokens=512
+                    temperature=0.2,
+                    max_tokens=500
                 )
-                return chat_completion.choices[0].message.content or "No response generated."
+                content = chat_completion.choices[0].message.content
+                if content and len(content.strip()) > 10:
+                    return content.strip()
             except Exception as e:
-                return f"Copilot error: {e}"
+                # Fall back gracefully to deterministic policy reasoning
+                print(f"Copilot inference warning: {e}; using deterministic fallback.")
 
         # Deterministic Copilot responses
-        q = user_query.lower()
+        if mcp_context_line:
+            return f"**TigerGraph MCP Live Telemetry**\n{mcp_context_line.strip()}\n\nInvestigating Case {case_context.get('case_id')} with grounded graph tool capabilities."
+
         if "l1" in q or "l2" in q or "approval" in q or "route" in q:
             exposure = case_context.get("exposure_usd", 0.0)
             return (

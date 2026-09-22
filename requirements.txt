@@ -18,6 +18,10 @@ python-dotenv>=1.2.0
 requests>=2.34.0
 networkx>=3.6.0
 pandas>=3.0.0
+numpy>=2.0.0
+
+# Graph-Native Case Memory (Hybrid Vector + Structural Retrieval)
+sentence-transformers>=2.2.0
 
 # REST API & Telemetry Backend (For React Command Center)
 fastapi>=0.115.0
