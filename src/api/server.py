@@ -278,6 +278,25 @@ def run_custom_pipeline(req: RunPipelineRequest):
     orch = get_orchestrator()
     case_meta = req.model_dump()
     out = orch.run_investigation(case_meta)
+    
+    # Persist the newly investigated case so it appears across all workbench views
+    case_dict = {
+        "case_id": out.case_id,
+        "case": out.case.model_dump(),
+        "evidence_requests": [e.model_dump() for e in out.evidence_requests],
+        "next_best_actions": out.next_best_actions.model_dump(),
+        "sar": out.sar.model_dump(),
+        "stop_reason": out.stop_reason,
+        "latency_s": out.latency_s,
+        "orchestrator_pipeline_trace": getattr(out, "orchestrator_pipeline_trace", [])
+    }
+    file_path = CASES_DIR / f"{out.case_id}.json"
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(case_dict, f, indent=2)
+    except Exception as e:
+        print(f"Warning: Failed to persist case {out.case_id}: {e}")
+
     return {
         "case_id": out.case_id,
         "case": out.case.model_dump(),
@@ -389,6 +408,79 @@ def get_case_graph(case_id: str):
     }
 
 
+@app.get("/api/graph/schema")
+def get_graph_schema():
+    """
+    Returns the live TigerGraph Savanna Cloud database schema definition,
+    including vertex types, edge types, and topology layout for React Flow.
+    """
+    try:
+        from src.graph.client import get_tg_connection
+        conn = get_tg_connection()
+        schema = conn.getSchema()
+        vtypes = schema.get("VertexTypes", [])
+        etypes = schema.get("EdgeTypes", [])
+        
+        # Build React Flow nodes for Schema Ontology
+        nodes = []
+        for i, vt in enumerate(vtypes):
+            name = vt.get("Name", f"Vertex_{i}")
+            color = "#06B6D4" # Cyan default
+            if "Transaction" in name:
+                color = "#F59E0B"
+            elif any(k in name for k in ["Party", "User", "Customer"]):
+                color = "#3B82F6"
+            elif any(k in name for k in ["Card", "Account"]):
+                color = "#10B981"
+            elif any(k in name for k in ["Device", "IP"]):
+                color = "#8B5CF6"
+            elif "Merchant" in name:
+                color = "#EC4899"
+            elif any(k in name for k in ["Case", "Fraud"]):
+                color = "#EF4444"
+
+            attr_names = [a.get("AttributeName") for a in vt.get("Attributes", [])]
+            primary_id = vt.get("PrimaryId", {}).get("AttributeName", "id")
+
+            nodes.append({
+                "id": name,
+                "label": name,
+                "type": "SchemaVertex",
+                "primary_id": primary_id,
+                "attributes": attr_names[:6], # first 6 attributes
+                "total_attributes": len(attr_names),
+                "color": color,
+            })
+            
+        edges = []
+        for i, et in enumerate(etypes):
+            name = et.get("Name", f"Edge_{i}")
+            from_v = et.get("FromVertexTypeName") or et.get("FromVertexType")
+            to_v = et.get("ToVertexTypeName") or et.get("ToVertexType")
+            is_directed = et.get("IsDirected", True)
+            if from_v and to_v:
+                edges.append({
+                    "id": f"e_{from_v}_{to_v}_{name}",
+                    "source": from_v,
+                    "target": to_v,
+                    "name": name,
+                    "label": name.replace("_", " "),
+                    "is_directed": is_directed,
+                })
+
+        return {
+            "graph_name": conn.graphname,
+            "vertex_count": len(vtypes),
+            "edge_count": len(etypes),
+            "vertices": vtypes,
+            "edges": etypes,
+            "flow_nodes": nodes,
+            "flow_edges": edges,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch TigerGraph schema: {str(e)}")
+
+
 @app.post("/api/cases/{case_id}/simulate-step-up")
 def simulate_step_up(case_id: str, req: StepUpRequest):
     """
@@ -424,6 +516,33 @@ def simulate_step_up(case_id: str, req: StepUpRequest):
         )
         escalation = "L2" if case_inner.get("exposure_usd", 0) > 1000 else "L1"
 
+    # Persist updated decisioning to disk
+    file_path = CASES_DIR / f"{case_id}.json"
+    if file_path.exists():
+        try:
+            case_inner["verdict"] = updated_verdict
+            case_inner["fraud_probability"] = updated_risk
+            case_inner["status"] = "closed_cleared" if req.outcome == "PASS" else "closed_fraud"
+            if "next_best_actions" not in cdata:
+                cdata["next_best_actions"] = {}
+            cdata["next_best_actions"]["final"] = [{
+                "action": updated_action,
+                "route": escalation,
+                "reason": what_changed
+            }]
+            trace = cdata.get("orchestrator_pipeline_trace", [])
+            trace.append({
+                "agent": "HUMAN_COGNITIVE_OVERRIDE",
+                "action": f"Executed step-up simulation ({req.action_type}) -> {req.outcome}. Final Action: {updated_action}. Uncertainty collapsed to {updated_uncertainty}.",
+                "status": "safe" if req.outcome == "PASS" else "danger"
+            })
+            cdata["orchestrator_pipeline_trace"] = trace
+            cdata["case"] = case_inner
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(cdata, f, indent=2)
+        except Exception as e:
+            print(f"Warning: Failed to persist step up update: {e}")
+
     return {
         "case_id": case_id,
         "step_up_action": req.action_type,
@@ -438,6 +557,59 @@ def simulate_step_up(case_id: str, req: StepUpRequest):
             "what_changed": what_changed,
         }
     }
+
+
+@app.post("/api/cases/{case_id}/reset")
+def reset_case(case_id: str):
+    """
+    Resets a case back to its initial open alert state (uncertainty > 0.40, stage 2 pending)
+    so analysts can repeatedly test live investigation and step-up execution.
+    """
+    cdata = load_case_json(case_id)
+    case_inner = cdata.get("case", {})
+
+    init_risk = 0.65
+    case_inner["status"] = "open"
+    case_inner["verdict"] = "uncertain"
+    case_inner["fraud_probability"] = init_risk
+
+    # Retain initial graph evidence only
+    raw_evidence = case_inner.get("evidence", [])
+    case_inner["evidence"] = [
+        ev for ev in raw_evidence 
+        if "customer_reply" not in str(ev.get("source", "")) and "customer_validation_response" not in str(ev.get("ref", ""))
+    ]
+
+    cdata["case"] = case_inner
+    if "next_best_actions" in cdata:
+        cdata["next_best_actions"]["final"] = []
+
+    # Filter out override from trace
+    trace = cdata.get("orchestrator_pipeline_trace", [])
+    cdata["orchestrator_pipeline_trace"] = [
+        s for s in trace 
+        if "HUMAN_COGNITIVE_OVERRIDE" not in s.get("agent", "") and "Step-Up authentication" not in s.get("action", "")
+    ]
+
+    file_path = CASES_DIR / f"{case_id}.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(cdata, f, indent=2)
+
+    return {
+        "status": "SUCCESS",
+        "case_id": case_id,
+        "message": f"Case {case_id} reset to active open alert state.",
+        "verdict": "uncertain",
+        "uncertainty": 0.70
+    }
+
+
+@app.post("/api/cases/reset-all")
+def reset_all_benchmark_cases():
+    """Resets all 20 benchmark cases to pending alert state for clean end-to-end demoing."""
+    from scripts.prepare_unexecuted_cases import reset_all_cases
+    reset_all_cases()
+    return {"status": "SUCCESS", "message": "All 20 benchmark cases reset to open alert state."}
 
 
 @app.post("/api/cases/{case_id}/chat")

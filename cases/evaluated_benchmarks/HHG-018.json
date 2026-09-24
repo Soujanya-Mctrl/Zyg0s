@@ -1,38 +1,48 @@
 {
-  "case_id": "HHG-009",
+  "case_id": "HHG-018",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.65,
+    "status": "closed_cleared",
+    "verdict": "cleared",
+    "fraud_probability": 0.05,
     "pattern": "none",
     "pattern_description": "",
     "affected_txn_ids": [],
-    "first_suspicious_txn_id": "3581141",
+    "first_suspicious_txn_id": "3491361",
     "connected_card_ids": [
-      "C08299-K1"
+      "C02354-K2"
     ],
     "connected_device_profiles": [],
     "exposure_usd": 0.0,
     "evidence": [
       {
-        "claim": "Disputed transaction of $30.02 matches customer recurring charge history (seen 4 prior times).",
+        "claim": "Disputed transaction of $39.08 matches customer recurring charge history (seen 160 prior times).",
         "source": "graph",
-        "ref": "query:customer_recurring_history(customer_id=C08299, amt=30.02)",
+        "ref": "query:customer_recurring_history(customer_id=C02354, amt=39.08)",
         "entity_ids": [
-          "3581141"
+          "3491361"
         ],
         "grade": "CONTRADICTORY",
         "weight": -0.8
+      },
+      {
+        "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3491361"
+        ],
+        "grade": "CONTRADICTORY",
+        "weight": -0.9
       }
     ],
     "similar_prior_cases": [
       "HHG-003",
       "HHG-008",
-      "HHG-002"
+      "HHG-009"
     ],
-    "summary": "Case HHG-009 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C08299 message: 'I never made this $30.02 purchase. Please check my card.' Refers to 358114... Initial fraud risk scored at 0.65. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-018 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
     "written_to_graph": false,
-    "graph_case_id": "CASE-SAVANNA-HHG-009"
+    "graph_case_id": "CASE-SAVANNA-HHG-018"
   },
   "evidence_requests": [
     {
@@ -59,7 +69,14 @@
         "reason": "R7: send informational reminder regarding subscription billing"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
+      }
+    ],
+    "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
   },
   "sar": {
     "file": false,
@@ -72,33 +89,33 @@
   "stop_reason": "Customer confirmation and established billing history cleared the alert as legitimate; no fraud.",
   "tool_calls": 16,
   "tokens": 4200,
-  "latency_s": 82.36,
+  "latency_s": 26.31,
   "orchestrator_pipeline_trace": [
     {
       "agent_id": "agent_1_alert_sentinel",
       "agent_name": "Alert Sentinel",
       "role": "Intake, Velocity Baselining & Epistemic Triage",
       "math_metrics": {
-        "flagged_txn_id": 3581141,
-        "flagged_amount_usd": 30.02,
-        "channel": "online",
-        "customer_id": "C08299",
-        "card_id": "C08299-K1",
-        "historical_mean_usd": 65.98,
-        "historical_std_usd": 67.58,
-        "z_score": -0.532,
-        "amount_acceleration_ratio": 0.45,
+        "flagged_txn_id": 3491361,
+        "flagged_amount_usd": 39.08,
+        "channel": "in_person",
+        "customer_id": "C02354",
+        "card_id": "C02354-K2",
+        "historical_mean_usd": 141.23,
+        "historical_std_usd": 212.73,
+        "z_score": -0.48,
+        "amount_acceleration_ratio": 0.28,
         "velocity_1h": 1,
-        "velocity_24h": 1,
-        "prior_txns_count": 46,
+        "velocity_24h": 42,
+        "prior_txns_count": 5864,
         "triage_priority": 1.0,
-        "hand_off_summary": "Anchored TX #3581141 ($30.02, Z=-0.53). Triage priority: 1.00."
+        "hand_off_summary": "Anchored TX #3491361 ($39.08, Z=-0.48). Triage priority: 1.00."
       },
-      "ai_reasoning": "Transaction #3581141 does not represent a statistically severe baseline anomaly, as the $30.02 amount falls well within the customer's historical spending distribution (Z-score: -0.53, 0.45x average). The primary risk driver is the explicit customer dispute indicating potential unauthorized use, rather than any deviation from established spending patterns.",
+      "ai_reasoning": "The $39.08 transaction is not a statistically severe baseline anomaly, as it falls well within the customer's historical spending distribution with a negligible Z-score of -0.48 and a ratio of only 0.28x their average transaction value. Consequently, the alert is driven entirely by the explicit customer dispute rather than any deviation from established behavioral patterns.",
       "evidence_generated": [],
-      "hand_off_summary": "Anchored TX #3581141 ($30.02, Z=-0.53). Triage priority: 1.00.",
-      "latency_ms": 302.78,
-      "timestamp": "2026-09-22T19:36:19.635561"
+      "hand_off_summary": "Anchored TX #3491361 ($39.08, Z=-0.48). Triage priority: 1.00.",
+      "latency_ms": 318.45,
+      "timestamp": "2026-09-22T19:47:05.418944"
     },
     {
       "agent_id": "agent_2_graph_scout",
@@ -112,29 +129,29 @@
         "connected_cards": [],
         "shared_device_degree": 1,
         "is_recurring_dispute": true,
-        "recurring_matches_count": 4,
+        "recurring_matches_count": 160,
         "is_out_of_region": false,
         "ego_threat_density": 0.15,
-        "subgraph_path": "[C08299] -[:OWNS_CARD]-> [C08299-K1] -[:MADE_TX]-> [TX #3581141]",
+        "subgraph_path": "[C02354] -[:OWNS_CARD]-> [C02354-K2] -[:MADE_TX]-> [TX #3491361]",
         "device_profile": "",
-        "hand_off_summary": "Graph topology: [C08299] -[:OWNS_CARD]-> [C08299-K1] -[:MADE_TX]-> [TX #3581141]. Threat density: 0.15."
+        "hand_off_summary": "Graph topology: [C02354] -[:OWNS_CARD]-> [C02354-K2] -[:MADE_TX]-> [TX #3491361]. Threat density: 0.15."
       },
-      "ai_reasoning": "The absence of shared device fingerprints, card-testing bursts, or geographic anomalies strongly indicates benign regularity rather than active identity collusion or synthetic fraud. However, the presence of four prior disputes warrants monitoring for potential chargeback abuse, though the low ego threat density (0.15) confirms the current transaction remains within acceptable risk parameters.",
+      "ai_reasoning": "The absence of shared device fingerprints, card-testing bursts, or out-of-region anomalies strongly indicates benign regularity rather than active identity collusion. However, the extreme recurrence of disputes (160 prior occurrences) suggests a chronic, high-volume chargeback pattern that warrants review for potential friendly fraud or systemic billing errors, despite the low ego threat density.",
       "evidence_generated": [
         {
-          "claim": "Disputed transaction of $30.02 matches customer recurring charge history (seen 4 prior times).",
+          "claim": "Disputed transaction of $39.08 matches customer recurring charge history (seen 160 prior times).",
           "source": "graph",
-          "ref": "query:customer_recurring_history(customer_id=C08299, amt=30.02)",
+          "ref": "query:customer_recurring_history(customer_id=C02354, amt=39.08)",
           "entity_ids": [
-            "3581141"
+            "3491361"
           ],
           "grade": "CONTRADICTORY",
           "weight": -0.8
         }
       ],
-      "hand_off_summary": "Graph topology: [C08299] -[:OWNS_CARD]-> [C08299-K1] -[:MADE_TX]-> [TX #3581141]. Threat density: 0.15.",
-      "latency_ms": 13457.05,
-      "timestamp": "2026-09-22T19:36:33.092669"
+      "hand_off_summary": "Graph topology: [C02354] -[:OWNS_CARD]-> [C02354-K2] -[:MADE_TX]-> [TX #3491361]. Threat density: 0.15.",
+      "latency_ms": 9491.99,
+      "timestamp": "2026-09-22T19:47:14.910971"
     },
     {
       "agent_id": "agent_3_evidence_assessor",
@@ -154,11 +171,11 @@
         "mathematical_rationale": "Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
         "hand_off_summary": "Graded 1 signals: P(Fraud)=0.99, U=0.670. Step-up needed: True."
       },
-      "ai_reasoning": "The evidence pool is fundamentally deficient for immediate action because the single contradictory signal lacks the corroborating direct or circumstantial evidence necessary to substantiate the high fraud probability, rendering the derived score epistemically unsound. Consequently, Policy Rule R1 mandates step-up authentication to resolve the elevated uncertainty (U=0.670) and protect the customer relationship, as acting on unverified contradictory data risks unjustified account disruption.",
+      "ai_reasoning": "The evidence pool is fundamentally deficient for immediate action because it contains zero direct, circumstantial, or correlative signals, rendering the 0.99 fraud probability statistically unsupported and the high epistemic uncertainty (0.670) a clear indicator of insufficient data. Consequently, Policy Rule R1 mandates step-up authentication to resolve the contradiction between the established history and novel device, thereby protecting the customer relationship from unjustified account restrictions based on an empty evidentiary basis.",
       "evidence_generated": [],
       "hand_off_summary": "Graded 1 signals: P(Fraud)=0.99, U=0.670. Step-up needed: True.",
-      "latency_ms": 298.39,
-      "timestamp": "2026-09-22T19:36:33.391118"
+      "latency_ms": 353.46,
+      "timestamp": "2026-09-22T19:47:15.264469"
     },
     {
       "agent_id": "agent_4_pattern_strategist",
@@ -169,15 +186,15 @@
         "matched_predicate": "BENIGN_PROFILE_MATCH",
         "is_novel_pattern": false,
         "is_benign": true,
-        "channel": "online",
+        "channel": "in_person",
         "shared_origin_detected": false,
         "hand_off_summary": "Typology classified as 'none' via predicate BENIGN_PROFILE_MATCH."
       },
-      "ai_reasoning": "The near-certain fraud probability (0.99) contradicts the benign classification, suggesting the system has likely misidentified a compromised or stolen card (C08299-K1) as legitimate due to a lack of historical anomaly data or a sophisticated spoofing technique that mimics normal user behavior. The attacker likely executed a low-value \"test\" transaction of $30.02 online to verify the card's validity and bypass initial fraud filters before escalating to higher-value theft.",
+      "ai_reasoning": "The classification of this transaction as a benign profile match, combined with the low value and in-person channel, indicates that the high fraud probability score is likely a false positive triggered by a misconfigured risk threshold rather than actual malicious activity. Consequently, the customer is assessed as legitimate, and the transaction should be cleared as a standard, low-risk point-of-sale purchase with no evidence of fraudulent intent or complex subgraph anomalies.",
       "evidence_generated": [],
       "hand_off_summary": "Typology classified as 'none' via predicate BENIGN_PROFILE_MATCH.",
-      "latency_ms": 23502.0,
-      "timestamp": "2026-09-22T19:36:56.893180"
+      "latency_ms": 291.17,
+      "timestamp": "2026-09-22T19:47:15.555698"
     },
     {
       "agent_id": "agent_3_evidence_assessor",
@@ -197,11 +214,11 @@
         "mathematical_rationale": "Contradictory signals present (e.g. established history vs novel device); uncertainty elevated.",
         "hand_off_summary": "Graded 2 signals: P(Fraud)=0.99, U=0.330. Step-up needed: False."
       },
-      "ai_reasoning": "Evidence Assessor verified 2 grounded signals. Fraud probability is 0.99 with epistemic uncertainty index U = 0.330. Step-up challenge required: False.",
+      "ai_reasoning": "The evidence pool is fundamentally defective because the rationale cites \"contradictory signals\" while the signal count explicitly records zero contradictory evidence, creating a logical inconsistency that invalidates the high fraud probability derivation. Consequently, under Policy Rule R1, the system must mandate customer verification rather than immediate action, as the absence of direct or circumstantial fraud indicators combined with this data integrity failure necessitates preserving the customer relationship through clarification.",
       "evidence_generated": [],
       "hand_off_summary": "Graded 2 signals: P(Fraud)=0.99, U=0.330. Step-up needed: False.",
-      "latency_ms": 29416.16,
-      "timestamp": "2026-09-22T19:37:26.309447"
+      "latency_ms": 14539.16,
+      "timestamp": "2026-09-22T19:47:30.094929"
     },
     {
       "agent_id": "agent_5_policy_governor",
@@ -226,11 +243,11 @@
         "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure.",
         "hand_off_summary": "Policy evaluated: Stage 1 [CREATE_CASE] -> Stage 2 [CLOSE_NO_FRAUD] (auto). Exposure: $0.00."
       },
-      "ai_reasoning": "The decision to close the case without financial intervention strictly adheres to Rule R1 by avoiding a premature block based on a single, unverified signal, thereby respecting the principle of proportionality for a $0.00 exposure well below the $2,500.00 L2 threshold. This final action is fully defensible as it relies on direct customer confirmation to validate the transaction's legitimacy, ensuring that regulatory resources are not misallocated to false positives while maintaining a clear audit trail of the verification-to-closure workflow.",
+      "ai_reasoning": "The decision to close the case without imposing account restrictions strictly adheres to Rule R1 by ensuring that a single, unverified alert signal did not trigger a disproportionate or premature block, thereby preserving customer access rights. The final action is fully defensible as the customer’s explicit confirmation of legitimate activity provided the necessary evidentiary basis to downgrade the risk assessment and justify immediate clearance with zero financial exposure.",
       "evidence_generated": [],
       "hand_off_summary": "Policy evaluated: Stage 1 [CREATE_CASE] -> Stage 2 [CLOSE_NO_FRAUD] (auto). Exposure: $0.00.",
-      "latency_ms": 14507.01,
-      "timestamp": "2026-09-22T19:37:40.816526"
+      "latency_ms": 285.72,
+      "timestamp": "2026-09-22T19:47:30.380707"
     },
     {
       "agent_id": "agent_6_compliance_officer",
@@ -246,11 +263,11 @@
         "filing_reason": null,
         "hand_off_summary": "Compliance audit: SAR Filed=False (Exposure: $0.00, Reason: None)."
       },
-      "ai_reasoning": "Compliance Officer finding: No BSA/AML SAR filing required for Case HHG-009. Alert was cleared as legitimate under Bank Fraud Policy v1.0.",
+      "ai_reasoning": "Compliance Officer finding: No BSA/AML SAR filing required for Case HHG-018. Alert was cleared as legitimate under Bank Fraud Policy v1.0.",
       "evidence_generated": [],
       "hand_off_summary": "Compliance audit: SAR Filed=False (Exposure: $0.00, Reason: None).",
       "latency_ms": 0.11,
-      "timestamp": "2026-09-22T19:37:40.816668"
+      "timestamp": "2026-09-22T19:47:30.380854"
     },
     {
       "agent_id": "agent_7_memory_weaver",
@@ -261,19 +278,19 @@
         "similar_prior_cases": [
           "HHG-003",
           "HHG-008",
-          "HHG-002"
+          "HHG-009"
         ],
         "rrf_k_parameter": 60,
         "embedding_dimension": 384,
         "written_to_graph": false,
-        "graph_case_id": "CASE-SAVANNA-HHG-009",
-        "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-003, HHG-008, HHG-002). Case persisted to TigerGraph (CASE-SAVANNA-HHG-009)."
+        "graph_case_id": "CASE-SAVANNA-HHG-018",
+        "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-003, HHG-008, HHG-009). Case persisted to TigerGraph (CASE-SAVANNA-HHG-018)."
       },
-      "ai_reasoning": "The cleared status of Case HHG-009 aligns with the benign transactional patterns established in precedents HHG-003, HHG-008, and HHG-002, which similarly exhibited no material risk indicators or illicit fund flows. This consistency across the retrieved graph neighborhood confirms that the current zero-exposure verdict is supported by historical evidence of legitimate activity.",
+      "ai_reasoning": "The cleared status of Case HHG-018 aligns with precedents HHG-003, HHG-008, and HHG-009, which collectively demonstrate that the absence of specific fraud patterns and zero financial exposure consistently results in a non-adverse verdict. This historical consistency validates the current decision by confirming that the retrieved graph structures and vector similarities accurately predict benign outcomes in the absence of risk indicators.",
       "evidence_generated": [],
-      "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-003, HHG-008, HHG-002). Case persisted to TigerGraph (CASE-SAVANNA-HHG-009).",
-      "latency_ms": 866.21,
-      "timestamp": "2026-09-22T19:37:41.682929"
+      "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-003, HHG-008, HHG-009). Case persisted to TigerGraph (CASE-SAVANNA-HHG-018).",
+      "latency_ms": 1030.1,
+      "timestamp": "2026-09-22T19:47:31.410993"
     }
   ]
 }

@@ -1,11 +1,13 @@
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Navbar, type SectionId } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { WorkbenchSection } from './components/WorkbenchSection';
 import { FeaturesSection } from './components/FeaturesSection';
 import { FaqSection } from './components/FaqSection';
+import { WorkbenchDashboard } from './pages/WorkbenchDashboard';
 
-export function App() {
+export function LandingPage() {
   const [currentTheme, setCurrentTheme] = useState<'dark' | 'light'>('dark');
   const [activeSection, setActiveSection] = useState<SectionId>('hero');
 
@@ -62,8 +64,10 @@ export function App() {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleLaunchApp = () => {
-    handleNavClick('workbench');
+    navigate('/workbench');
   };
 
   return (
@@ -111,6 +115,15 @@ export function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/workbench/*" element={<WorkbenchDashboard />} />
+    </Routes>
   );
 }
 

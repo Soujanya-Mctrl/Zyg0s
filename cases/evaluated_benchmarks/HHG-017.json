@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-017",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.57,
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.85,
     "pattern": "card_not_present_fraud",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -40,6 +40,16 @@
         ],
         "grade": "DIRECT",
         "weight": 1.0
+      },
+      {
+        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3450629"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
       }
     ],
     "similar_prior_cases": [
@@ -47,7 +57,7 @@
       "HHG-002",
       "HHG-016"
     ],
-    "summary": "Case HHG-017 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3450629 ($100.09, online) at 0.57. Review and decide.... Initial fraud risk scored at 0.57. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-017 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'card_not_present_fraud'. Total financial exposure: $100.09. Initial Stage 1 action was VERIFY_WITH_CUSTOMER, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-017"
   },
@@ -71,12 +81,34 @@
         "reason": "R1: place card on 72-hour heightened monitoring pending response"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "BLOCK_ALL_CARDS",
+        "route": "L2",
+        "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: create internal fraud case with evidence attached and persist to graph"
+      },
+      {
+        "action": "FILE_REPORT",
+        "route": "L2",
+        "reason": "R2 and R6: shared device/network links to other cards"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "route": "auto",
+        "reason": "R6: shared device profile / entity links across multiple cards"
+      }
+    ],
+    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
   },
   "sar": {
     "file": true,
     "reason": "R2: confirmed unauthorized use",
-    "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR)**\n**Case Reference:** HHG-017\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nDuring the period from 2016-11-11 23:46:24 to 2016-11-11 23:46:24, the Institution identified suspicious transaction activity totaling $100.09 USD. This activity comprised 1 transaction(s) associated with card C04570-K1, linked to customer profile C04570. The primary indicator of suspicious activity is classified as 'card_not_present_fraud'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C04570\n*   **Primary Card Number Reference:** C04570-K1\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | Windows 10 | chrome 65.0 | 1920x1080\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-11-11 23:46:24\n*   **Latest Activity Timestamp:** 2016-11-11 23:46:24\n*   **Affected Transaction Record IDs:** 3450629\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nThe transaction occurred within established billing region 204.0, which aligns with the customer\u2019s historical profile. However, device telemetry analysis identified the profile \"Windows | Windows 10 | chrome 65.0 | 1920x1080\" as being observed across 3 other distinct customer accounts within the TigerGraph network.\n\nThe cardholder explicitly denied authorizing the transaction and confirmed that the physical card remains in their possession. Multi-entity syndicate linkage analysis revealed that the aforementioned device profile is shared across multiple cardholder profiles. This pattern indicates coordinated synthetic identity or card-not-present syndicate activity.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nIn response to the identified fraud indicators, the Institution initiated immediate card control actions in accordance with Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access to the account. Consequently, the card was permanently blocked and placed on fraud monitoring. This report is filed pursuant to Bank Secrecy Act (BSA) and Anti-Money Laundering (AML) compliance mandates.",
+    "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR)**\n**Case Reference:** HHG-017\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nDuring the period from 2016-11-11 23:46:24 to 2016-11-11 23:46:24, the Institution identified suspicious transaction activity totaling $100.09 USD. This activity comprised 1 transaction(s) associated with card C04570-K1, linked to customer profile C04570. The primary indicator of suspicious activity is classified as 'card_not_present_fraud'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C04570\n*   **Primary Card Number Reference:** C04570-K1\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | Windows 10 | chrome 65.0 | 1920x1080\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-11-11 23:46:24\n*   **Latest Activity Timestamp:** 2016-11-11 23:46:24\n*   **Affected Transaction Record IDs:** 3450629\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nThe transaction occurred within established billing region 204.0, which aligns with the customer’s historical profile. However, device telemetry analysis identified the profile \"Windows | Windows 10 | chrome 65.0 | 1920x1080\" as being observed across 3 other distinct customer accounts within the TigerGraph network.\n\nThe cardholder explicitly denied authorizing the transaction and confirmed that the physical card remains in their possession. Multi-entity syndicate linkage analysis revealed that the aforementioned device profile is shared across multiple cardholder profiles. This pattern indicates coordinated synthetic identity or card-not-present syndicate activity.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nIn response to the identified fraud indicators, the Institution initiated immediate card control actions in accordance with Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access to the account. Consequently, the card was permanently blocked and placed on fraud monitoring. This report is filed pursuant to Bank Secrecy Act (BSA) and Anti-Money Laundering (AML) compliance mandates.",
     "subjects": [
       "C04570",
       "C04570-K1",
@@ -263,7 +295,7 @@
         "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing.",
         "hand_off_summary": "Policy evaluated: Stage 1 [VERIFY_WITH_CUSTOMER] -> Stage 2 [BLOCK_ALL_CARDS] (L2). Exposure: $100.09."
       },
-      "ai_reasoning": "The initial Stage 1 actions adhered to Rule R1 by restricting the response to non-intrusive verification and monitoring, thereby avoiding a premature block based solely on the single initial signal. The subsequent escalation to permanent card blocking and SAR filing is fully defensible as a proportionate mitigation measure, as it was triggered only after the customer\u2019s explicit denial confirmed the fraudulent nature of the activity, satisfying the evidentiary threshold for L2 intervention despite the low financial exposure.",
+      "ai_reasoning": "The initial Stage 1 actions adhered to Rule R1 by restricting the response to non-intrusive verification and monitoring, thereby avoiding a premature block based solely on the single initial signal. The subsequent escalation to permanent card blocking and SAR filing is fully defensible as a proportionate mitigation measure, as it was triggered only after the customer’s explicit denial confirmed the fraudulent nature of the activity, satisfying the evidentiary threshold for L2 intervention despite the low financial exposure.",
       "evidence_generated": [],
       "hand_off_summary": "Policy evaluated: Stage 1 [VERIFY_WITH_CUSTOMER] -> Stage 2 [BLOCK_ALL_CARDS] (L2). Exposure: $100.09.",
       "latency_ms": 6482.86,

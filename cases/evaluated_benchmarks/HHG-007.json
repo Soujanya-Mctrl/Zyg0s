@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-007",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.87,
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.85,
     "pattern": "account_takeover",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -35,6 +35,16 @@
         ],
         "grade": "CONTRADICTORY",
         "weight": -0.7
+      },
+      {
+        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3514948"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
       }
     ],
     "similar_prior_cases": [
@@ -42,7 +52,7 @@
       "HHG-006",
       "HHG-005"
     ],
-    "summary": "Case HHG-007 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3514948 ($111.92, in billing region 264.0) at 0.87. Review and de... Initial fraud risk scored at 0.87. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-007 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'account_takeover'. Total financial exposure: $111.92. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_CARD under L1 authorization.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-007"
   },
@@ -66,7 +76,19 @@
         "reason": "R1: require step-up authentication before blocking card"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "R2: customer denied unauthorized use; block card (exposure <= $2,500)"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: create internal fraud case with evidence attached and persist to graph"
+      }
+    ],
+    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
   },
   "sar": {
     "file": false,
@@ -244,7 +266,7 @@
         "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing.",
         "hand_off_summary": "Policy evaluated: Stage 1 [DECLINE_TRANSACTION] -> Stage 2 [BLOCK_CARD] (L1). Exposure: $111.92."
       },
-      "ai_reasoning": "The initial Stage 1 actions of transaction decline and step-up authentication strictly adhered to Rule R1 by avoiding premature card blocking based solely on a single automated signal, thereby preserving customer experience while gathering necessary evidence. The subsequent escalation to a permanent card block and SAR filing is fully defensible as a proportionate mitigation measure, as it was triggered only after the customer\u2019s explicit denial confirmed the fraudulent nature of the activity, satisfying the requirement for verified intent before imposing severe restrictions.",
+      "ai_reasoning": "The initial Stage 1 actions of transaction decline and step-up authentication strictly adhered to Rule R1 by avoiding premature card blocking based solely on a single automated signal, thereby preserving customer experience while gathering necessary evidence. The subsequent escalation to a permanent card block and SAR filing is fully defensible as a proportionate mitigation measure, as it was triggered only after the customer’s explicit denial confirmed the fraudulent nature of the activity, satisfying the requirement for verified intent before imposing severe restrictions.",
       "evidence_generated": [],
       "hand_off_summary": "Policy evaluated: Stage 1 [DECLINE_TRANSACTION] -> Stage 2 [BLOCK_CARD] (L1). Exposure: $111.92.",
       "latency_ms": 10511.02,
