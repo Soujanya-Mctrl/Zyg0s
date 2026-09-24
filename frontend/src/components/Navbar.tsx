@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 export type SectionId = 'hero' | 'workbench' | 'features' | 'faqs';
 
@@ -23,11 +24,11 @@ interface GlitchTextProps {
   isLight: boolean;
 }
 
-const GlitchText: React.FC<GlitchTextProps> = ({ text, isActive, isLight }) => {
+const GlitchText: React.FC<GlitchTextProps> = ({ text, isActive }) => {
   const [displayText, setDisplayText] = useState(text);
   const [isScrambling, setIsScrambling] = useState(false);
 
-  // Digital hacker scramble burst on becoming active
+  // Digital hacker scramble burst only briefly on becoming active, then settles completely
   useEffect(() => {
     if (!isActive) {
       setDisplayText(text);
@@ -37,7 +38,7 @@ const GlitchText: React.FC<GlitchTextProps> = ({ text, isActive, isLight }) => {
 
     setIsScrambling(true);
     let iteration = 0;
-    const maxIterations = 8;
+    const maxIterations = 5;
     const interval = setInterval(() => {
       setDisplayText(
         text
@@ -55,43 +56,21 @@ const GlitchText: React.FC<GlitchTextProps> = ({ text, isActive, isLight }) => {
         setDisplayText(text);
         setIsScrambling(false);
       }
-    }, 30);
+    }, 25);
 
     return () => clearInterval(interval);
   }, [isActive, text]);
 
   return (
-    <span
-      className={`relative inline-block select-none font-mono ${
-        isActive ? 'animate-glitch-skew' : 'group-hover:animate-glitch-skew'
-      }`}
-    >
+    <span className="relative inline-block select-none font-mono">
       {/* Primary High-Contrast Text */}
       <span className="relative z-10">{displayText}</span>
 
-      {/* Cyan/Blue Sliced Chromatic Glitch Layer */}
-      {(isActive || isScrambling) && (
+      {/* Subtle momentary monochrome flicker only while scrambling, never continuous */}
+      {isScrambling && (
         <span
           aria-hidden="true"
-          className={`absolute inset-0 pointer-events-none z-0 select-none animate-glitch-layer-1 ${
-            isLight
-              ? 'text-cyan-600/70'
-              : 'text-cyan-400/80 drop-shadow-[1px_0_0_rgba(0,255,255,0.8)]'
-          }`}
-        >
-          {displayText}
-        </span>
-      )}
-
-      {/* Red/Magenta Sliced Chromatic Glitch Layer */}
-      {(isActive || isScrambling) && (
-        <span
-          aria-hidden="true"
-          className={`absolute inset-0 pointer-events-none z-0 select-none animate-glitch-layer-2 ${
-            isLight
-              ? 'text-rose-600/70'
-              : 'text-rose-500/80 drop-shadow-[-1px_0_0_rgba(255,0,80,0.8)]'
-          }`}
+          className="absolute inset-0 pointer-events-none z-0 select-none text-zinc-400 translate-x-[1px] opacity-60"
         >
           {displayText}
         </span>
@@ -181,6 +160,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           );
         })}
+
+        {/* Dedicated Docs Page Link */}
+        <Link
+          to="/docs"
+          className={`relative py-1 text-[11px] lg:text-xs font-mono tracking-[0.22em] transition-all duration-200 flex items-center cursor-pointer group ${
+            isLight
+              ? 'text-zinc-500 hover:text-black font-normal'
+              : 'text-zinc-400 hover:text-white font-normal'
+          }`}
+        >
+          <GlitchText text="DOCS" isActive={false} isLight={isLight} />
+        </Link>
       </nav>
 
       {/* Right Controls */}

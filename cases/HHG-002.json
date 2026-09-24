@@ -3,7 +3,7 @@
   "case": {
     "status": "open",
     "verdict": "uncertain",
-    "fraud_probability": 0.79,
+    "fraud_probability": 0.65,
     "pattern": "card_not_present_fraud",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -288,5 +288,6 @@
       "latency_ms": 872.44,
       "timestamp": "2026-09-22T19:30:03.299305"
     }
-  ]
+  ],
+  "uncertainty_score": 0.65
 }

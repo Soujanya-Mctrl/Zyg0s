@@ -42,6 +42,12 @@ class StepUpRequest(BaseModel):
     outcome: str = Field(default="PASS", description="Outcome (PASS, FAIL, TIMEOUT)")
 
 
+class OverrideRequest(BaseModel):
+    action: str = Field(default="BLOCK_ALL_CARDS", description="Enforced action (BLOCK_CARD, BLOCK_ALL_CARDS, CLOSE_NO_FRAUD)")
+    reason: str = Field(default="Analyst forensic discretion: anomalous cross-border velocity and high chargeback risk.", description="Analyst reason")
+    route: str = Field(default="L2", description="Approval route (L1, L2)")
+
+
 class ChatRequest(BaseModel):
     message: str = Field(..., description="Analyst question regarding the case")
 
@@ -503,12 +509,18 @@ def get_graph_schema():
 def simulate_step_up(case_id: str, req: StepUpRequest):
     """
     Interactive Step-Up Auth Simulator:
-    Demonstrates dynamic 2-stage NBA re-decisioning and uncertainty collapse.
+    Demonstrates dynamic 2-stage NBA re-decisioning, sequential evidence gathering,
+    and uncertainty collapse.
+    
+    Logs TWO distinct sequential chronological events:
+      Step 1: HUMAN_APPROVAL / STEP_UP_DISPATCHED (Approving Stage 1 recommendation to request evidence)
+      Step 2: UNCERTAINTY_REASSESSMENT (Ingesting evidence response, collapsing uncertainty, committing Stage 2 NBA)
     """
     cdata = load_case_json(case_id)
     case_inner = cdata.get("case", {})
     nba = cdata.get("next_best_actions", {})
     initial_nba = nba.get("initial", [])
+    init_u = float(cdata.get("uncertainty_score", 0.65))
     
     # Calculate updated uncertainty and action based on simulation outcome
     if req.outcome == "PASS":
@@ -518,8 +530,8 @@ def simulate_step_up(case_id: str, req: StepUpRequest):
         updated_verdict = "cleared"
         what_changed = (
             f"Step-Up authentication ({req.action_type}) PASSED by cardholder. "
-            "Primary fraud ambiguity resolved; uncertainty collapsed from "
-            f"{cdata.get('uncertainty_score', 0.65):.2f} to 0.04. Case cleared under Policy R3/R10."
+            "Primary fraud ambiguity resolved; epistemic uncertainty collapsed from "
+            f"{init_u:.2f} to 0.04. Case cleared under Policy R3/R10."
         )
         escalation = "auto"
     else: # FAIL or TIMEOUT
@@ -529,8 +541,8 @@ def simulate_step_up(case_id: str, req: StepUpRequest):
         updated_verdict = "fraud"
         what_changed = (
             f"Step-Up authentication ({req.action_type}) {req.outcome}. "
-            "Customer challenge failed to resolve identity possession; uncertainty collapsed from "
-            f"{cdata.get('uncertainty_score', 0.65):.2f} to 0.05. Risk escalated to confirmed fraud under Policy R1/R2."
+            "Customer challenge failed to resolve identity possession; epistemic uncertainty collapsed from "
+            f"{init_u:.2f} to 0.05. Risk escalated to confirmed fraud under Policy R1/R2."
         )
         escalation = "L2" if case_inner.get("exposure_usd", 0) > 1000 else "L1"
 
@@ -541,6 +553,8 @@ def simulate_step_up(case_id: str, req: StepUpRequest):
             case_inner["verdict"] = updated_verdict
             case_inner["fraud_probability"] = updated_risk
             case_inner["status"] = "closed_cleared" if req.outcome == "PASS" else "closed_fraud"
+            
+            # 1. Update 2-Stage NBA
             if "next_best_actions" not in cdata:
                 cdata["next_best_actions"] = {}
             cdata["next_best_actions"]["final"] = [{
@@ -548,14 +562,66 @@ def simulate_step_up(case_id: str, req: StepUpRequest):
                 "route": escalation,
                 "reason": what_changed
             }]
+            cdata["next_best_actions"]["what_changed"] = what_changed
+            
+            # 2. Update Evidence Requests Log
+            cdata["evidence_requests"] = [
+                {
+                    "type": "customer_validation",
+                    "channel": req.action_type,
+                    "asked_after_step": 4,
+                    "status": "COMPLETED",
+                    "result": req.outcome,
+                    "assumed_response": (
+                        "Cardholder confirmed transaction as authorized via OTP challenge."
+                        if req.outcome == "PASS" else
+                        "Cardholder challenge failed / OTP expired without validation."
+                    )
+                }
+            ]
+
+            # 3. Append customer challenge evidence claim
+            new_claim = {
+                "claim": f"Step-Up authentication ({req.action_type}) returned {req.outcome}.",
+                "source": "customer_step_up",
+                "grade": "CONTRADICTORY" if req.outcome == "PASS" else "DIRECT",
+                "ref": f"auth_gateway:{req.action_type.lower()}_result"
+            }
+            existing_ev = [
+                e for e in case_inner.get("evidence", []) 
+                if "customer_step_up" not in str(e.get("source", "")) and "auth_gateway" not in str(e.get("ref", ""))
+            ]
+            existing_ev.append(new_claim)
+            case_inner["evidence"] = existing_ev
+
+            # 4. Append TWO distinct sequential events to orchestrator pipeline trace
             trace = cdata.get("orchestrator_pipeline_trace", [])
+            
+            # Step A: Human Approval / Challenge Dispatched
             trace.append({
-                "agent": "HUMAN_COGNITIVE_OVERRIDE",
-                "action": f"Executed step-up simulation ({req.action_type}) -> {req.outcome}. Final Action: {updated_action}. Uncertainty collapsed to {updated_uncertainty}.",
-                "status": "safe" if req.outcome == "PASS" else "danger"
+                "agent_id": "human_approval",
+                "agent_name": "Human Approval",
+                "role": "Analyst Authorization & Step-Up Authentication Dispatch",
+                "hand_off_summary": f"Approved Stage 1 NBA: Dispatched Step-Up Challenge ({req.action_type}) to cardholder. Status: Awaiting response.",
+                "action": f"Approved Stage 1 NBA: Dispatched Step-Up Challenge ({req.action_type}) to cardholder.",
+                "status": "safe",
+                "latency_ms": 115.0
             })
+            
+            # Step B: Uncertainty Collapse & Stage 2 Decision
+            trace.append({
+                "agent_id": "uncertainty_reassessment",
+                "agent_name": "Evidence Assessor (Reassessment)",
+                "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
+                "hand_off_summary": f"Received cardholder challenge response ({req.outcome}). Epistemic uncertainty collapsed {init_u:.2f} -> {updated_uncertainty:.2f}. Committed Stage 2 NBA: {updated_action} (Route: {escalation}).",
+                "action": f"Received cardholder challenge response ({req.outcome}). Epistemic uncertainty collapsed {init_u:.2f} -> {updated_uncertainty:.2f}. Committed Stage 2 NBA: {updated_action}.",
+                "status": "safe" if req.outcome == "PASS" else "danger",
+                "latency_ms": 175.0
+            })
+            
             cdata["orchestrator_pipeline_trace"] = trace
             cdata["case"] = case_inner
+            cdata["uncertainty_score"] = updated_uncertainty
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(cdata, f, indent=2)
         except Exception as e:
@@ -577,6 +643,72 @@ def simulate_step_up(case_id: str, req: StepUpRequest):
     }
 
 
+@app.post("/api/cases/{case_id}/manual-override")
+def manual_override(case_id: str, req: OverrideRequest):
+    """
+    True Human Cognitive Override:
+    Demonstrates human-in-the-loop analyst exercising discretionary authority
+    to overturn or escalate beyond the agent's policy recommendation.
+    """
+    cdata = load_case_json(case_id)
+    case_inner = cdata.get("case", {})
+    
+    is_fraud = "BLOCK" in req.action or "DECLINE" in req.action
+    updated_verdict = "fraud" if is_fraud else "cleared"
+    updated_risk = 0.98 if is_fraud else 0.02
+    
+    case_inner["verdict"] = updated_verdict
+    case_inner["fraud_probability"] = updated_risk
+    case_inner["status"] = "closed_fraud" if is_fraud else "closed_cleared"
+    
+    # Update Stage 2 NBA
+    if "next_best_actions" not in cdata:
+        cdata["next_best_actions"] = {}
+    cdata["next_best_actions"]["final"] = [{
+        "action": req.action,
+        "route": req.route,
+        "reason": f"HUMAN_COGNITIVE_OVERRIDE: {req.reason}"
+    }]
+    cdata["next_best_actions"]["what_changed"] = f"Analyst cognitive override overrode automated policy: enforced {req.action} ({req.route})."
+    
+    # Append distinct override event to pipeline trace
+    trace = cdata.get("orchestrator_pipeline_trace", [])
+    trace.append({
+        "agent_id": "human_cognitive_override",
+        "agent_name": "Human Cognitive Override",
+        "role": "Analyst Discretionary Override & Executive Enforcement",
+        "hand_off_summary": f"Analyst overrode agent recommendation. Reason: {req.reason}. Enforced Action: {req.action} (Route: {req.route}).",
+        "action": f"Analyst overrode agent recommendation. Reason: {req.reason}. Enforced Action: {req.action} (Route: {req.route}).",
+        "status": "danger" if is_fraud else "safe",
+        "latency_ms": 45.0
+    })
+    cdata["orchestrator_pipeline_trace"] = trace
+    
+    # Append override evidence note
+    case_inner.setdefault("evidence", []).append({
+        "claim": f"Human analyst discretionary override: {req.reason}",
+        "source": "human_investigator_override",
+        "grade": "DIRECT",
+        "ref": f"analyst_session:override_{case_id}"
+    })
+    
+    cdata["case"] = case_inner
+    cdata["uncertainty_score"] = 0.02
+    
+    file_path = CASES_DIR / f"{case_id}.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(cdata, f, indent=2)
+        
+    return {
+        "status": "SUCCESS",
+        "case_id": case_id,
+        "override_action": req.action,
+        "verdict": updated_verdict,
+        "reason": req.reason,
+        "route": req.route
+    }
+
+
 @app.post("/api/cases/{case_id}/reset")
 def reset_case(case_id: str):
     """
@@ -595,18 +727,20 @@ def reset_case(case_id: str):
     raw_evidence = case_inner.get("evidence", [])
     case_inner["evidence"] = [
         ev for ev in raw_evidence 
-        if "customer_reply" not in str(ev.get("source", "")) and "customer_validation_response" not in str(ev.get("ref", ""))
+        if "customer_step_up" not in str(ev.get("source", "")) and "human_investigator_override" not in str(ev.get("source", ""))
     ]
 
     cdata["case"] = case_inner
+    cdata["uncertainty_score"] = 0.65
     if "next_best_actions" in cdata:
         cdata["next_best_actions"]["final"] = []
 
-    # Filter out override from trace
+    # Filter out simulation & override events from trace
     trace = cdata.get("orchestrator_pipeline_trace", [])
     cdata["orchestrator_pipeline_trace"] = [
         s for s in trace 
-        if "HUMAN_COGNITIVE_OVERRIDE" not in s.get("agent", "") and "Step-Up authentication" not in s.get("action", "")
+        if s.get("agent") not in ["HUMAN_COGNITIVE_OVERRIDE", "HUMAN_APPROVAL", "UNCERTAINTY_REASSESSMENT"]
+        and "Step-Up authentication" not in s.get("action", "")
     ]
 
     file_path = CASES_DIR / f"{case_id}.json"
@@ -618,7 +752,7 @@ def reset_case(case_id: str):
         "case_id": case_id,
         "message": f"Case {case_id} reset to active open alert state.",
         "verdict": "uncertain",
-        "uncertainty": 0.70
+        "uncertainty": 0.65
     }
 
 
@@ -639,10 +773,10 @@ def case_chat(case_id: str, req: ChatRequest):
     cdata = load_case_json(case_id)
     case_inner = cdata.get("case", {})
     nba = cdata.get("next_best_actions", {})
-    init_items = nba.get("initial") or [{}]
+    init_items = nba.get("initial") or []
     initial_nba = init_items[0].get("action", "VERIFY_WITH_CUSTOMER") if init_items else "VERIFY_WITH_CUSTOMER"
-    final_items = nba.get("final") or [{}]
-    final_nba = final_items[0].get("action", "PENDING_INVESTIGATION") if final_items else "PENDING_INVESTIGATION"
+    final_items = nba.get("final") or []
+    final_nba = final_items[0].get("action", "AWAITING_STEP_UP") if final_items else "AWAITING_STEP_UP"
     sar = cdata.get("sar", {})
 
     llm = get_llm_client()
@@ -684,10 +818,10 @@ def case_ai_deep_dive(case_id: str):
     cdata = load_case_json(case_id)
     case_inner = cdata.get("case", {})
     nba = cdata.get("next_best_actions", {})
-    init_items = nba.get("initial") or [{}]
+    init_items = nba.get("initial") or []
     initial_nba = init_items[0].get("action", "VERIFY_WITH_CUSTOMER") if init_items else "VERIFY_WITH_CUSTOMER"
-    final_items = nba.get("final") or [{}]
-    final_nba = final_items[0].get("action", "PENDING_INVESTIGATION") if final_items else "PENDING_INVESTIGATION"
+    final_items = nba.get("final") or []
+    final_nba = final_items[0].get("action", "AWAITING_STEP_UP") if final_items else "AWAITING_STEP_UP"
     sar = cdata.get("sar", {})
 
     llm = get_llm_client()

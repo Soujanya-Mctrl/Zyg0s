@@ -150,6 +150,15 @@
   background: #3f3f46;
 }
 
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Cyber Text Glitch Keyframes */
 @keyframes glitch-skew {
   0%, 100% {

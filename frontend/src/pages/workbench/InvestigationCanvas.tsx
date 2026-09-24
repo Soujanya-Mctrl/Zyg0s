@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
-  Controls,
+  Panel,
   Handle,
   Position,
   useNodesState,
@@ -15,16 +15,21 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+  type SimulationNodeDatum,
+  type SimulationLinkDatum,
+} from 'd3-force';
+
 import { StatusDot } from '../../components/ui/Micrographics';
 import {
-  User,
-  Smartphone,
-  CreditCard,
-  AlertTriangle,
-  Database,
-  Layers,
-  ShieldAlert,
   RefreshCw,
+  X,
+  Info,
 } from 'lucide-react';
 import { fetchGraphSchema, type CaseGraphData, type SchemaOntology } from '../../api/client';
 
@@ -46,51 +51,29 @@ interface ForensicNodeData {
 }
 
 function ForensicEntityNode({ data, selected }: NodeProps<Node<ForensicNodeData>>) {
-  const color = data.color || '#06b6d4';
   const isDanger = data.status === 'danger' || data.isThreatBeacon;
-
-  const renderIcon = () => {
-    switch (data.iconType) {
-      case 'user':
-        return <User size={14} className="text-[#3b82f6]" />;
-      case 'card':
-        return <CreditCard size={14} className="text-[#10b981]" />;
-      case 'device':
-        return <Smartphone size={14} className="text-[#f59e0b]" />;
-      case 'tx':
-        return <AlertTriangle size={14} className="text-[#ef4444]" />;
-      case 'precedent':
-        return <ShieldAlert size={14} className="text-[#ef4444]" />;
-      default:
-        return <Database size={14} className="text-[#06b6d4]" />;
-    }
-  };
 
   return (
     <div
-      style={{ borderLeftColor: color, borderLeftWidth: 3 }}
-      className={`relative min-w-[200px] max-w-[240px] bg-zinc-950/95 border rounded px-3.5 py-2.5 shadow-2xl backdrop-blur-md transition-all font-mono select-none ${
+      className={`relative min-w-[210px] max-w-[250px] bg-zinc-950 border rounded px-3.5 py-2.5 shadow-2xl backdrop-blur-md transition-all font-mono select-none ${
         selected
-          ? 'border-[#06b6d4] ring-2 ring-[#06b6d4]/40 shadow-[0_0_25px_rgba(6,182,212,0.35)]'
+          ? 'border-white ring-2 ring-white/40 shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-105'
           : isDanger
-          ? 'border-[#ef4444]/60 hover:border-[#ef4444] shadow-[0_0_15px_rgba(239,68,68,0.15)]'
+          ? 'border-white/40 hover:border-white shadow-[0_0_15px_rgba(255,255,255,0.08)]'
           : 'border-white/10 hover:border-white/30'
       }`}
     >
       {/* Handles on all 4 boundaries for collision-free routing */}
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-[#06b6d4] !border-none opacity-60" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-[#06b6d4] !border-none opacity-60" />
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-[#06b6d4] !border-none opacity-60" />
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-[#06b6d4] !border-none opacity-60" />
+      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-white !border-none opacity-60" />
+      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-white !border-none opacity-60" />
+      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-white !border-none opacity-60" />
+      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-white !border-none opacity-60" />
 
-      {/* Top Bar: Icon, Entity Type, Status */}
-      <div className="flex items-center justify-between gap-2 pb-1.5 mb-1.5 border-b border-white/[0.06]">
-        <div className="flex items-center gap-1.5">
-          {renderIcon()}
-          <span className="text-[9px] uppercase tracking-wider text-zinc-400 font-bold truncate max-w-[120px]">
-            {data.type}
-          </span>
-        </div>
+      {/* Top Bar: Entity Type, Status */}
+      <div className="flex items-center justify-between gap-2 pb-1.5 mb-1.5 border-b border-white/[0.08]">
+        <span className="text-[9px] uppercase tracking-wider text-zinc-400 font-bold truncate max-w-[150px]">
+          {data.type}
+        </span>
         <StatusDot status={data.status || 'safe'} />
       </div>
 
@@ -103,11 +86,7 @@ function ForensicEntityNode({ data, selected }: NodeProps<Node<ForensicNodeData>
       <div className="text-[10px] text-zinc-400 flex items-center justify-between pt-1">
         <span className="truncate max-w-[130px]">{data.sublabel || 'Forensic Entity'}</span>
         {data.risk !== undefined && (
-          <span
-            className={`font-bold ml-1 text-[9px] ${
-              data.risk > 0.7 ? 'text-[#ef4444]' : data.risk > 0.4 ? 'text-[#f59e0b]' : 'text-[#10b981]'
-            }`}
-          >
+          <span className="font-bold ml-1 text-[9px] text-white">
             {Math.round(data.risk * 100)}% RISK
           </span>
         )}
@@ -115,7 +94,7 @@ function ForensicEntityNode({ data, selected }: NodeProps<Node<ForensicNodeData>
 
       {/* Amount or Threat Beacon Highlight */}
       {data.amount && (
-        <div className="mt-1 text-[11px] font-bold text-[#ef4444] bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20 text-center">
+        <div className="mt-1 text-[11px] font-bold text-white bg-white/10 px-1.5 py-0.5 rounded border border-white/20 text-center">
           {typeof data.amount === 'number' ? `$${data.amount.toLocaleString()}` : data.amount}
         </div>
       )}
@@ -137,24 +116,21 @@ interface SchemaNodeData {
 }
 
 function SchemaVertexNode({ data, selected }: NodeProps<Node<SchemaNodeData>>) {
-  const color = data.color || '#06b6d4';
-
   return (
     <div
-      style={{ borderTopColor: color, borderTopWidth: 3 }}
-      className={`min-w-[190px] bg-black/90 border rounded-md p-3 shadow-xl backdrop-blur-md font-mono select-none transition-all ${
-        selected ? 'border-[#06b6d4] ring-2 ring-[#06b6d4]/40' : 'border-white/10 hover:border-white/30'
+      className={`min-w-[190px] bg-black border rounded-md p-3 shadow-xl backdrop-blur-md font-mono select-none transition-all ${
+        selected ? 'border-white ring-2 ring-white/40 scale-105' : 'border-white/15 hover:border-white/30'
       }`}
     >
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-[#06b6d4] opacity-70" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-[#06b6d4] opacity-70" />
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-[#06b6d4] opacity-70" />
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-[#06b6d4] opacity-70" />
+      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-white opacity-70" />
+      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-white opacity-70" />
+      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-white opacity-70" />
+      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-white opacity-70" />
 
       {/* Schema Header */}
       <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-white/[0.08]">
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+          <div className="w-2 h-2 rounded-full bg-white" />
           <span className="text-[10px] font-bold text-white uppercase tracking-wider">{data.label}</span>
         </div>
         <span className="text-[8px] text-zinc-500">{data.total_attributes || 0} fields</span>
@@ -163,7 +139,7 @@ function SchemaVertexNode({ data, selected }: NodeProps<Node<SchemaNodeData>>) {
       {/* Primary Key */}
       {data.primary_id && (
         <div className="text-[9px] text-zinc-400 mb-1 flex items-center gap-1">
-          <span className="text-[#06b6d4] font-bold">PK:</span>
+          <span className="text-white font-bold">PK:</span>
           <span className="text-zinc-300">{data.primary_id}</span>
         </div>
       )}
@@ -187,7 +163,66 @@ const nodeTypes = {
 };
 
 // ---------------------------------------------------------------------------
-// Main InvestigationCanvas Component with React Flow
+// D3-Force Positioning Physics Simulation
+// ---------------------------------------------------------------------------
+interface SimNode extends SimulationNodeDatum {
+  id: string;
+}
+
+interface SimLink extends SimulationLinkDatum<SimNode> {
+  source: string;
+  target: string;
+}
+
+function calculateD3ForceLayout(
+  nodes: Node<any>[],
+  edges: Edge[],
+  centerX: number = 380,
+  centerY: number = 240
+): Node<any>[] {
+  if (nodes.length === 0) return nodes;
+
+  const simNodes: SimNode[] = nodes.map((n, i) => ({
+    id: n.id,
+    x: n.position.x || centerX + Math.cos((i * 2 * Math.PI) / nodes.length) * 160,
+    y: n.position.y || centerY + Math.sin((i * 2 * Math.PI) / nodes.length) * 160,
+  }));
+
+  const simLinks: SimLink[] = edges
+    .filter((e) => simNodes.some((n) => n.id === e.source) && simNodes.some((n) => n.id === e.target))
+    .map((e) => ({
+      source: e.source,
+      target: e.target,
+    }));
+
+  const simulation = forceSimulation<SimNode>(simNodes)
+    .force(
+      'link',
+      forceLink<SimNode, SimLink>(simLinks)
+        .id((d) => d.id)
+        .distance(180)
+        .strength(0.8)
+    )
+    .force('charge', forceManyBody().strength(-750))
+    .force('center', forceCenter(centerX, centerY))
+    .force('collision', forceCollide().radius(120).strength(1))
+    .stop();
+
+  // Run 120 iterations synchronously for instant organic equilibrium
+  for (let i = 0; i < 120; ++i) {
+    simulation.tick();
+  }
+
+  const posMap = new Map(simNodes.map((d) => [d.id, { x: Math.round(d.x ?? centerX), y: Math.round(d.y ?? centerY) }]));
+
+  return nodes.map((n) => ({
+    ...n,
+    position: posMap.get(n.id) || n.position,
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Main InvestigationCanvas Component with React Flow + D3-Force Physics
 // ---------------------------------------------------------------------------
 interface InvestigationCanvasProps {
   caseDetails: any;
@@ -205,26 +240,7 @@ export function InvestigationCanvas({
   const [viewMode, setViewMode] = useState<'subgraph' | 'schema'>('subgraph');
   const [schemaData, setSchemaData] = useState<SchemaOntology | null>(null);
   const [isLoadingSchema, setIsLoadingSchema] = useState(false);
-
-  // 8-Step Core Flow Stages
-  const uncertainty = caseDetails?.uncertainty_score ?? 0.5;
-  const isResolved =
-    caseDetails?.status === 'closed_cleared' ||
-    caseDetails?.status === 'closed_fraud' ||
-    caseDetails?.verdict === 'cleared' ||
-    caseDetails?.verdict === 'fraud';
-  const hasStage2 = Boolean(caseDetails?.next_best_actions?.final?.length);
-
-  const stages = [
-    { name: 'Trigger', active: false, complete: true },
-    { name: 'Investigate', active: false, complete: true },
-    { name: 'Evidence', active: false, complete: Boolean(caseDetails?.evidence?.length) },
-    { name: 'Uncertainty', active: false, complete: uncertainty !== undefined },
-    { name: 'More Evidence', active: !isResolved && uncertainty > 0.4, complete: isResolved || uncertainty <= 0.4 },
-    { name: 'Reassess', active: !isResolved && hasStage2, complete: isResolved || hasStage2 },
-    { name: 'Action', active: false, complete: isResolved || hasStage2 },
-    { name: 'Resolve', active: isResolved, complete: isResolved },
-  ];
+  const [activeInspectorNode, setActiveInspectorNode] = useState<Node<any> | null>(null);
 
   // Fetch schema when user toggles to schema view
   const loadSchema = useCallback(async () => {
@@ -246,61 +262,62 @@ export function InvestigationCanvas({
     }
   }, [viewMode, loadSchema]);
 
-  // Construct Subgraph Nodes & Edges from caseDetails / caseGraph
+  // Construct Subgraph Nodes & Edges from caseDetails and compute D3-force layout
   const { initialCaseNodes, initialCaseEdges } = useMemo(() => {
     const customerId = caseDetails?.customer_id || 'C08623';
     const cardId = caseDetails?.primary_card_id || 'C08623-K2';
     const txId = caseDetails?.first_suspicious_txn_id || '3530164';
-    const exposure = caseDetails?.exposure_usd !== undefined ? `$${Math.round(caseDetails.exposure_usd).toLocaleString()}` : '$0';
+    const exposure =
+      caseDetails?.exposure_usd !== undefined ? `$${Math.round(caseDetails.exposure_usd).toLocaleString()}` : '$0';
     const deviceRaw = caseDetails?.connected_device_profiles?.[0] || 'Unknown Device';
     const precedents = caseDetails?.similar_prior_cases || [];
 
-    const nodes: Node<ForensicNodeData>[] = [
+    const rawNodes: Node<ForensicNodeData>[] = [
       // 1. Customer Node
       {
         id: `cust_${customerId}`,
         type: 'forensicNode',
-        position: { x: 40, y: 160 },
+        position: { x: 80, y: 220 },
         selected: selectedNodeId === `cust_${customerId}`,
         data: {
           label: customerId,
           type: 'Party / Customer',
           iconType: 'user',
           status: 'safe',
-          color: '#3B82F6',
+          color: '#FFFFFF',
           sublabel: 'Account Holder',
           risk: 0.12,
         },
       },
-      // 2. Account Card Node
+      // 2. Account Card Node (Central Anchor)
       {
         id: `card_${cardId}`,
         type: 'forensicNode',
-        position: { x: 300, y: 160 },
+        position: { x: 380, y: 220 },
         selected: selectedNodeId === `card_${cardId}`,
         data: {
           label: cardId,
           type: 'Account Card',
           iconType: 'card',
           status: 'safe',
-          color: '#10B981',
+          color: '#FFFFFF',
           sublabel: 'Issued Payment Card',
           risk: 0.28,
         },
       },
-      // 3. Flagged Transaction Node
+      // 3. Flagged Transaction Node (Threat Source)
       {
         id: `tx_${txId}`,
         type: 'forensicNode',
-        position: { x: 570, y: 160 },
+        position: { x: 680, y: 220 },
         selected: selectedNodeId === `tx_${txId}`,
         data: {
           label: `#${txId}`,
           type: 'Payment Txn',
           iconType: 'tx',
           status: 'danger',
-          color: '#EF4444',
-          sublabel: 'Flagged Event',
+          color: '#FFFFFF',
+          sublabel: 'Flagged Anomaly',
           amount: exposure,
           risk: caseDetails?.risk_score ?? 0.85,
         },
@@ -309,14 +326,14 @@ export function InvestigationCanvas({
       {
         id: 'node_device',
         type: 'forensicNode',
-        position: { x: 300, y: 30 },
+        position: { x: 380, y: 50 },
         selected: selectedNodeId === 'node_device',
         data: {
           label: deviceRaw.includes('|') ? deviceRaw.split('|')[0].trim() : deviceRaw.substring(0, 18),
           type: 'Device Profile',
           iconType: 'device',
           status: 'pending',
-          color: '#F59E0B',
+          color: '#FFFFFF',
           sublabel: 'Browser / OS Fingerprint',
           risk: 0.65,
         },
@@ -325,17 +342,17 @@ export function InvestigationCanvas({
 
     // 5. Precedent Beacon (if case has similar prior cases)
     if (precedents.length > 0) {
-      nodes.push({
+      rawNodes.push({
         id: `cc_${precedents[0]}`,
         type: 'forensicNode',
-        position: { x: 180, y: 300 },
+        position: { x: 220, y: 390 },
         selected: selectedNodeId === `cc_${precedents[0]}`,
         data: {
           label: precedents[0],
           type: 'Precedent Memory',
           iconType: 'precedent',
           status: 'danger',
-          color: '#EF4444',
+          color: '#FFFFFF',
           sublabel: 'Closed Fraud Case',
           isThreatBeacon: true,
           risk: 0.94,
@@ -344,17 +361,17 @@ export function InvestigationCanvas({
     }
 
     // 6. TigerGraph Savanna Cloud Engine Node
-    nodes.push({
+    rawNodes.push({
       id: 'node_tg_savanna',
       type: 'forensicNode',
-      position: { x: 440, y: 300 },
+      position: { x: 540, y: 390 },
       selected: selectedNodeId === 'node_tg_savanna',
       data: {
         label: 'Savanna Cloud',
         type: 'TigerGraph GraphRAG',
         iconType: 'database',
         status: 'safe',
-        color: '#06B6D4',
+        color: '#FFFFFF',
         sublabel: 'Transaction_Fraud',
       },
     });
@@ -365,8 +382,12 @@ export function InvestigationCanvas({
         source: `cust_${customerId}`,
         target: `card_${cardId}`,
         label: 'OWNS',
-        style: { stroke: 'rgba(255,255,255,0.3)', strokeWidth: 1.5 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(255,255,255,0.4)' },
+        labelStyle: { fill: '#94a3b8', fontSize: 9, fontFamily: 'monospace' },
+        labelBgStyle: { fill: 'rgba(0, 0, 0, 0.8)', stroke: 'rgba(255, 255, 255, 0.1)', strokeWidth: 1 },
+        labelBgPadding: [4, 2] as [number, number],
+        labelBgBorderRadius: 2,
+        style: { stroke: 'rgba(255,255,255,0.4)', strokeWidth: 1.5 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(255,255,255,0.6)' },
       },
       {
         id: 'e_card_tx',
@@ -374,16 +395,24 @@ export function InvestigationCanvas({
         target: `tx_${txId}`,
         label: 'MADE_TXN',
         animated: true,
-        style: { stroke: '#EF4444', strokeWidth: 2 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#EF4444' },
+        labelStyle: { fill: '#ffffff', fontSize: 9, fontFamily: 'monospace', fontWeight: 'bold' },
+        labelBgStyle: { fill: 'rgba(0, 0, 0, 0.9)', stroke: 'rgba(255, 255, 255, 0.3)', strokeWidth: 1 },
+        labelBgPadding: [4, 2] as [number, number],
+        labelBgBorderRadius: 2,
+        style: { stroke: 'rgba(255, 255, 255, 0.5)', strokeWidth: 1.5 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
       },
       {
         id: 'e_dev_card',
         source: 'node_device',
         target: `card_${cardId}`,
         label: 'USED_DEVICE',
-        style: { stroke: '#F59E0B', strokeWidth: 1.5, strokeDasharray: '4 4' },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#F59E0B' },
+        labelStyle: { fill: '#a1a1aa', fontSize: 9, fontFamily: 'monospace' },
+        labelBgStyle: { fill: 'rgba(0, 0, 0, 0.9)', stroke: 'rgba(255, 255, 255, 0.2)', strokeWidth: 1 },
+        labelBgPadding: [4, 2] as [number, number],
+        labelBgBorderRadius: 2,
+        style: { stroke: 'rgba(255, 255, 255, 0.3)', strokeWidth: 1.5, strokeDasharray: '4 4' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
       },
     ];
 
@@ -394,8 +423,12 @@ export function InvestigationCanvas({
         target: `cc_${precedents[0]}`,
         label: 'MATCHED_PRECEDENT',
         animated: true,
-        style: { stroke: '#EF4444', strokeWidth: 1.5, strokeDasharray: '3 3' },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#EF4444' },
+        labelStyle: { fill: '#ffffff', fontSize: 9, fontFamily: 'monospace' },
+        labelBgStyle: { fill: 'rgba(0, 0, 0, 0.9)', stroke: 'rgba(255, 255, 255, 0.2)', strokeWidth: 1 },
+        labelBgPadding: [4, 2] as [number, number],
+        labelBgBorderRadius: 2,
+        style: { stroke: 'rgba(255, 255, 255, 0.3)', strokeWidth: 1.5, strokeDasharray: '3 3' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
       });
     }
 
@@ -404,18 +437,24 @@ export function InvestigationCanvas({
       source: `tx_${txId}`,
       target: 'node_tg_savanna',
       label: 'INDEXED_IN_GRAPH',
-      style: { stroke: '#06B6D4', strokeWidth: 1.5, strokeDasharray: '4 4' },
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#06B6D4' },
+      labelStyle: { fill: '#ffffff', fontSize: 9, fontFamily: 'monospace' },
+      labelBgStyle: { fill: 'rgba(0, 0, 0, 0.9)', stroke: 'rgba(255, 255, 255, 0.2)', strokeWidth: 1 },
+      labelBgPadding: [4, 2] as [number, number],
+      labelBgBorderRadius: 2,
+      style: { stroke: 'rgba(255, 255, 255, 0.3)', strokeWidth: 1.5, strokeDasharray: '4 4' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
     });
 
-    return { initialCaseNodes: nodes, initialCaseEdges: edges };
+    // Run D3-Force physics simulation to establish organic positions
+    const forcePositionedNodes = calculateD3ForceLayout(rawNodes, edges, 380, 240);
+
+    return { initialCaseNodes: forcePositionedNodes, initialCaseEdges: edges };
   }, [caseDetails, selectedNodeId]);
 
   // Construct Schema Ontology Nodes & Edges from live TigerGraph Schema
   const { schemaNodes, schemaEdges } = useMemo(() => {
     if (!schemaData) return { schemaNodes: [], schemaEdges: [] };
 
-    // Select primary vertices for a clean topological grid
     const primaryVertices = schemaData.flow_nodes.slice(0, 16);
     const cols = 4;
     const nodes: Node<SchemaNodeData>[] = primaryVertices.map((v: any, index: number) => {
@@ -450,8 +489,8 @@ export function InvestigationCanvas({
         labelBgStyle: { fill: 'rgba(0, 0, 0, 0.75)', stroke: 'rgba(255, 255, 255, 0.1)', strokeWidth: 1 },
         labelBgPadding: [4, 2] as [number, number],
         labelBgBorderRadius: 2,
-        style: { stroke: 'rgba(6,182,212,0.4)', strokeWidth: 1.2 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#06b6d4' },
+        style: { stroke: 'rgba(255, 255, 255, 0.25)', strokeWidth: 1.2 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
       }));
 
     return { schemaNodes: nodes, schemaEdges: edges };
@@ -460,6 +499,7 @@ export function InvestigationCanvas({
   // State management for React Flow
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<any>>(initialCaseNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialCaseEdges);
+  const [isLegendHovered, setIsLegendHovered] = useState(false);
 
   // Update nodes/edges on view mode or case changes
   useEffect(() => {
@@ -472,135 +512,227 @@ export function InvestigationCanvas({
     }
   }, [viewMode, initialCaseNodes, initialCaseEdges, schemaNodes, schemaEdges, schemaData, setNodes, setEdges]);
 
-  // Node selection handler
+  // Handle Node Click -> Opens Inspector Card
   const handleNodeClick = (_: any, node: Node) => {
+    setActiveInspectorNode(node);
     onSelectNode?.(node.id);
+  };
+
+  // Re-run D3 Force physics on demand
+  const handleRelayout = () => {
+    if (viewMode === 'subgraph') {
+      const refreshed = calculateD3ForceLayout(nodes, edges, 380, 240);
+      setNodes(refreshed);
+    }
   };
 
   const threatDensity = caseGraph?.metrics?.threat_density ?? (caseDetails?.risk_score ?? 0.8);
 
   return (
-    <div className="flex-1 flex relative overflow-hidden select-none bg-black">
-      {/* Left: Investigation Stage Tracker (8-Step Core Flow) */}
-      <div className="w-32 border-r border-white/[0.04] flex flex-col p-6 items-center shrink-0 z-10 bg-black">
-        <div className="flex-1 flex flex-col items-center justify-between py-6 w-full relative">
-          <div className="absolute top-8 bottom-8 left-1/2 -translate-x-1/2 w-px bg-white/[0.1] z-0"></div>
+    <div className="flex-1 relative flex flex-col overflow-hidden select-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0c0c12] via-[#050507] to-black">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onNodeClick={handleNodeClick}
+        onPaneClick={() => setActiveInspectorNode(null)}
+        nodeTypes={nodeTypes}
+        fitView
+        fitViewOptions={{ padding: 0.25 }}
+        minZoom={0.3}
+        maxZoom={2}
+        defaultEdgeOptions={{
+          type: 'smoothstep',
+        }}
+        proOptions={{ hideAttribution: true }}
+      >
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="#27272a" />
 
-          {stages.map((s, idx) => (
-            <div key={idx} className="relative z-10 flex flex-col items-center gap-2 group">
-              <div
-                className={`w-3 h-3 rounded-full border flex items-center justify-center bg-black transition-all ${
-                  s.complete
-                    ? 'border-[#10b981]'
-                    : s.active
-                    ? 'border-[#06b6d4] shadow-[0_0_10px_#06b6d4]'
-                    : 'border-zinc-700'
-                }`}
-              >
-                {(s.complete || s.active) && (
-                  <div className={`w-1.5 h-1.5 rounded-full ${s.complete ? 'bg-[#10b981]' : 'bg-[#06b6d4] animate-ping'}`} />
-                )}
+        {/* Top-Left Panel: Region 02 Header + Canvas Switcher & D3 Force Physics Trigger */}
+        <Panel position="top-left" className="!m-4">
+          <div className="flex flex-col gap-2">
+            <div className="bg-[#121218]/95 border border-zinc-700/70 px-3 py-1.5 rounded backdrop-blur-md shadow-2xl flex items-center gap-3">
+              <div>
+                <div className="font-mono text-[8px] text-zinc-400 uppercase tracking-[0.25em] font-bold">
+                  WHAT DO WE KNOW?
+                </div>
+                <div className="font-mono text-[11px] text-white font-bold tracking-wider uppercase">
+                  TIGERGRAPH + EVIDENCE
+                </div>
               </div>
-              <span
-                className={`text-[9px] font-mono tracking-widest uppercase absolute left-6 w-24 top-0 transition-colors ${
-                  s.complete ? 'text-zinc-400' : s.active ? 'text-white font-bold' : 'text-zinc-600'
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center bg-[#121218]/95 border border-zinc-700/70 p-1 rounded font-mono text-[9px] tracking-widest uppercase backdrop-blur-md shadow-2xl">
+                <button
+                  onClick={() => setViewMode('subgraph')}
+                  className={`px-3 py-1 rounded transition-colors ${
+                    viewMode === 'subgraph' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40'
+                  }`}
+                >
+                  Case Subgraph
+                </button>
+                <button
+                  onClick={() => setViewMode('schema')}
+                  className={`px-3 py-1 rounded transition-colors flex items-center gap-1.5 ${
+                    viewMode === 'schema' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40'
+                  }`}
+                >
+                  {isLoadingSchema && <RefreshCw size={10} className="animate-spin" />}
+                  TigerGraph Schema
+                </button>
+              </div>
+
+              {viewMode === 'subgraph' && (
+                <button
+                  type="button"
+                  onClick={handleRelayout}
+                  className="px-2.5 py-1.5 bg-[#121218]/95 border border-zinc-700/70 hover:border-zinc-400 text-zinc-300 hover:text-white rounded font-mono text-[9px] tracking-widest uppercase backdrop-blur-md flex items-center transition-colors shadow-2xl"
+                  title="Run D3-Force physics relaxation simulation"
+                >
+                  D3 Force Relax
+                </button>
+              )}
+            </div>
+          </div>
+        </Panel>
+
+          {/* Top-Right Panel: Interactive 'i' Info Button that opens on hover */}
+          <Panel position="top-right" className="!m-4 z-40">
+            <div 
+              className="relative group"
+              onMouseEnter={() => setIsLegendHovered(true)}
+              onMouseLeave={() => setIsLegendHovered(false)}
+            >
+              {/* Trigger 'i' Button */}
+              <button
+                type="button"
+                onClick={() => setIsLegendHovered((prev) => !prev)}
+                className={`w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all shadow-2xl backdrop-blur-md cursor-pointer ${
+                  isLegendHovered 
+                    ? 'bg-white text-black border border-white scale-105 shadow-[0_0_14px_rgba(255,255,255,0.4)]' 
+                    : 'bg-[#121218]/95 border border-zinc-700/80 text-zinc-400 group-hover:text-white group-hover:border-zinc-400 group-hover:bg-zinc-800'
+                }`}
+                title="Relationship Topology Legend & Telemetry"
+                aria-label="Toggle Legend"
+              >
+                <Info size={13} strokeWidth={2.2} />
+              </button>
+
+              {/* Legend Card: Smoothly visible on hover / toggle */}
+              <div
+                className={`absolute right-0 top-7 pt-2 transition-all duration-200 ease-out origin-top-right ${
+                  isLegendHovered
+                    ? 'opacity-100 scale-100 pointer-events-auto translate-y-0'
+                    : 'opacity-0 scale-95 pointer-events-none -translate-y-1 group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto group-hover:translate-y-0'
                 }`}
               >
-                {s.name}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+                <div className="bg-[#121218]/98 border border-zinc-700/80 p-3.5 rounded-md font-mono text-[9px] tracking-wider text-zinc-400 backdrop-blur-xl shadow-2xl space-y-2.5 w-[270px]">
+                  {/* Telemetry Row */}
+                  <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                    <div>
+                      <span>NODES: <strong className="text-white">{nodes.length}</strong></span>
+                    </div>
+                    <div className="w-px h-3 bg-zinc-700" />
+                    <div>
+                      <span>EDGES: <strong className="text-white">{edges.length}</strong></span>
+                    </div>
+                    <div className="w-px h-3 bg-zinc-700" />
+                    <div>
+                      <span>RISK: <strong className="text-white">{Math.round(threatDensity * 100)}%</strong></span>
+                    </div>
+                  </div>
 
-      {/* Center: React Flow Interactive Graph Canvas */}
-      <div className="flex-1 relative flex flex-col overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/30 via-black to-black">
-        {/* Top Floating Controls & Telemetry HUD */}
-        <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
-          {/* Mode Switcher */}
-          <div className="pointer-events-auto flex items-center bg-black/80 border border-white/10 p-1 rounded font-mono text-[9px] tracking-widest uppercase backdrop-blur-md">
-            <button
-              onClick={() => setViewMode('subgraph')}
-              className={`px-3 py-1 rounded transition-colors ${
-                viewMode === 'subgraph' ? 'bg-[#06b6d4] text-black font-bold' : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              Case Subgraph
-            </button>
-            <button
-              onClick={() => setViewMode('schema')}
-              className={`px-3 py-1 rounded transition-colors flex items-center gap-1.5 ${
-                viewMode === 'schema' ? 'bg-[#06b6d4] text-black font-bold' : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              {isLoadingSchema && <RefreshCw size={10} className="animate-spin" />}
-              TigerGraph Schema
-            </button>
-          </div>
-
-          {/* Graph Telemetry Metrics */}
-          <div className="pointer-events-auto flex items-center gap-4 bg-black/80 border border-white/10 px-4 py-1.5 rounded font-mono text-[9px] tracking-widest text-zinc-400 backdrop-blur-md">
-            <div className="flex items-center gap-1.5">
-              <Layers size={11} className="text-[#06b6d4]" />
-              <span>
-                NODES: <strong className="text-white">{nodes.length}</strong>
-              </span>
-            </div>
-            <div className="w-px h-3 bg-white/20" />
-            <div>
-              <span>
-                EDGES: <strong className="text-white">{edges.length}</strong>
-              </span>
-            </div>
-            {viewMode === 'subgraph' && (
-              <>
-                <div className="w-px h-3 bg-white/20" />
-                <div>
-                  <span>
-                    THREAT DENSITY:{' '}
-                    <strong className="text-[#ef4444]">{Math.round(threatDensity * 100)}%</strong>
-                  </span>
+                  {/* Relationship Legend */}
+                  <div className="space-y-1.5 pt-0.5">
+                    <div className="text-[8px] uppercase tracking-widest text-zinc-500 font-bold mb-1">
+                      Relationship Topology Legend
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-300">
+                      <div className="w-4 h-[2px] bg-white/50" />
+                      <span>OWNS (Customer ➔ Card)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white">
+                      <div className="w-4 h-[2px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
+                      <span className="font-bold">
+                        MADE_TXN (Card ➔ Txn)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-300">
+                      <div className="w-4 h-[2px] border-b border-white/60 border-dashed" />
+                      <span>USED_DEVICE (Device ➔ Card)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-400">
+                      <div className="w-4 h-[2px] border-b border-white/40 border-dotted" />
+                      <span>MATCHED_PRECEDENT (Beacon)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-300">
+                      <div className="w-4 h-[2px] border-b border-white/80 border-dashed" />
+                      <span>INDEXED_IN_GRAPH (Savanna)</span>
+                    </div>
+                  </div>
                 </div>
-              </>
-            )}
-            {viewMode === 'schema' && (
-              <>
-                <div className="w-px h-3 bg-white/20" />
-                <div className="text-[#10b981]">
-                  <span>GRAPH: <strong>Transaction_Fraud</strong></span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+              </div>
+            </div>
+          </Panel>
 
-        {/* React Flow Viewport */}
-        <div className="w-full h-full flex-1">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onNodeClick={handleNodeClick}
-            nodeTypes={nodeTypes}
-            fitView
-            fitViewOptions={{ padding: 0.25 }}
-            minZoom={0.3}
-            maxZoom={2}
-            defaultEdgeOptions={{
-              type: 'smoothstep',
-            }}
-            proOptions={{ hideAttribution: true }}
-          >
-            <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="#27272a" />
-            <Controls
-              position="bottom-right"
-              className="!bg-black/80 !border-white/10 !rounded-sm !shadow-2xl [&>button]:!bg-transparent [&>button]:!border-white/10 [&>button]:!text-zinc-400 hover:[&>button]:!text-white"
-              showInteractive={false}
-            />
-          </ReactFlow>
-        </div>
-      </div>
+          {/* Bottom-Left Panel: Interactive Forensic Entity Inspector (On Node Click) */}
+          {activeInspectorNode && (
+            <Panel position="bottom-left" className="!m-4 !mb-6">
+              <div className="bg-[#14141c]/98 border border-zinc-700 p-4 rounded-md font-mono text-[10px] text-zinc-300 backdrop-blur-xl shadow-2xl max-w-[320px] ring-1 ring-white/10 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-start justify-between pb-2 mb-2 border-b border-zinc-800">
+                  <div>
+                    <span className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold">
+                      {activeInspectorNode.data.type || 'Entity Details'}
+                    </span>
+                    <div className="text-white text-sm font-bold truncate mt-0.5">
+                      {activeInspectorNode.data.label}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setActiveInspectorNode(null)}
+                    className="text-zinc-500 hover:text-white p-1 transition-colors"
+                  >
+                    <X size={13} />
+                  </button>
+                </div>
+
+                <div className="space-y-1.5 text-zinc-400">
+                  <div className="flex justify-between">
+                    <span>Forensic ID:</span>
+                    <span className="text-zinc-200 font-bold">{activeInspectorNode.id}</span>
+                  </div>
+                  {activeInspectorNode.data.risk !== undefined && (
+                    <div className="flex justify-between">
+                      <span>Threat Risk:</span>
+                      <span className="font-bold text-white">
+                        {Math.round(activeInspectorNode.data.risk * 100)}%
+                      </span>
+                    </div>
+                  )}
+                  {activeInspectorNode.data.amount && (
+                    <div className="flex justify-between">
+                      <span>Exposure:</span>
+                      <span className="text-white font-bold">{activeInspectorNode.data.amount}</span>
+                    </div>
+                  )}
+                  {activeInspectorNode.data.sublabel && (
+                    <div className="flex justify-between">
+                      <span>Profile:</span>
+                      <span className="text-zinc-200 truncate max-w-[180px]">{activeInspectorNode.data.sublabel}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-3 pt-2 border-t border-zinc-800 text-[9px] text-zinc-400 flex items-center justify-between">
+                  <span>TigerGraph Node Verified</span>
+                  <span className="text-zinc-500">Drag to arrange</span>
+                </div>
+              </div>
+            </Panel>
+          )}
+        </ReactFlow>
     </div>
   );
 }

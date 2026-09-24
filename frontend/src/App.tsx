@@ -6,6 +6,7 @@ import { WorkbenchSection } from './components/WorkbenchSection';
 import { FeaturesSection } from './components/FeaturesSection';
 import { FaqSection } from './components/FaqSection';
 import { WorkbenchDashboard } from './pages/WorkbenchDashboard';
+import { DocsPage } from './pages/DocsPage';
 
 export function LandingPage() {
   const [currentTheme, setCurrentTheme] = useState<'dark' | 'light'>('dark');
@@ -123,6 +124,7 @@ export function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/workbench/*" element={<WorkbenchDashboard />} />
+      <Route path="/docs" element={<DocsPage />} />
     </Routes>
   );
 }

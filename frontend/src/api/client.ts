@@ -165,4 +165,19 @@ export async function resetAllCases(): Promise<any> {
   return res.json();
 }
 
+export async function manualOverride(
+  caseId: string,
+  action: string = 'BLOCK_ALL_CARDS',
+  reason: string = 'Analyst forensic discretion: abnormal graph topology and high loss exposure.',
+  route: string = 'L2'
+): Promise<any> {
+  const res = await fetch(`${API_BASE}/cases/${encodeURIComponent(caseId)}/manual-override`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, reason, route }),
+  });
+  if (!res.ok) throw new Error(`Manual override failed: ${res.statusText}`);
+  return res.json();
+}
+
 

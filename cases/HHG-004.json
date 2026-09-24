@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-004",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.65,
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.95,
     "pattern": "card_not_present_new_device",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -27,6 +27,18 @@
         ],
         "grade": "CIRCUMSTANTIAL",
         "weight": 0.6
+      },
+      {
+        "claim": "Human analyst discretionary override: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.",
+        "source": "human_investigator_override",
+        "grade": "DIRECT",
+        "ref": "analyst_session:override_HHG-004"
+      },
+      {
+        "claim": "Step-Up authentication (SMS_OTP) returned FAIL.",
+        "source": "customer_step_up",
+        "grade": "DIRECT",
+        "ref": "auth_gateway:sms_otp_result"
       }
     ],
     "similar_prior_cases": [
@@ -41,8 +53,11 @@
   "evidence_requests": [
     {
       "type": "customer_validation",
+      "channel": "SMS_OTP",
       "asked_after_step": 4,
-      "assumed_response": "Customer states they did not make these purchases and still has the physical card."
+      "status": "COMPLETED",
+      "result": "FAIL",
+      "assumed_response": "Cardholder challenge failed / OTP expired without validation."
     }
   ],
   "next_best_actions": {
@@ -58,7 +73,14 @@
         "reason": "R1: verify card possession and transaction details with customer"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Step-Up authentication (SMS_OTP) FAIL. Customer challenge failed to resolve identity possession; epistemic uncertainty collapsed from 0.04 to 0.05. Risk escalated to confirmed fraud under Policy R1/R2."
+      }
+    ],
+    "what_changed": "Step-Up authentication (SMS_OTP) FAIL. Customer challenge failed to resolve identity possession; epistemic uncertainty collapsed from 0.04 to 0.05. Risk escalated to confirmed fraud under Policy R1/R2."
   },
   "sar": {
     "file": false,
@@ -273,6 +295,88 @@
       "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-002, HHG-001, HHG-003). Case persisted to TigerGraph (CASE-SAVANNA-HHG-004).",
       "latency_ms": 905.7,
       "timestamp": "2026-09-22T19:31:16.187495"
+    },
+    {
+      "agent_id": "human_approval",
+      "agent_name": "Human Approval",
+      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
+      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
+      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
+      "status": "safe",
+      "latency_ms": 115.0
+    },
+    {
+      "agent_id": "uncertainty_reassessment",
+      "agent_name": "Evidence Assessor (Reassessment)",
+      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
+      "hand_off_summary": "Received cardholder challenge response (FAIL). Epistemic uncertainty collapsed 0.65 -> 0.05. Committed Stage 2 NBA: BLOCK_CARD (Route: L1).",
+      "action": "Received cardholder challenge response (FAIL). Epistemic uncertainty collapsed 0.65 -> 0.05. Committed Stage 2 NBA: BLOCK_CARD.",
+      "status": "danger",
+      "latency_ms": 175.0
+    },
+    {
+      "agent_id": "human_approval",
+      "agent_name": "Human Approval",
+      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
+      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
+      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
+      "status": "safe",
+      "latency_ms": 115.0
+    },
+    {
+      "agent_id": "uncertainty_reassessment",
+      "agent_name": "Evidence Assessor (Reassessment)",
+      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
+      "hand_off_summary": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.05 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD (Route: auto).",
+      "action": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.05 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD.",
+      "status": "safe",
+      "latency_ms": 175.0
+    },
+    {
+      "agent_id": "human_cognitive_override",
+      "agent_name": "Human Cognitive Override",
+      "role": "Analyst Discretionary Override & Executive Enforcement",
+      "hand_off_summary": "Analyst overrode agent recommendation. Reason: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.. Enforced Action: BLOCK_ALL_CARDS (Route: L2).",
+      "action": "Analyst overrode agent recommendation. Reason: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.. Enforced Action: BLOCK_ALL_CARDS (Route: L2).",
+      "status": "danger",
+      "latency_ms": 45.0
+    },
+    {
+      "agent_id": "human_approval",
+      "agent_name": "Human Approval",
+      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
+      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
+      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
+      "status": "safe",
+      "latency_ms": 115.0
+    },
+    {
+      "agent_id": "uncertainty_reassessment",
+      "agent_name": "Evidence Assessor (Reassessment)",
+      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
+      "hand_off_summary": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.02 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD (Route: auto).",
+      "action": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.02 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD.",
+      "status": "safe",
+      "latency_ms": 175.0
+    },
+    {
+      "agent_id": "human_approval",
+      "agent_name": "Human Approval",
+      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
+      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
+      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
+      "status": "safe",
+      "latency_ms": 115.0
+    },
+    {
+      "agent_id": "uncertainty_reassessment",
+      "agent_name": "Evidence Assessor (Reassessment)",
+      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
+      "hand_off_summary": "Received cardholder challenge response (FAIL). Epistemic uncertainty collapsed 0.04 -> 0.05. Committed Stage 2 NBA: BLOCK_CARD (Route: L1).",
+      "action": "Received cardholder challenge response (FAIL). Epistemic uncertainty collapsed 0.04 -> 0.05. Committed Stage 2 NBA: BLOCK_CARD.",
+      "status": "danger",
+      "latency_ms": 175.0
     }
-  ]
+  ],
+  "uncertainty_score": 0.05
 }
