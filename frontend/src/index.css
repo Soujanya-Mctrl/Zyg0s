@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-void: #000000;
+    --text-primary: #ffffff;
+    --text-secondary: #8e8e93;
+    --text-muted: #52525b;
+    --border-hairline: rgba(255, 255, 255, 0.12);
+  }
+
+  html {
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: #000000;
+    color: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: clip;
+  }
+}
+
+.font-display {
+  font-family: 'Syne', sans-serif;
+}
+
+.font-heading {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Subtle Technical Hairline Grid */
+.bg-tech-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Subtle Noise Texture */
+.bg-noise {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Sparkle Star Breathing Keyframe */
+@keyframes sparkle-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.15) rotate(10deg);
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 1));
+    opacity: 1;
+  }
+}
+
+.animate-sparkle {
+  animation: sparkle-pulse 3.5s ease-in-out infinite;
+}
+
+/* Soft Orbital Rotation for Reticle Ring */
+@keyframes slow-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-slow-spin {
+  animation: slow-rotate 120s linear infinite;
+}
+
+/* Smooth Arrow Bounce */
+@keyframes arrow-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+.animate-arrow-down {
+  animation: arrow-bounce 2s ease-in-out infinite;
+}
+
+/* Zero-Gravity Celestial Float Keyframe */
+@keyframes celestial-float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-14px) rotate(-0.8deg);
+  }
+  50% {
+    transform: translateY(-22px) rotate(0.4deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.animate-celestial-float {
+  animation: celestial-float 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Ethereal Celestial Pulse */
+@keyframes celestial-glow {
+  0%, 100% {
+    transform: scale(0.94);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.45;
+  }
+}
+
+.animate-celestial-glow {
+  animation: celestial-glow 5s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Cyber Text Glitch Keyframes */
+@keyframes glitch-skew {
+  0%, 100% {
+    transform: skew(0deg);
+  }
+  20% {
+    transform: skew(-2.5deg);
+  }
+  40% {
+    transform: skew(2deg);
+  }
+  60% {
+    transform: skew(-1deg);
+  }
+  80% {
+    transform: skew(1.5deg);
+  }
+}
+
+.animate-glitch-skew {
+  animation: glitch-skew 3.5s ease-in-out infinite;
+}
+
+@keyframes glitch-layer-1 {
+  0% {
+    clip-path: inset(15% 0 65% 0);
+    transform: translate(-2px, -1px);
+    opacity: 0.9;
+  }
+  20% {
+    clip-path: inset(55% 0 25% 0);
+    transform: translate(2px, 1px);
+    opacity: 0.8;
+  }
+  40% {
+    clip-path: inset(35% 0 45% 0);
+    transform: translate(-1.5px, 1px);
+    opacity: 0.95;
+  }
+  60% {
+    clip-path: inset(75% 0 10% 0);
+    transform: translate(1px, -1px);
+    opacity: 0.7;
+  }
+  80% {
+    clip-path: inset(10% 0 75% 0);
+    transform: translate(-2px, 0);
+    opacity: 0.85;
+  }
+  100% {
+    clip-path: inset(25% 0 50% 0);
+    transform: translate(0);
+    opacity: 0.6;
+  }
+}
+
+.animate-glitch-layer-1 {
+  animation: glitch-layer-1 0.7s steps(2, start) infinite;
+}
+
+@keyframes glitch-layer-2 {
+  0% {
+    clip-path: inset(45% 0 35% 0);
+    transform: translate(2px, 1px);
+    opacity: 0.8;
+  }
+  20% {
+    clip-path: inset(10% 0 70% 0);
+    transform: translate(-2px, -1px);
+    opacity: 0.9;
+  }
+  40% {
+    clip-path: inset(65% 0 15% 0);
+    transform: translate(1.5px, -1px);
+    opacity: 0.75;
+  }
+  60% {
+    clip-path: inset(20% 0 60% 0);
+    transform: translate(-1px, 1px);
+    opacity: 0.9;
+  }
+  80% {
+    clip-path: inset(70% 0 20% 0);
+    transform: translate(2px, 0);
+    opacity: 0.8;
+  }
+  100% {
+    clip-path: inset(50% 0 30% 0);
+    transform: translate(0);
+    opacity: 0.6;
+  }
+}
+
+.animate-glitch-layer-2 {
+  animation: glitch-layer-2 0.8s steps(2, start) infinite;
+}

@@ -85,7 +85,7 @@ The system resolves the conflict between AI flexibility and banking compliance b
 ┌──────────────────────────────────────────────────────────────────────────────────┐
 │                         NEURO-SYMBOLIC DIVISION OF LABOR                         │
 ├────────────────────────────────────────┬─────────────────────────────────────────┤
-│ 🛡️ DETERMINISTIC GOVERNOR (Symbolic)   │ 🧠 LLM COGNITIVE LAYER (Neural)         │
+│ 🛡️ DETERMINISTIC GOVERNOR (Symbolic)   │ 🧠 LLM COGNITIVE LAYER (Neural)        │
 │ "Absolute Truth, Math, & Compliance"   │ "Fluid Reasoning, Synthesis, & Copilot" │
 ├────────────────────────────────────────┼─────────────────────────────────────────┤
 │ • GSQL multi-hop graph traversals      │ • Novel pattern discovery & naming (R9) │
