@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-007",
   "case": {
-    "status": "closed_fraud",
-    "verdict": "fraud",
-    "fraud_probability": 0.98,
+    "status": "open",
+    "verdict": "uncertain",
+    "fraud_probability": 0.87,
     "pattern": "account_takeover",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -81,14 +81,7 @@
         "reason": "R1: require step-up authentication before blocking card"
       }
     ],
-    "final": [
-      {
-        "action": "BLOCK_ALL_CARDS",
-        "route": "L2",
-        "reason": "HUMAN_COGNITIVE_OVERRIDE: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops."
-      }
-    ],
-    "what_changed": "Analyst cognitive override overrode automated policy: enforced BLOCK_ALL_CARDS (L2)."
+    "final": []
   },
   "sar": {
     "file": false,
@@ -361,5 +354,5 @@
       "latency_ms": 45.0
     }
   ],
-  "uncertainty_score": 0.02
+  "uncertainty_score": 0.26
 }

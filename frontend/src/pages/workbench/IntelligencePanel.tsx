@@ -39,18 +39,21 @@ export function IntelligencePanel({
     );
   }
 
-  const riskScore = !isInvestigated && !isInvestigating
-    ? null
-    : isInvestigating
-    ? liveRiskScore
-    : Math.round((caseDetails.risk_score ?? 0.5) * 100);
-
   const uncertaintyScore = Math.round((caseDetails.uncertainty_score ?? 0.5) * 100);
-  const confidenceScore = !isInvestigated && !isInvestigating
-    ? null
-    : isInvestigating
-    ? liveConfidence
+
+  const calculatedConfidence = caseDetails.confidence_score != null
+    ? caseDetails.confidence_score
     : Math.max(0, 100 - uncertaintyScore);
+
+  const riskScore = isInvestigating
+    ? liveRiskScore
+    : caseDetails.risk_score != null
+    ? Math.round(caseDetails.risk_score * 100)
+    : null;
+
+  const confidenceScore = isInvestigating
+    ? liveConfidence
+    : calculatedConfidence;
   
   // Extract 2-stage Next-Best Action
   const nbaFinal = caseDetails.next_best_actions?.final?.[0];

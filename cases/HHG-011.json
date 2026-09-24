@@ -3,7 +3,7 @@
   "case": {
     "status": "open",
     "verdict": "uncertain",
-    "fraud_probability": 0.65,
+    "fraud_probability": 0.7,
     "pattern": "none",
     "pattern_description": "",
     "affected_txn_ids": [],
@@ -42,7 +42,7 @@
       "HHG-008",
       "HHG-009"
     ],
-    "summary": "Case HHG-011 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 35833... Initial fraud risk scored at 0.65. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-011 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 35833... Initial fraud risk scored at 0.70. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-011"
   },
@@ -297,5 +297,6 @@
       "latency_ms": 989.6,
       "timestamp": "2026-09-22T19:40:22.141554"
     }
-  ]
+  ],
+  "uncertainty_score": 0.6
 }

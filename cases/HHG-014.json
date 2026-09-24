@@ -3,7 +3,7 @@
   "case": {
     "status": "open",
     "verdict": "uncertain",
-    "fraud_probability": 0.65,
+    "fraud_probability": 0.82,
     "pattern": "card_not_present_new_device",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -56,7 +56,7 @@
       "HHG-005",
       "HHG-004"
     ],
-    "summary": "Case HHG-014 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Analyst request: several cards this month show purchases from the same unusual device profile. Revie... Initial fraud risk scored at 0.65. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-014 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Analyst request: several cards this month show purchases from the same unusual device profile. Revie... Initial fraud risk scored at 0.82. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-014"
   },
@@ -343,5 +343,6 @@
       "latency_ms": 35206.87,
       "timestamp": "2026-09-22T19:43:40.915688"
     }
-  ]
+  ],
+  "uncertainty_score": 0.36
 }

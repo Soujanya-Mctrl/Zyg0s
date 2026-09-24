@@ -35,55 +35,71 @@ class GraphScoutAgent(BaseSpecializedAgent):
         flagged_device = context.flagged_device
         flagged_amt = context.flagged_amt
 
-        # 1. Target Card Window Analysis (+/- 48 hours)
-        window_start = flagged_ts - timedelta(hours=48)
-        window_end = flagged_ts + timedelta(hours=48)
-        card_window = merged_df[
-            (merged_df["customer_id"] == customer_id) &
-            (merged_df["ts_dt"] >= window_start) &
-            (merged_df["ts_dt"] <= window_end)
-        ].sort_values("ts_dt")
+        # 1-3. Topological and Ego-Network Analysis
+        has_df = (
+            merged_df is not None 
+            and not getattr(merged_df, "empty", True) 
+            and "customer_id" in merged_df.columns
+        )
 
-        # Check for card testing (3+ micro authorizations < $5 within 1 hour followed by larger purchase)
-        one_hr_window = card_window[
-            (card_window["ts_dt"] >= flagged_ts - timedelta(hours=1)) &
-            (card_window["ts_dt"] <= flagged_ts + timedelta(hours=1))
-        ]
-        micro_auths = one_hr_window[one_hr_window["TransactionAmt"] < 5.0]
-        is_card_testing = len(micro_auths) >= 3 and any(one_hr_window["TransactionAmt"] > 50.0)
-        context.is_card_testing = is_card_testing
+        if has_df:
+            # 1. Target Card Window Analysis (+/- 48 hours)
+            window_start = flagged_ts - timedelta(hours=48)
+            window_end = flagged_ts + timedelta(hours=48)
+            card_window = merged_df[
+                (merged_df["customer_id"] == customer_id) &
+                (merged_df["ts_dt"] >= window_start) &
+                (merged_df["ts_dt"] <= window_end)
+            ].sort_values("ts_dt")
 
-        # 2. Multi-Hop Shared Device Inspection
-        has_shared_origin = False
-        connected_cards: List[str] = []
-        shared_device_degree = 1
-        if flagged_device and flagged_device not in ("NoDevice", ""):
-            shared_matches = merged_df[
-                (merged_df["DeviceInfo"] == flagged_device) &
-                (merged_df["customer_id"] != customer_id)
+            # Check for card testing (3+ micro authorizations < $5 within 1 hour followed by larger purchase)
+            one_hr_window = card_window[
+                (card_window["ts_dt"] >= flagged_ts - timedelta(hours=1)) &
+                (card_window["ts_dt"] <= flagged_ts + timedelta(hours=1))
             ]
-            if not shared_matches.empty:
-                has_shared_origin = True
-                connected_cards = list(shared_matches["customer_id"].unique()[:3])
-                shared_device_degree = len(shared_matches["customer_id"].unique()) + 1
+            micro_auths = one_hr_window[one_hr_window["TransactionAmt"] < 5.0]
+            is_card_testing = len(micro_auths) >= 3 and any(one_hr_window["TransactionAmt"] > 50.0)
 
+            # 2. Multi-Hop Shared Device Inspection
+            has_shared_origin = False
+            connected_cards: List[str] = []
+            shared_device_degree = 1
+            if flagged_device and flagged_device not in ("NoDevice", ""):
+                shared_matches = merged_df[
+                    (merged_df["DeviceInfo"] == flagged_device) &
+                    (merged_df["customer_id"] != customer_id)
+                ]
+                if not shared_matches.empty:
+                    has_shared_origin = True
+                    connected_cards = list(shared_matches["customer_id"].unique()[:3])
+                    shared_device_degree = len(shared_matches["customer_id"].unique()) + 1
+
+            # 3. Recurring Dispute Check (Policy R7)
+            is_recurring_dispute = False
+            customer_history = merged_df[
+                (merged_df["customer_id"] == customer_id) & 
+                (merged_df["ts_dt"] < flagged_ts)
+            ]
+            same_amt_history = pd.DataFrame()
+            if context.trigger_type == "customer_report":
+                same_amt_history = customer_history[
+                    (np.isclose(customer_history["TransactionAmt"], flagged_amt, atol=1.0)) &
+                    (customer_history["ProductCD"] == context.flagged_pcd)
+                ]
+                if len(same_amt_history) >= 2:
+                    is_recurring_dispute = True
+        else:
+            micro_auths = pd.DataFrame()
+            same_amt_history = pd.DataFrame()
+            is_card_testing = context.case_meta.get("pattern") == "card_testing"
+            connected_cards = context.case_meta.get("connected_card_ids", [])
+            has_shared_origin = len(connected_cards) > 1 or "device" in str(context.case_meta.get("pattern", "")).lower()
+            shared_device_degree = max(1, len(connected_cards))
+            is_recurring_dispute = False
+
+        context.is_card_testing = is_card_testing
         context.has_shared_origin = has_shared_origin
         context.connected_cards = connected_cards
-
-        # 3. Recurring Dispute Check (Policy R7)
-        is_recurring_dispute = False
-        customer_history = merged_df[
-            (merged_df["customer_id"] == customer_id) & 
-            (merged_df["ts_dt"] < flagged_ts)
-        ]
-        same_amt_history = pd.DataFrame()
-        if context.trigger_type == "customer_report":
-            same_amt_history = customer_history[
-                (np.isclose(customer_history["TransactionAmt"], flagged_amt, atol=1.0)) &
-                (customer_history["ProductCD"] == context.flagged_pcd)
-            ]
-            if len(same_amt_history) >= 2:
-                is_recurring_dispute = True
         context.is_recurring_dispute = is_recurring_dispute
 
         # 4. Out-of-Region Check (Policy R4)

@@ -3,7 +3,7 @@
   "case": {
     "status": "open",
     "verdict": "uncertain",
-    "fraud_probability": 0.65,
+    "fraud_probability": 0.52,
     "pattern": "card_not_present_new_device",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -64,11 +64,8 @@
   "evidence_requests": [
     {
       "type": "customer_validation",
-      "channel": "SMS_OTP",
       "asked_after_step": 4,
-      "status": "COMPLETED",
-      "result": "PASS",
-      "assumed_response": "Cardholder confirmed transaction as authorized via OTP challenge."
+      "assumed_response": "Customer states they did not make these purchases and still has the physical card."
     }
   ],
   "next_best_actions": {
@@ -84,8 +81,7 @@
         "reason": "R1: place card on 72-hour heightened monitoring pending response"
       }
     ],
-    "final": [],
-    "what_changed": "Step-Up authentication (SMS_OTP) PASSED by cardholder. Primary fraud ambiguity resolved; epistemic uncertainty collapsed from 0.65 to 0.04. Case cleared under Policy R3/R10."
+    "final": []
   },
   "sar": {
     "file": true,
@@ -344,25 +340,7 @@
       "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-010, HHG-006, HHG-013). Case persisted to TigerGraph (CASE-SAVANNA-HHG-020).",
       "latency_ms": 34113.94,
       "timestamp": "2026-09-22T19:49:56.235204"
-    },
-    {
-      "agent_id": "human_approval",
-      "agent_name": "Human Approval",
-      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
-      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
-      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
-      "status": "safe",
-      "latency_ms": 115.0
-    },
-    {
-      "agent_id": "uncertainty_reassessment",
-      "agent_name": "Evidence Assessor (Reassessment)",
-      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
-      "hand_off_summary": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.65 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD (Route: auto).",
-      "action": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.65 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD.",
-      "status": "safe",
-      "latency_ms": 175.0
     }
   ],
-  "uncertainty_score": 0.65
+  "uncertainty_score": 0.96
 }

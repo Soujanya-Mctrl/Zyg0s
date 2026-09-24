@@ -21,15 +21,16 @@ import {
   type HealthStatus,
   type CaseGraphData,
 } from '../api/client';
+import { getCaseProgression } from '../data/caseProgressions';
 
-const PIPELINE_AGENTS = [
-  { name: 'Alert Sentinel', score: 18, conf: 35 },
-  { name: 'Graph Scout', score: 42, conf: 52 },
+const DEFAULT_PIPELINE_AGENTS = [
+  { name: 'Alert Sentinel', score: 35, conf: 40 },
+  { name: 'Graph Scout', score: 50, conf: 55 },
   { name: 'Evidence Assessor', score: 65, conf: 70 },
-  { name: 'Pattern Strategist', score: 79, conf: 82 },
-  { name: 'Policy Governor', score: 86, conf: 88 },
-  { name: 'Compliance Officer', score: 91, conf: 92 },
-  { name: 'Memory Weaver', score: 92, conf: 95 },
+  { name: 'Pattern Strategist', score: 75, conf: 80 },
+  { name: 'Policy Governor', score: 85, conf: 85 },
+  { name: 'Compliance Officer', score: 85, conf: 88 },
+  { name: 'Memory Weaver', score: 85, conf: 90 },
 ];
 
 export function WorkbenchDashboard() {
@@ -76,6 +77,10 @@ export function WorkbenchDashboard() {
       if (casesData.status === 'fulfilled') {
         const fetchedCases = casesData.value.cases || [];
         setCases(fetchedCases);
+        const alreadyInvestigated = new Set<string>(
+          fetchedCases.filter((c: any) => c.status !== 'open').map((c: any) => c.case_id)
+        );
+        setInvestigatedCaseIds(alreadyInvestigated);
         if (fetchedCases.length > 0 && !activeCaseId) {
           setActiveCaseId(fetchedCases[0].case_id);
         }
@@ -261,22 +266,23 @@ export function WorkbenchDashboard() {
   // Autonomous Investigation Execution: Runs the 7-agent pipeline live
   const handleStartInvestigation = async () => {
     if (!activeCaseId || isInvestigating) return;
+    const progression = activeCaseId ? getCaseProgression(activeCaseId) : DEFAULT_PIPELINE_AGENTS;
     setIsInvestigating(true);
     setActionFeedback(null);
     setActiveAgentIndex(0);
-    setActiveAgentName(PIPELINE_AGENTS[0].name);
-    setLiveRiskScore(PIPELINE_AGENTS[0].score);
-    setLiveConfidence(PIPELINE_AGENTS[0].conf);
+    setActiveAgentName(progression[0].name);
+    setLiveRiskScore(progression[0].score);
+    setLiveConfidence(progression[0].conf);
 
     // Live score calculation animation cycling through the 7 agents
     let step = 0;
     const tickerInterval = setInterval(() => {
       step++;
-      if (step < PIPELINE_AGENTS.length) {
+      if (step < progression.length) {
         setActiveAgentIndex(step);
-        setActiveAgentName(PIPELINE_AGENTS[step].name);
-        setLiveRiskScore(PIPELINE_AGENTS[step].score);
-        setLiveConfidence(PIPELINE_AGENTS[step].conf);
+        setActiveAgentName(progression[step].name);
+        setLiveRiskScore(progression[step].score);
+        setLiveConfidence(progression[step].conf);
       }
     }, 450);
 
@@ -346,7 +352,12 @@ export function WorkbenchDashboard() {
     }
   };
 
-  const isCurrentCaseInvestigated = Boolean(activeCaseId && investigatedCaseIds.has(activeCaseId));
+  const isCurrentCaseInvestigated = Boolean(
+    activeCaseId && (
+      investigatedCaseIds.has(activeCaseId) ||
+      (activeCaseDetails?.status && activeCaseDetails.status !== 'open')
+    )
+  );
 
   return (
     <div className="h-screen w-full bg-black text-white flex flex-col overflow-hidden font-body select-none">

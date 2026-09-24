@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-004",
   "case": {
-    "status": "closed_fraud",
-    "verdict": "fraud",
-    "fraud_probability": 0.95,
+    "status": "open",
+    "verdict": "uncertain",
+    "fraud_probability": 0.75,
     "pattern": "card_not_present_new_device",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -46,7 +46,7 @@
       "HHG-001",
       "HHG-003"
     ],
-    "summary": "Case HHG-004 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 35832... Initial fraud risk scored at 0.65. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-004 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 35832... Initial fraud risk scored at 0.75. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-004"
   },
@@ -73,14 +73,7 @@
         "reason": "R1: verify card possession and transaction details with customer"
       }
     ],
-    "final": [
-      {
-        "action": "BLOCK_CARD",
-        "route": "L1",
-        "reason": "Step-Up authentication (SMS_OTP) FAIL. Customer challenge failed to resolve identity possession; epistemic uncertainty collapsed from 0.04 to 0.05. Risk escalated to confirmed fraud under Policy R1/R2."
-      }
-    ],
-    "what_changed": "Step-Up authentication (SMS_OTP) FAIL. Customer challenge failed to resolve identity possession; epistemic uncertainty collapsed from 0.04 to 0.05. Risk escalated to confirmed fraud under Policy R1/R2."
+    "final": []
   },
   "sar": {
     "file": false,
@@ -378,5 +371,5 @@
       "latency_ms": 175.0
     }
   ],
-  "uncertainty_score": 0.05
+  "uncertainty_score": 0.5
 }

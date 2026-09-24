@@ -321,5 +321,6 @@
       "latency_ms": 37094.26,
       "timestamp": "2026-09-22T19:47:04.845033"
     }
-  ]
+  ],
+  "uncertainty_score": 0.86
 }
