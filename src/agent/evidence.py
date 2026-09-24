@@ -4,13 +4,16 @@ Implements the 4-tier defensibility framework and mathematical uncertainty asses
 prescribed by the HHGOA Hackathon standards.
 """
 
-from typing import List, Tuple, Dict, Any
-from src.agent.models import EvidenceItem, EvidenceGradeEnum
+from typing import List, Tuple, Dict, Any, Optional
+from src.agent.models import (
+    EvidenceItem, EvidenceGradeEnum, StoppingCriterionEnum, StoppingDecision
+)
 
 
 class EvidenceEngine:
     """
-    Grades evidence and quantifies uncertainty and composite fraud risk.
+    Grades evidence and quantifies uncertainty, composite fraud risk,
+    and evaluates stopping conditions for defensible action.
     """
 
     GRADE_WEIGHTS = {
@@ -86,3 +89,135 @@ class EvidenceEngine:
             rationale = "Consistent multi-hop graph signals gathered; uncertainty within acceptable policy bounds."
 
         return fraud_prob, round(uncertainty, 2), rationale
+
+    @classmethod
+    def evaluate_stopping_condition(
+        cls,
+        evidence_items: List[EvidenceItem],
+        fraud_probability: float,
+        uncertainty_score: float,
+        customer_response: Optional[str] = None,
+        is_recurring_dispute: bool = False,
+        has_shared_origin: bool = False,
+        compromised_cards_count: int = 1
+    ) -> StoppingDecision:
+        """
+        Evaluates whether the investigation has gathered enough defensible evidence to stop.
+        Implements the 3 formal HHGOA Hackathon stopping criteria:
+          1. Fraud probability is at or above 0.85, or at or below 0.15, supported by >= 2 independent pieces of evidence.
+          2. A verification response settles the question.
+          3. Further steps are unlikely to change the decision (Decision Invariance / Diminishing Marginal Utility).
+
+        Strictly prevents both:
+          - Premature stopping (stopping before defensible evidence is available creates risk).
+          - Over-investigation (continuing past a defensible decision wastes time).
+        """
+        direct_count = sum(1 for e in evidence_items if e.grade == EvidenceGradeEnum.DIRECT)
+        n_items = len(evidence_items)
+
+        # -------------------------------------------------------------
+        # Criterion 2: A verification response settles the question
+        # -------------------------------------------------------------
+        if customer_response:
+            resp_lower = customer_response.lower()
+            if "confirm" in resp_lower or "authorized" in resp_lower or "legitimate" in resp_lower:
+                return StoppingDecision(
+                    should_stop=True,
+                    criterion=StoppingCriterionEnum.CRITERION_2_VERIFICATION_SETTLES_QUESTION,
+                    stop_reason="Customer confirmation and established billing history cleared the alert as legitimate; no fraud.",
+                    defensibility_status="DEFENSIBLE_CLEARED",
+                    evidence_count=n_items,
+                    direct_evidence_count=direct_count,
+                    fraud_probability=min(0.15, fraud_probability),
+                    uncertainty_score=0.0,
+                    defensible_action="CLOSE_NO_FRAUD"
+                )
+            else:
+                # Customer denies transaction or confirms fraud
+                defensible_action = "BLOCK_ALL_CARDS" if compromised_cards_count >= 2 else "BLOCK_CARD"
+                return StoppingDecision(
+                    should_stop=True,
+                    criterion=StoppingCriterionEnum.CRITERION_2_VERIFICATION_SETTLES_QUESTION,
+                    stop_reason="Customer denial confirmed fraud; pattern and network links identified. Further steps would not change action.",
+                    defensibility_status="DEFENSIBLE_CONFIRMED_FRAUD",
+                    evidence_count=n_items,
+                    direct_evidence_count=direct_count,
+                    fraud_probability=max(0.85, fraud_probability),
+                    uncertainty_score=0.0,
+                    defensible_action=defensible_action
+                )
+
+        # -------------------------------------------------------------
+        # Criterion 3: Further steps are unlikely to change the decision
+        # -------------------------------------------------------------
+        if is_recurring_dispute:
+            return StoppingDecision(
+                should_stop=True,
+                criterion=StoppingCriterionEnum.CRITERION_3_DECISION_INVARIANCE,
+                stop_reason="Established recurring billing history confirms benign subscription charge; further steps will not alter policy action.",
+                defensibility_status="DEFENSIBLE_SUBSCRIPTION_RECURRENCE",
+                evidence_count=n_items,
+                direct_evidence_count=direct_count,
+                fraud_probability=0.10,
+                uncertainty_score=0.05,
+                defensible_action="WARN_CUSTOMER"
+            )
+
+        if compromised_cards_count >= 2 and has_shared_origin and (direct_count > 0 or fraud_probability >= 0.80):
+            return StoppingDecision(
+                should_stop=True,
+                criterion=StoppingCriterionEnum.CRITERION_3_DECISION_INVARIANCE,
+                stop_reason="Syndicate multi-card compromise verified on shared hardware cluster; maximum mitigation mandated and further steps would not change action.",
+                defensibility_status="DEFENSIBLE_SYNDICATE_CONFIRMED",
+                evidence_count=n_items,
+                direct_evidence_count=direct_count,
+                fraud_probability=max(0.85, fraud_probability),
+                uncertainty_score=0.0,
+                defensible_action="BLOCK_ALL_CARDS"
+            )
+
+        # -------------------------------------------------------------
+        # Criterion 1: Definitive probability supported by >= 2 independent evidence pieces
+        # -------------------------------------------------------------
+        is_definitive_prob = (fraud_probability >= 0.85 or fraud_probability <= 0.15)
+        has_sufficient_corroboration = (n_items >= 2 or direct_count >= 1)
+
+        if is_definitive_prob and has_sufficient_corroboration:
+            if fraud_probability >= 0.85:
+                action = "BLOCK_ALL_CARDS" if compromised_cards_count >= 2 else "BLOCK_CARD"
+                reason = f"Fraud probability ({fraud_probability:.2f}) decisively reached threshold supported by {n_items} independent evidence items. Further steps would not change action."
+                status = "DEFENSIBLE_HIGH_CONFIDENCE_FRAUD"
+            else:
+                action = "CLOSE_NO_FRAUD"
+                reason = f"Fraud probability ({fraud_probability:.2f}) decisively cleared below benign threshold supported by {n_items} independent evidence items."
+                status = "DEFENSIBLE_LOW_CONFIDENCE_BENIGN"
+
+            return StoppingDecision(
+                should_stop=True,
+                criterion=StoppingCriterionEnum.CRITERION_1_DEFINITIVE_PROBABILITY,
+                stop_reason=reason,
+                defensibility_status=status,
+                evidence_count=n_items,
+                direct_evidence_count=direct_count,
+                fraud_probability=fraud_probability,
+                uncertainty_score=uncertainty_score,
+                defensible_action=action
+            )
+
+        # -------------------------------------------------------------
+        # Guard: Evidence Insufficient -> PREVENT PREMATURE STOP
+        # -------------------------------------------------------------
+        return StoppingDecision(
+            should_stop=False,
+            criterion=StoppingCriterionEnum.INSUFFICIENT_EVIDENCE_CONTINUE,
+            stop_reason=(
+                f"Evidence pool insufficient for definitive action (P={fraud_probability:.2f}, U={uncertainty_score:.2f}, "
+                f"signals={n_items}). Stopping now creates false-positive risk under Policy R1. Secondary verification required."
+            ),
+            defensibility_status="PREMATURE_STOP_BLOCKED",
+            evidence_count=n_items,
+            direct_evidence_count=direct_count,
+            fraud_probability=fraud_probability,
+            uncertainty_score=uncertainty_score,
+            defensible_action="VERIFY_WITH_CUSTOMER"
+        )

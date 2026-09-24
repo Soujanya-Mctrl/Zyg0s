@@ -64,7 +64,11 @@ class RunPipelineRequest(BaseModel):
 def load_case_json(case_id: str) -> Dict[str, Any]:
     file_path = CASES_DIR / f"{case_id}.json"
     if not file_path.exists():
-        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+        eval_path = BASE_DIR / "cases" / "evaluated_benchmarks" / f"{case_id}.json"
+        if eval_path.exists():
+            file_path = eval_path
+        else:
+            raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -267,6 +271,20 @@ def get_case_pipeline(case_id: str):
         "agent_count": len(trace),
         "pipeline_trace": trace
     }
+
+
+@app.get("/api/cases/{case_id}/explanation")
+def get_case_explanation(case_id: str):
+    """
+    Returns the comprehensive investigative reasoning explanation satisfying HHGOA Hackathon standards:
+    1. What evidence was used
+    2. Why additional evidence was requested
+    3. Why the selected actions were recommended
+    """
+    cdata = load_case_json(case_id)
+    from src.agent.reasoning import FraudReasoningEngine
+    explanation = FraudReasoningEngine.explain_case_reasoning(cdata)
+    return explanation.model_dump()
 
 
 @app.post("/api/pipeline/run")
@@ -621,8 +639,10 @@ def case_chat(case_id: str, req: ChatRequest):
     cdata = load_case_json(case_id)
     case_inner = cdata.get("case", {})
     nba = cdata.get("next_best_actions", {})
-    initial_nba = nba.get("initial", [{}])[0].get("action", "VERIFY_WITH_CUSTOMER")
-    final_nba = nba.get("final", [{}])[0].get("action", "MONITOR_CARD")
+    init_items = nba.get("initial") or [{}]
+    initial_nba = init_items[0].get("action", "VERIFY_WITH_CUSTOMER") if init_items else "VERIFY_WITH_CUSTOMER"
+    final_items = nba.get("final") or [{}]
+    final_nba = final_items[0].get("action", "PENDING_INVESTIGATION") if final_items else "PENDING_INVESTIGATION"
     sar = cdata.get("sar", {})
 
     llm = get_llm_client()
@@ -664,8 +684,10 @@ def case_ai_deep_dive(case_id: str):
     cdata = load_case_json(case_id)
     case_inner = cdata.get("case", {})
     nba = cdata.get("next_best_actions", {})
-    initial_nba = nba.get("initial", [{}])[0].get("action", "VERIFY_WITH_CUSTOMER")
-    final_nba = nba.get("final", [{}])[0].get("action", "MONITOR_CARD")
+    init_items = nba.get("initial") or [{}]
+    initial_nba = init_items[0].get("action", "VERIFY_WITH_CUSTOMER") if init_items else "VERIFY_WITH_CUSTOMER"
+    final_items = nba.get("final") or [{}]
+    final_nba = final_items[0].get("action", "PENDING_INVESTIGATION") if final_items else "PENDING_INVESTIGATION"
     sar = cdata.get("sar", {})
 
     llm = get_llm_client()

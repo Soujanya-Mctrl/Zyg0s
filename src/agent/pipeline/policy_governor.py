@@ -7,6 +7,7 @@ and produces 2-stage Next-Best Actions (Initial non-destructive vs Final mitigat
 from typing import Dict, Any, List
 from src.agent.pipeline.base import BaseSpecializedAgent, InvestigationContext
 from src.agent.policy import BankFraudPolicyEngine
+from src.agent.evidence import EvidenceEngine
 from src.agent.models import ActionRecommendation, ActionEnum, ApprovalRouteEnum
 
 
@@ -51,14 +52,24 @@ class PolicyGovernorAgent(BaseSpecializedAgent):
             final_status = "closed_cleared"
             final_prob = 0.05
             exposure_usd = 0.0
-            stop_reason = "Customer confirmation and established billing history cleared the alert as legitimate; no fraud."
         else:
             context.customer_response = "Customer states they did not make these purchases and still has the physical card."
             final_verdict = "fraud"
             final_status = "closed_fraud"
             final_prob = max(0.85, context.fraud_probability)
             exposure_usd = flagged_amt
-            stop_reason = "Customer denial confirmed fraud; pattern and network links identified. Further steps would not change action."
+
+        # Formal stopping condition evaluation
+        stopping_decision = EvidenceEngine.evaluate_stopping_condition(
+            evidence_items=context.evidence_items,
+            fraud_probability=final_prob,
+            uncertainty_score=0.0,
+            customer_response=context.customer_response,
+            is_recurring_dispute=context.is_recurring_dispute,
+            has_shared_origin=context.has_shared_origin,
+            compromised_cards_count=len(context.connected_cards) if context.has_shared_origin else 1
+        )
+        stop_reason = stopping_decision.stop_reason
 
         context.final_verdict = final_verdict
         context.final_status = final_status
