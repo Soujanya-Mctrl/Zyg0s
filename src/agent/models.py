@@ -58,6 +58,25 @@ class EvidenceItem(BaseModel):
     weight: float = Field(default=0.6, description="Numerical weight in risk/uncertainty scoring")
 
 
+class StoppingCriterionEnum(str, Enum):
+    CRITERION_1_DEFINITIVE_PROBABILITY = "CRITERION_1_DEFINITIVE_PROBABILITY"
+    CRITERION_2_VERIFICATION_SETTLES_QUESTION = "CRITERION_2_VERIFICATION_SETTLES_QUESTION"
+    CRITERION_3_DECISION_INVARIANCE = "CRITERION_3_DECISION_INVARIANCE"
+    INSUFFICIENT_EVIDENCE_CONTINUE = "INSUFFICIENT_EVIDENCE_CONTINUE"
+
+
+class StoppingDecision(BaseModel):
+    should_stop: bool
+    criterion: StoppingCriterionEnum
+    stop_reason: str
+    defensibility_status: str
+    evidence_count: int
+    direct_evidence_count: int
+    fraud_probability: float
+    uncertainty_score: float
+    defensible_action: Optional[str] = None
+
+
 class ActionRecommendation(BaseModel):
     action: ActionEnum
     route: ApprovalRouteEnum
@@ -117,3 +136,37 @@ class BenchmarkCaseOutput(BaseModel):
     tokens: int = Field(default=0)
     latency_s: float = Field(default=0.0)
     orchestrator_pipeline_trace: List[Dict[str, Any]] = Field(default_factory=list, description="Step-by-step trace of 7 specialized pipeline agents")
+
+
+class EvidenceSummary(BaseModel):
+    total_signals: int
+    direct_count: int
+    circumstantial_count: int
+    correlative_count: int
+    contradictory_count: int
+    signals: List[Dict[str, Any]]
+
+
+class ActionReasoning(BaseModel):
+    stage_1_initial: List[Dict[str, Any]]
+    stage_2_final: List[Dict[str, Any]]
+    what_changed: str
+    governing_policies: List[str]
+    sar_narrative: Optional[str] = None
+
+
+class CaseExplanation(BaseModel):
+    """
+    Comprehensive investigative reasoning explanation satisfying HHGOA Hackathon standards:
+    1. What evidence was used
+    2. Why additional evidence was requested
+    3. Why the selected actions were recommended
+    """
+    case_id: str
+    verdict: str
+    fraud_probability: float
+    exposure_usd: float
+    what_evidence_was_used: EvidenceSummary
+    why_additional_evidence_was_requested: Dict[str, Any]
+    why_selected_actions_were_recommended: ActionReasoning
+    executive_narrative: str

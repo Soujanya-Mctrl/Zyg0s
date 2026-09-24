@@ -126,22 +126,54 @@ class GraphNativeCaseMemory:
         try:
             graph_case_id = case_data.get("graph_case_id", f"CASE-{case_id}")
 
-            # 4a. Upsert ClosedCase vertex with all attributes + narrative
-            conn.upsertVertex(
-                "ClosedCase",
-                graph_case_id,
-                attributes={
-                    "customer_id": case_data.get("customer_id", ""),
-                    "card_id": case_data.get("card_id", ""),
-                    "outcome": case_data.get("status", ""),
-                    "pattern": case_data.get("pattern", "none"),
-                    "exposure_usd": case_data.get("exposure_usd", 0.0),
-                    "analyst_notes": case_data.get("summary", ""),
-                    "case_narrative": narrative_text,
-                    "fraud_probability": case_data.get("fraud_probability", 0.0),
-                    "verdict": case_data.get("verdict", ""),
-                }
-            )
+            # 4a. Upsert ClosedCase vertex with all attributes + narrative (with fallback to base schema)
+            try:
+                conn.upsertVertex(
+                    "ClosedCase",
+                    graph_case_id,
+                    attributes={
+                        "customer_id": case_data.get("customer_id", ""),
+                        "card_id": case_data.get("card_id", ""),
+                        "outcome": case_data.get("status", ""),
+                        "pattern": case_data.get("pattern", "none"),
+                        "exposure_usd": case_data.get("exposure_usd", 0.0),
+                        "analyst_notes": case_data.get("summary", ""),
+                        "case_narrative": narrative_text,
+                        "fraud_probability": case_data.get("fraud_probability", 0.0),
+                        "verdict": case_data.get("verdict", ""),
+                    }
+                )
+            except Exception as upsert_err:
+                # Fallback to standard base schema attributes
+                conn.upsertVertex(
+                    "ClosedCase",
+                    graph_case_id,
+                    attributes={
+                        "customer_id": case_data.get("customer_id", ""),
+                        "card_id": case_data.get("card_id", ""),
+                        "outcome": case_data.get("status", ""),
+                        "pattern": case_data.get("pattern", "none"),
+                        "exposure_usd": case_data.get("exposure_usd", 0.0),
+                        "analyst_notes": case_data.get("summary", ""),
+                    }
+                )
+
+            # 4a-bis. Also sync to Investigation_Case vertex if present in schema
+            try:
+                conn.upsertVertex(
+                    "Investigation_Case",
+                    graph_case_id,
+                    attributes={
+                        "verdict": case_data.get("verdict", ""),
+                        "status": case_data.get("status", ""),
+                        "pattern": case_data.get("pattern", "none"),
+                        "fraud_probability": case_data.get("fraud_probability", 0.0),
+                        "exposure_usd": case_data.get("exposure_usd", 0.0),
+                        "summary": case_data.get("summary", ""),
+                    }
+                )
+            except Exception:
+                pass
 
             # 4b. Edges: Case → Customer
             customer_id = case_data.get("customer_id", "")
