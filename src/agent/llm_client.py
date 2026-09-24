@@ -230,19 +230,28 @@ class HybridLLMClient:
                 f"- Key Anchored Evidence:\n{evidence_summary if evidence_summary else '- Standard baseline telemetry.'}\n\n"
                 f"ANALYST QUESTION: {user_query}\n\n"
                 f"INVESTIGATOR GUIDANCE:\n"
-                f"1. Structure your reply clearly with bold section titles and concise bullet points.\n"
-                f"2. Cite Bank Fraud Policy v1.0 rules (R1 to R10), TigerGraph graph topology (nodes and edges), and mathematical uncertainty where relevant.\n"
-                f"3. Maintain an executive cyber-fraud & AML compliance officer perspective."
+                f"1. Explain in simple, plain English that any analyst or executive can immediately understand in 10 seconds. Avoid dense academic jargon.\n"
+                f"2. Structure your reply with clean, readable Markdown:\n"
+                f"   - **Summary**: 1-2 punchy sentences stating the bottom line (cleared or fraud) and why.\n"
+                f"   - **What TigerGraph Found**: 2-3 concise bullet points with real facts (e.g., location match, device link, OTP result).\n"
+                f"   - **Decision & Policy**: Why this action was taken under Bank Fraud Policy (e.g., Policy R3 cleared after OTP; or Policy R2 blocked after dispute).\n"
+                f"3. Keep the total response concise (under 180 words) and visually scannable."
             )
             try:
                 chat_completion = self._client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "You are Zyg0s Forensic Copilot, an elite cyber-fraud intelligence agent."},
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are ZYGØS Forensic Copilot. You explain fraud cases simply, clearly, and authoritatively. "
+                                "Always use clean markdown formatting with bold headers and bullet points. Never write long unformatted walls of text."
+                            )
+                        },
                         {"role": "user", "content": prompt}
                     ],
                     model=self.FAST_GROQ_MODEL,
                     temperature=0.2,
-                    max_tokens=500
+                    max_tokens=400
                 )
                 content = chat_completion.choices[0].message.content
                 if content and len(content.strip()) > 10:

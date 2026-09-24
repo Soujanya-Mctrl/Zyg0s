@@ -4,6 +4,7 @@ import { SidebarQueue, type CaseSummary } from './workbench/SidebarQueue';
 import { InvestigationCanvas } from './workbench/InvestigationCanvas';
 import { IntelligencePanel } from './workbench/IntelligencePanel';
 import { TimelinePanel } from './workbench/TimelinePanel';
+import { InvestigationStepper } from './workbench/InvestigationStepper';
 import { CommandBar } from './workbench/CommandBar';
 import {
   fetchHealth,
@@ -14,6 +15,7 @@ import {
   runAdHocPipeline,
   sendCaseChat,
   simulateStepUp,
+  manualOverride,
   resetCase,
   resetAllCases,
   type HealthStatus,
@@ -156,9 +158,14 @@ export function WorkbenchDashboard() {
           pipeline_trace: [
             ...(prev?.pipeline_trace || []),
             {
-              agent: 'ZYG0S COPILOT (GROQ)',
+              agent_id: 'zygos_copilot',
+              agent_name: 'ZYGØS Copilot (Groq LPU)',
+              role: 'Conversational Forensic Intelligence & Defensibility',
+              hand_off_summary: 'Investigator Inquiry Answered',
+              ai_reasoning: res.response,
               action: res.response,
               status: 'safe',
+              latency_ms: 320,
             },
           ],
         }));
@@ -218,6 +225,32 @@ export function WorkbenchDashboard() {
     }
   };
 
+  // True Human Cognitive Override: Analyst manually overrules policy recommendation
+  const handleOverrideAction = async () => {
+    if (!activeCaseId || isActionPending) return;
+    setIsActionPending(true);
+
+    try {
+      const res = await manualOverride(
+        activeCaseId,
+        'BLOCK_ALL_CARDS',
+        'Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.',
+        'L2'
+      );
+      setActionFeedback(`Analyst Override Enforced: ${res.override_action} (Route: ${res.route}). Case closed as ${res.verdict}.`);
+      
+      // Reload active case data and list to reflect updated state
+      await loadCaseData(activeCaseId);
+      const freshCases = await fetchCases();
+      setCases(freshCases.cases || []);
+    } catch (err) {
+      console.error('Manual override failed:', err);
+      setActionFeedback('Failed to execute manual override.');
+    } finally {
+      setIsActionPending(false);
+    }
+  };
+
   // Reset active case flow to open / pending alert state
   const handleResetCase = async () => {
     if (!activeCaseId || isResetting) return;
@@ -246,34 +279,36 @@ export function WorkbenchDashboard() {
         isResetting={isResetting}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      {/* Top 3 Columns: CASE QUEUE | WHAT DO WE KNOW? | WHAT DO WE BELIEVE? */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
         <SidebarQueue
           cases={cases}
           activeCaseId={activeCaseId}
           onSelectCase={setActiveCaseId}
         />
 
-        <div className="flex-1 flex flex-col min-w-0">
-          <div className="flex-1 flex overflow-hidden">
-            <InvestigationCanvas
-              caseDetails={activeCaseDetails}
-              caseGraph={activeCaseGraph}
-              selectedNodeId={selectedNodeId}
-              onSelectNode={setSelectedNodeId}
-            />
-            <IntelligencePanel
-              caseDetails={activeCaseDetails}
-              onExecuteAction={handleExecuteAction}
-              onEscalateAction={handleEscalateAction}
-              isActionPending={isActionPending}
-              actionFeedback={actionFeedback}
-            />
-          </div>
-
-          <TimelinePanel pipeline={activeCasePipeline} />
-          <CommandBar onSubmit={handleCommand} isLoading={isAgentReasoning} />
+        <div className="flex-1 flex overflow-hidden min-w-0">
+          <InvestigationCanvas
+            caseDetails={activeCaseDetails}
+            caseGraph={activeCaseGraph}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={setSelectedNodeId}
+          />
+          <IntelligencePanel
+            caseDetails={activeCaseDetails}
+            onExecuteAction={handleExecuteAction}
+            onEscalateAction={handleEscalateAction}
+            onOverrideAction={handleOverrideAction}
+            isActionPending={isActionPending}
+            actionFeedback={actionFeedback}
+          />
         </div>
       </div>
+
+      {/* Bottom Stack: WHAT DID ZYGØS DO? -> WHERE ARE WE? -> WHAT SHOULD WE DO? */}
+      <TimelinePanel pipeline={activeCasePipeline} />
+      <InvestigationStepper caseDetails={activeCaseDetails} />
+      <CommandBar onSubmit={handleCommand} isLoading={isAgentReasoning} />
     </div>
   );
 }

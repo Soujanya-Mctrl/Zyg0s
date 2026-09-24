@@ -60,9 +60,9 @@ export function WorkbenchTopBar({ activeCaseId, health, onResetCase, isResetting
         </div>
 
         {/* AI Engine Status */}
-        <div className="flex items-center gap-1.5 text-zinc-400" title={`AI Cognitive Engine: ${aiModel}`}>
+        <div className="flex items-center gap-1.5 text-zinc-400" title={`AI Cognitive Engine: ${aiModel} (Groq Cloud Active Endpoint)`}>
           <Cpu size={13} className={isAiActive ? 'text-[#10b981]' : 'text-zinc-600'} />
-          <span>Groq LPU</span>
+          <span>Groq LPU: Qwen-27B</span>
         </div>
 
         {/* System Online Badge */}

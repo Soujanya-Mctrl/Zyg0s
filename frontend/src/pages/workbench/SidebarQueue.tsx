@@ -27,8 +27,14 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase }: SidebarQueue
       
       {/* Category Navigation */}
       <div className="p-6 pb-2 border-b border-white/[0.08]">
-        <h2 className="font-mono text-[10px] tracking-[0.2em] uppercase text-zinc-500 mb-6 flex items-center gap-2">
-          <ShieldAlert size={12} /> Investigation Queue
+        <div className="font-mono text-[8px] text-[#06b6d4] uppercase tracking-[0.25em] font-bold mb-1">
+          REGION 01
+        </div>
+        <h2 className="font-mono text-xs tracking-[0.2em] uppercase text-white font-bold mb-4 flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <ShieldAlert size={13} className="text-[#06b6d4]" /> CASE QUEUE
+          </span>
+          <span className="text-[10px] text-zinc-500 font-normal">{cases.length} alerts</span>
         </h2>
         
         <div className="space-y-1 font-mono text-[9px] tracking-widest uppercase mb-4">

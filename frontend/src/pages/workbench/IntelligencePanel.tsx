@@ -1,9 +1,11 @@
-import { Crosshair, Fingerprint, Gavel, Loader2, CheckCircle2 } from 'lucide-react';
+import { Crosshair, Fingerprint, Gavel, Loader2, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { MarkdownViewer } from '../../components/ui/MarkdownViewer';
 
 interface IntelligencePanelProps {
   caseDetails: any;
   onExecuteAction?: () => void;
   onEscalateAction?: () => void;
+  onOverrideAction?: () => void;
   isActionPending?: boolean;
   actionFeedback?: string | null;
 }
@@ -12,6 +14,7 @@ export function IntelligencePanel({
   caseDetails,
   onExecuteAction,
   onEscalateAction,
+  onOverrideAction,
   isActionPending = false,
   actionFeedback = null,
 }: IntelligencePanelProps) {
@@ -42,13 +45,18 @@ export function IntelligencePanel({
   return (
     <aside className="w-[380px] border-l border-white/[0.08] bg-black flex flex-col h-full overflow-y-auto shrink-0 select-none">
       
-      {/* 01: Case Intelligence */}
-      <div className="p-8 border-b border-white/[0.08]">
-        <h3 className="font-mono text-[10px] tracking-widest text-zinc-500 uppercase mb-8 flex items-center gap-2">
-          <Crosshair size={12} className="text-[#06b6d4]" /> Case Intelligence
+      {/* 01: Region 03 Header & Belief State */}
+      <div className="p-6 border-b border-white/[0.08]">
+        <div className="font-mono text-[8px] text-[#06b6d4] uppercase tracking-[0.25em] font-bold mb-1">
+          REGION 03 • WHAT DO WE BELIEVE?
+        </div>
+        <h3 className="font-mono text-xs text-white font-bold uppercase tracking-wider mb-6 flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <Crosshair size={13} className="text-[#06b6d4]" /> RISK • CONFIDENCE • UNCERTAINTY
+          </span>
         </h3>
         
-        <div className="space-y-6 font-mono text-xs">
+        <div className="space-y-5 font-mono text-xs">
           <div>
             <div className="text-zinc-600 mb-1 tracking-widest uppercase">Risk</div>
             <div className="flex items-end gap-2">
@@ -121,8 +129,12 @@ export function IntelligencePanel({
             })}
           </ul>
         ) : (
-          <div className="font-mono text-xs text-zinc-500 leading-relaxed">
-            {caseDetails.summary || 'Awaiting live graph traversal and multi-hop entity resolution.'}
+          <div className="font-mono text-xs text-zinc-400 leading-relaxed">
+            {caseDetails.summary ? (
+              <MarkdownViewer content={caseDetails.summary} />
+            ) : (
+              'Awaiting live graph traversal and multi-hop entity resolution.'
+            )}
           </div>
         )}
       </div>
@@ -174,25 +186,37 @@ export function IntelligencePanel({
         </div>
 
         {/* Action Execution Controls */}
-        <div className="pt-4 grid grid-cols-2 gap-2">
+        <div className="pt-4 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button 
+              onClick={onExecuteAction}
+              disabled={isActionPending}
+              className="py-2.5 bg-[#06b6d4] text-black font-bold font-mono text-[10px] tracking-wider uppercase hover:bg-cyan-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+              title="Step-Up Approval: Execute challenge -> Cardholder passes OTP -> Clears case & uncertainty collapses"
+            >
+              {isActionPending ? <Loader2 size={12} className="animate-spin" /> : null}
+              Pass OTP
+            </button>
+            
+            <button 
+              onClick={onEscalateAction}
+              disabled={isActionPending}
+              className="py-2.5 border border-white/20 text-white font-mono text-[10px] tracking-wider uppercase hover:bg-white/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+              title="Step-Up Failure: Challenge failed/timeout -> Escalate to L2 & block cards"
+            >
+              {isActionPending ? <Loader2 size={12} className="animate-spin" /> : null}
+              Fail OTP
+            </button>
+          </div>
+
           <button 
-            onClick={onExecuteAction}
+            onClick={onOverrideAction}
             disabled={isActionPending}
-            className="py-2.5 bg-[#06b6d4] text-black font-bold font-mono text-[11px] tracking-widest uppercase hover:bg-cyan-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
-            title="Execute recommended step-up auth / clearance (Pass OTP)"
+            className="w-full py-2 border border-red-500/40 text-red-400 font-mono text-[9px] tracking-widest uppercase hover:bg-red-500/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+            title="Human Cognitive Override: Analyst manually overrules agent policy and enforces immediate block"
           >
-            {isActionPending ? <Loader2 size={12} className="animate-spin" /> : null}
-            Execute
-          </button>
-          
-          <button 
-            onClick={onEscalateAction}
-            disabled={isActionPending}
-            className="py-2.5 border border-white/20 text-white font-mono text-[11px] tracking-widest uppercase hover:bg-white/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
-            title="Escalate challenge failure: block card and route to L2 fraud analyst"
-          >
-            {isActionPending ? <Loader2 size={12} className="animate-spin" /> : null}
-            Escalate
+            <ShieldAlert size={12} />
+            Analyst Discretionary Override
           </button>
         </div>
       </div>
