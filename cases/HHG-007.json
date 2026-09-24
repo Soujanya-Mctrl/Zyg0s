@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-007",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.87,
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.98,
     "pattern": "account_takeover",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -35,6 +35,18 @@
         ],
         "grade": "CONTRADICTORY",
         "weight": -0.7
+      },
+      {
+        "claim": "Step-Up authentication (SMS_OTP) returned FAIL.",
+        "source": "customer_step_up",
+        "grade": "DIRECT",
+        "ref": "auth_gateway:sms_otp_result"
+      },
+      {
+        "claim": "Human analyst discretionary override: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.",
+        "source": "human_investigator_override",
+        "grade": "DIRECT",
+        "ref": "analyst_session:override_HHG-007"
       }
     ],
     "similar_prior_cases": [
@@ -49,8 +61,11 @@
   "evidence_requests": [
     {
       "type": "customer_validation",
+      "channel": "SMS_OTP",
       "asked_after_step": 4,
-      "assumed_response": "Customer states they did not make these purchases and still has the physical card."
+      "status": "COMPLETED",
+      "result": "FAIL",
+      "assumed_response": "Cardholder challenge failed / OTP expired without validation."
     }
   ],
   "next_best_actions": {
@@ -66,7 +81,14 @@
         "reason": "R1: require step-up authentication before blocking card"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "BLOCK_ALL_CARDS",
+        "route": "L2",
+        "reason": "HUMAN_COGNITIVE_OVERRIDE: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops."
+      }
+    ],
+    "what_changed": "Analyst cognitive override overrode automated policy: enforced BLOCK_ALL_CARDS (L2)."
   },
   "sar": {
     "file": false,
@@ -292,6 +314,52 @@
       "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-002, HHG-006, HHG-005). Case persisted to TigerGraph (CASE-SAVANNA-HHG-007).",
       "latency_ms": 944.2,
       "timestamp": "2026-09-22T19:35:08.200477"
+    },
+    {
+      "agent_id": "human_approval",
+      "agent_name": "Human Approval",
+      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
+      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
+      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
+      "status": "safe",
+      "latency_ms": 115.0
+    },
+    {
+      "agent_id": "uncertainty_reassessment",
+      "agent_name": "Evidence Assessor (Reassessment)",
+      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
+      "hand_off_summary": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.65 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD (Route: auto).",
+      "action": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.65 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD.",
+      "status": "safe",
+      "latency_ms": 175.0
+    },
+    {
+      "agent_id": "human_approval",
+      "agent_name": "Human Approval",
+      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
+      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
+      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
+      "status": "safe",
+      "latency_ms": 115.0
+    },
+    {
+      "agent_id": "uncertainty_reassessment",
+      "agent_name": "Evidence Assessor (Reassessment)",
+      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
+      "hand_off_summary": "Received cardholder challenge response (FAIL). Epistemic uncertainty collapsed 0.04 -> 0.05. Committed Stage 2 NBA: BLOCK_CARD (Route: L1).",
+      "action": "Received cardholder challenge response (FAIL). Epistemic uncertainty collapsed 0.04 -> 0.05. Committed Stage 2 NBA: BLOCK_CARD.",
+      "status": "danger",
+      "latency_ms": 175.0
+    },
+    {
+      "agent_id": "human_cognitive_override",
+      "agent_name": "Human Cognitive Override",
+      "role": "Analyst Discretionary Override & Executive Enforcement",
+      "hand_off_summary": "Analyst overrode agent recommendation. Reason: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.. Enforced Action: BLOCK_ALL_CARDS (Route: L2).",
+      "action": "Analyst overrode agent recommendation. Reason: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.. Enforced Action: BLOCK_ALL_CARDS (Route: L2).",
+      "status": "danger",
+      "latency_ms": 45.0
     }
-  ]
+  ],
+  "uncertainty_score": 0.02
 }
