@@ -4,6 +4,7 @@ Coordinates 7 specialized neuro-symbolic agents across an 8-stage lifecycle,
 manages the uncertainty feedback loop, and compiles the official benchmark output envelope.
 """
 
+import os
 import time
 from typing import Dict, Any, List, Optional
 import pandas as pd
@@ -31,12 +32,17 @@ class InvestigationOrchestrator:
     """
 
     def __init__(self, txns_path: str = "data/hhgoa_ieee/exam_txns.csv", id_path: str = "data/hhgoa_ieee/exam_identities.csv"):
-        # Load merged transaction and identity dataset
-        df_t = pd.read_csv(txns_path).copy()
-        df_t["ts_dt"] = pd.to_datetime(df_t["ts"], errors="coerce")
-        self.df_txns = df_t
-        self.df_id = pd.read_csv(id_path).copy()
-        self.merged_df = pd.merge(self.df_txns, self.df_id, on="TransactionID", how="left").copy()
+        # Load merged transaction and identity dataset if files exist
+        if os.path.exists(txns_path):
+            df_t = pd.read_csv(txns_path).copy()
+            df_t["ts_dt"] = pd.to_datetime(df_t["ts"], errors="coerce")
+            self.df_txns = df_t
+            self.df_id = pd.read_csv(id_path).copy() if os.path.exists(id_path) else pd.DataFrame()
+            self.merged_df = pd.merge(self.df_txns, self.df_id, on="TransactionID", how="left").copy()
+        else:
+            self.df_txns = pd.DataFrame()
+            self.df_id = pd.DataFrame()
+            self.merged_df = pd.DataFrame()
 
         # Instantiate the 7 specialized agents
         self.agent_sentinel = AlertSentinelAgent()
