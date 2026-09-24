@@ -16,11 +16,12 @@ interface SidebarQueueProps {
   cases: CaseSummary[];
   activeCaseId: string | null;
   onSelectCase: (id: string) => void;
+  investigatedCaseIds?: Set<string>;
 }
 
 type QueueFilter = 'ALL' | 'ACTIVE' | 'EVIDENCE' | 'REVIEW' | 'APPROVAL' | 'CLOSED';
 
-export function SidebarQueue({ cases, activeCaseId, onSelectCase }: SidebarQueueProps) {
+export function SidebarQueue({ cases, activeCaseId, onSelectCase, investigatedCaseIds }: SidebarQueueProps) {
   const [selectedFilter, setSelectedFilter] = useState<QueueFilter>('ACTIVE');
 
   const counts = useMemo(() => {
@@ -120,7 +121,8 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase }: SidebarQueue
         ) : (
           filteredCases.map((c) => {
             const isActive = c.case_id === activeCaseId;
-            const riskDisplay = Math.round(c.risk_score * 100);
+            const isCaseInvestigated = investigatedCaseIds ? investigatedCaseIds.has(c.case_id) : true;
+            const riskDisplay = isCaseInvestigated ? `${Math.round(c.risk_score * 100)}%` : '--';
             return (
               <div 
                 key={c.case_id}
@@ -129,28 +131,33 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase }: SidebarQueue
               >
                 {isActive && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.7)]" />}
                 
-                <div className="mb-4">
+                <div className="mb-3 flex items-center justify-between">
                   <span className={`font-mono text-sm tracking-widest font-bold ${isActive ? 'text-white' : 'text-zinc-400'}`}>
                     {isActive ? <GlitchText text={c.case_id} active={isActive} /> : c.case_id}
                   </span>
+                  {!isCaseInvestigated && (
+                    <span className="text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-zinc-700 bg-zinc-800/90 text-zinc-300">
+                      STANDBY
+                    </span>
+                  )}
                 </div>
                 
-                <div className="font-mono text-[10px] tracking-widest uppercase text-zinc-400 space-y-1 mb-6">
+                <div className="font-mono text-[10px] tracking-widest uppercase text-zinc-400 space-y-1 mb-5">
                   <div>{c.fraud_pattern || 'UNKNOWN PATTERN'}</div>
                   <div>{c.trigger_type || 'NEW DEVICE'}</div>
                 </div>
                 
                 <div className="flex justify-between items-end font-mono text-[10px] tracking-widest uppercase">
                   <div>
-                    <div className="text-zinc-600 mb-1">RISK</div>
-                    <div className="font-bold text-white">
-                      {riskDisplay}%
+                    <div className="text-zinc-600 mb-0.5 text-[9px]">RISK</div>
+                    <div className={`font-bold ${isCaseInvestigated ? 'text-white' : 'text-zinc-600'}`}>
+                      {riskDisplay}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${c.status === 'open' ? 'bg-white animate-pulse' : 'bg-zinc-500'}`} />
-                    <span className={c.status === 'open' ? 'text-white font-bold' : 'text-zinc-500'}>
-                      {c.status === 'open' ? 'INVESTIGATING' : c.status}
+                    <div className={`w-1.5 h-1.5 rounded-full ${!isCaseInvestigated ? 'bg-zinc-600' : c.status === 'open' ? 'bg-white animate-pulse' : 'bg-zinc-400'}`} />
+                    <span className={!isCaseInvestigated ? 'text-zinc-500' : c.status === 'open' ? 'text-white font-bold' : 'text-zinc-400'}>
+                      {!isCaseInvestigated ? 'AWAITING' : c.status === 'open' ? 'INVESTIGATED' : c.status}
                     </span>
                   </div>
                 </div>

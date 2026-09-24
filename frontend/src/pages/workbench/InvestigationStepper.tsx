@@ -2,9 +2,17 @@ import { Compass } from 'lucide-react';
 
 interface InvestigationStepperProps {
   caseDetails: any;
+  isInvestigated?: boolean;
+  isInvestigating?: boolean;
+  activeStep?: number;
 }
 
-export function InvestigationStepper({ caseDetails }: InvestigationStepperProps) {
+export function InvestigationStepper({
+  caseDetails,
+  isInvestigated = true,
+  isInvestigating = false,
+  activeStep = 0,
+}: InvestigationStepperProps) {
   const uncertainty = caseDetails?.uncertainty_score ?? 0.5;
   const isResolved =
     caseDetails?.status === 'closed_cleared' ||
@@ -13,16 +21,42 @@ export function InvestigationStepper({ caseDetails }: InvestigationStepperProps)
     caseDetails?.verdict === 'fraud';
   const hasStage2 = Boolean(caseDetails?.next_best_actions?.final?.length);
 
-  const stages = [
-    { name: 'Trigger', active: false, complete: true },
-    { name: 'Investigate', active: false, complete: true },
-    { name: 'Evidence', active: false, complete: Boolean(caseDetails?.evidence?.length) },
-    { name: 'Uncertainty', active: false, complete: uncertainty !== undefined },
-    { name: 'More Evidence', active: !isResolved && uncertainty > 0.4, complete: isResolved || uncertainty <= 0.4 },
-    { name: 'Reassess', active: !isResolved && hasStage2, complete: isResolved || hasStage2 },
-    { name: 'Actions', active: false, complete: isResolved || hasStage2 },
-    { name: 'Resolve', active: isResolved, complete: isResolved },
+  const stageNames = [
+    'Trigger',
+    'Investigate',
+    'Evidence',
+    'Uncertainty',
+    'More Evidence',
+    'Reassess',
+    'Actions',
+    'Resolve',
   ];
+
+  let stages;
+  if (!isInvestigated && !isInvestigating) {
+    stages = stageNames.map((name, idx) => ({
+      name,
+      active: idx === 0,
+      complete: idx === 0,
+    }));
+  } else if (isInvestigating) {
+    stages = stageNames.map((name, idx) => ({
+      name,
+      active: idx === activeStep,
+      complete: idx < activeStep,
+    }));
+  } else {
+    stages = [
+      { name: 'Trigger', active: false, complete: true },
+      { name: 'Investigate', active: false, complete: true },
+      { name: 'Evidence', active: false, complete: Boolean(caseDetails?.evidence?.length) },
+      { name: 'Uncertainty', active: false, complete: uncertainty !== undefined },
+      { name: 'More Evidence', active: !isResolved && uncertainty > 0.4, complete: isResolved || uncertainty <= 0.4 },
+      { name: 'Reassess', active: !isResolved && hasStage2, complete: isResolved || hasStage2 },
+      { name: 'Actions', active: false, complete: isResolved || hasStage2 },
+      { name: 'Resolve', active: isResolved, complete: isResolved },
+    ];
+  }
 
   return (
     <div className="h-9 border-t border-zinc-800 bg-[#101015] flex items-center px-6 justify-between shrink-0 font-mono text-[9px] tracking-[0.16em] uppercase select-none">

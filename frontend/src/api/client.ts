@@ -85,6 +85,14 @@ export async function fetchCasePipeline(caseId: string): Promise<any> {
   return res.json();
 }
 
+export async function investigateCase(caseId: string): Promise<any> {
+  const res = await fetch(`${API_BASE}/cases/${encodeURIComponent(caseId)}/investigate`, {
+    method: 'POST',
+  });
+  if (!res.ok) throw new Error(`Investigate case failed: ${res.statusText}`);
+  return res.json();
+}
+
 export async function fetchCaseGraph(caseId: string): Promise<CaseGraphData> {
   const res = await fetch(`${API_BASE}/cases/${encodeURIComponent(caseId)}/graph`);
   if (!res.ok) throw new Error(`Fetch graph failed: ${res.statusText}`);

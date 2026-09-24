@@ -229,6 +229,11 @@ interface InvestigationCanvasProps {
   caseGraph?: CaseGraphData | null;
   onSelectNode?: (nodeId: string) => void;
   selectedNodeId?: string | null;
+  isInvestigated?: boolean;
+  isInvestigating?: boolean;
+  onStartInvestigation?: () => void;
+  activeAgentName?: string;
+  activeAgentStep?: number;
 }
 
 export function InvestigationCanvas({
@@ -236,6 +241,11 @@ export function InvestigationCanvas({
   caseGraph,
   onSelectNode,
   selectedNodeId,
+  isInvestigated = true,
+  isInvestigating = false,
+  onStartInvestigation,
+  activeAgentName = 'Alert Sentinel',
+  activeAgentStep = 1,
 }: InvestigationCanvasProps) {
   const [viewMode, setViewMode] = useState<'subgraph' | 'schema'>('subgraph');
   const [schemaData, setSchemaData] = useState<SchemaOntology | null>(null);
@@ -733,6 +743,74 @@ export function InvestigationCanvas({
             </Panel>
           )}
         </ReactFlow>
-    </div>
-  );
-}
+
+        {/* Uninvestigated / Standby Alert Hero Overlay */}
+        {!isInvestigated && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center p-6 bg-black/75 backdrop-blur-sm pointer-events-auto">
+            <div className="max-w-md w-full bg-[#0d0d12]/98 border border-zinc-700/80 rounded-lg p-6 shadow-2xl backdrop-blur-xl text-center space-y-5 ring-1 ring-white/10 animate-in fade-in zoom-in-95 duration-200">
+              {/* Header Strip */}
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-zinc-400 font-bold">
+                  TRANSACTION ALERT INTAKE
+                </span>
+                <span className="font-mono text-[10px] text-white font-bold bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">
+                  {caseDetails?.case_id || 'STANDBY'}
+                </span>
+              </div>
+
+              {/* Technical Alert Breakdown */}
+              <div className="bg-[#14141c] border border-zinc-800 rounded p-4 text-left font-mono text-xs space-y-2.5">
+                <div className="flex justify-between items-center text-zinc-400">
+                  <span>EXPOSURE AMOUNT</span>
+                  <span className="text-white font-bold text-sm">
+                    ${(caseDetails?.exposure_usd || 1250.0).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-zinc-400">
+                  <span>PRIMARY CARD</span>
+                  <span className="text-zinc-200">{caseDetails?.primary_card_id || '4212-XXXX-8921'}</span>
+                </div>
+                <div className="flex justify-between items-center text-zinc-400">
+                  <span>FLAGGED PATTERN</span>
+                  <span className="text-zinc-200">{caseDetails?.pattern || 'RAPID CARD VELOCITY BURST'}</span>
+                </div>
+                <div className="flex justify-between items-center text-zinc-400">
+                  <span>PIPELINE STATUS</span>
+                  <span className="text-zinc-400 flex items-center gap-1.5 font-bold">
+                    <span className={`w-1.5 h-1.5 rounded-full ${isInvestigating ? 'bg-white animate-ping' : 'bg-zinc-500'}`} />
+                    {isInvestigating ? `ORCHESTRATING: ${activeAgentName.toUpperCase()}` : 'AWAITING INVESTIGATION'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Call to Action Button */}
+              <div>
+                <button
+                  type="button"
+                  onClick={onStartInvestigation}
+                  disabled={isInvestigating}
+                  className={`w-full py-3.5 px-6 rounded font-mono text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xl ${
+                    isInvestigating
+                      ? 'bg-zinc-800 text-white border border-zinc-600 animate-pulse cursor-wait'
+                      : 'bg-white text-black hover:bg-zinc-200 border border-white hover:scale-[1.02] shadow-[0_0_20px_rgba(255,255,255,0.3)]'
+                  }`}
+                >
+                  {isInvestigating ? (
+                    <>
+                      <RefreshCw size={13} className="animate-spin text-white" />
+                      <span>ORCHESTRATING AGENTS (STEP {activeAgentStep}/7)...</span>
+                    </>
+                  ) : (
+                    <span>⚡ START AUTONOMOUS INVESTIGATION</span>
+                  )}
+                </button>
+                <div className="text-[9px] font-mono text-zinc-500 tracking-wider mt-2.5">
+                  Executes 7-Agent Neuro-Symbolic Loop (TigerGraph Savanna Cloud + Groq LPU)
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }

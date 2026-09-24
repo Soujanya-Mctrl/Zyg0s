@@ -1,5 +1,5 @@
 import { StatusDot } from '../../components/ui/Micrographics';
-import { ArrowLeft, Cpu, Database, RotateCcw, BookOpen } from 'lucide-react';
+import { ArrowLeft, Cpu, Database, RotateCcw, BookOpen, Zap, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { HealthStatus } from '../../api/client';
 
@@ -8,9 +8,20 @@ interface WorkbenchTopBarProps {
   health?: HealthStatus | null;
   onResetCase?: () => void;
   isResetting?: boolean;
+  isCaseInvestigated?: boolean;
+  isInvestigating?: boolean;
+  onStartInvestigation?: () => void;
 }
 
-export function WorkbenchTopBar({ activeCaseId, health, onResetCase, isResetting }: WorkbenchTopBarProps) {
+export function WorkbenchTopBar({
+  activeCaseId,
+  health,
+  onResetCase,
+  isResetting,
+  isCaseInvestigated = true,
+  isInvestigating = false,
+  onStartInvestigation,
+}: WorkbenchTopBarProps) {
   const navigate = useNavigate();
 
   const isTgConnected = health?.mcp_service?.status === 'CONNECTED';
@@ -34,16 +45,43 @@ export function WorkbenchTopBar({ activeCaseId, health, onResetCase, isResetting
           <span>Investigations</span>
           <span className="text-zinc-700">/</span>
           <span className="text-white font-bold">{activeCaseId || 'Loading...'}</span>
+          {!isCaseInvestigated && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded border border-zinc-700 bg-zinc-800 text-zinc-300 ml-1">
+              AWAITING INVESTIGATION
+            </span>
+          )}
         </div>
       </div>
 
       {/* Right side: Live Backend Telemetry & Reset Action (Monochromatic) */}
-      <div className="flex items-center gap-5 font-mono text-[10px] tracking-[0.16em] uppercase">
+      <div className="flex items-center gap-4 font-mono text-[10px] tracking-[0.16em] uppercase">
+        {/* Start Investigation CTA */}
+        {!isCaseInvestigated && activeCaseId && (
+          <button
+            onClick={onStartInvestigation}
+            disabled={isInvestigating}
+            className="px-3 py-1 bg-white text-black font-bold font-mono text-[9px] tracking-wider uppercase hover:bg-zinc-200 border border-white transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(255,255,255,0.25)]"
+            title="Execute autonomous 7-agent investigation pipeline"
+          >
+            {isInvestigating ? (
+              <>
+                <Loader2 size={11} className="animate-spin text-black" />
+                <span>Investigating...</span>
+              </>
+            ) : (
+              <>
+                <Zap size={11} className="text-black fill-black" />
+                <span>Start Investigation</span>
+              </>
+            )}
+          </button>
+        )}
+
         {/* Reset Case Flow Button */}
         {activeCaseId && (
           <button
             onClick={onResetCase}
-            disabled={isResetting}
+            disabled={isResetting || isInvestigating}
             className="px-2.5 py-1 border border-white/20 text-zinc-300 hover:text-white hover:border-white transition-colors rounded text-[9px] flex items-center gap-1.5 bg-white/[0.02] disabled:opacity-50 cursor-pointer"
             title="Reset active case to pending alert state to test live execution again"
           >

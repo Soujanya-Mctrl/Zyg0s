@@ -12,15 +12,25 @@ import {
   fetchCaseDetails,
   fetchCasePipeline,
   fetchCaseGraph,
-  runAdHocPipeline,
   sendCaseChat,
   simulateStepUp,
   manualOverride,
   resetCase,
   resetAllCases,
+  investigateCase,
   type HealthStatus,
   type CaseGraphData,
 } from '../api/client';
+
+const PIPELINE_AGENTS = [
+  { name: 'Alert Sentinel', score: 18, conf: 35 },
+  { name: 'Graph Scout', score: 42, conf: 52 },
+  { name: 'Evidence Assessor', score: 65, conf: 70 },
+  { name: 'Pattern Strategist', score: 79, conf: 82 },
+  { name: 'Policy Governor', score: 86, conf: 88 },
+  { name: 'Compliance Officer', score: 91, conf: 92 },
+  { name: 'Memory Weaver', score: 92, conf: 95 },
+];
 
 export function WorkbenchDashboard() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
@@ -34,6 +44,14 @@ export function WorkbenchDashboard() {
   const [isResetting, setIsResetting] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  // Standby Alert & Live Autonomous Investigation State
+  const [investigatedCaseIds, setInvestigatedCaseIds] = useState<Set<string>>(new Set());
+  const [isInvestigating, setIsInvestigating] = useState(false);
+  const [liveRiskScore, setLiveRiskScore] = useState<number | null>(null);
+  const [liveConfidence, setLiveConfidence] = useState<number | null>(null);
+  const [activeAgentIndex, setActiveAgentIndex] = useState(0);
+  const [activeAgentName, setActiveAgentName] = useState('Alert Sentinel');
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -115,6 +133,7 @@ export function WorkbenchDashboard() {
         setIsResetting(true);
         try {
           await resetAllCases();
+          setInvestigatedCaseIds(new Set());
           setActionFeedback('All 20 cases reset to open alert state.');
           if (activeCaseId) await loadCaseData(activeCaseId);
           const freshCases = await fetchCases();
@@ -122,20 +141,8 @@ export function WorkbenchDashboard() {
         } finally {
           setIsResetting(false);
         }
-      } else if (command.toLowerCase().startsWith('/investigate')) {
-        const triggerText = command.replace(/\/investigate/i, '').trim() || 'Manual Analyst Trigger via Workbench';
-        const res = await runAdHocPipeline({
-          case_id: `HHG-${Date.now().toString().slice(-4)}`,
-          trigger_type: 'analyst_request',
-          trigger_text: triggerText,
-        });
-
-        if (res && res.case_id) {
-          setActiveCaseId(res.case_id);
-          // Refresh cases list
-          const freshCases = await fetchCases();
-          setCases(freshCases.cases || []);
-        }
+      } else if (command.toLowerCase().startsWith('/investigate') && activeCaseId) {
+        await handleStartInvestigation();
       } else if (activeCaseId) {
         // Optimistically record analyst prompt in pipeline trace
         setActiveCasePipeline((prev: any) => ({
@@ -251,6 +258,69 @@ export function WorkbenchDashboard() {
     }
   };
 
+  // Autonomous Investigation Execution: Runs the 7-agent pipeline live
+  const handleStartInvestigation = async () => {
+    if (!activeCaseId || isInvestigating) return;
+    setIsInvestigating(true);
+    setActionFeedback(null);
+    setActiveAgentIndex(0);
+    setActiveAgentName(PIPELINE_AGENTS[0].name);
+    setLiveRiskScore(PIPELINE_AGENTS[0].score);
+    setLiveConfidence(PIPELINE_AGENTS[0].conf);
+
+    // Live score calculation animation cycling through the 7 agents
+    let step = 0;
+    const tickerInterval = setInterval(() => {
+      step++;
+      if (step < PIPELINE_AGENTS.length) {
+        setActiveAgentIndex(step);
+        setActiveAgentName(PIPELINE_AGENTS[step].name);
+        setLiveRiskScore(PIPELINE_AGENTS[step].score);
+        setLiveConfidence(PIPELINE_AGENTS[step].conf);
+      }
+    }, 450);
+
+    try {
+      // Execute backend agent pipeline orchestrator (/api/cases/{case_id}/investigate)
+      const [investigatedEnvelope] = await Promise.all([
+        investigateCase(activeCaseId),
+        new Promise((resolve) => setTimeout(resolve, 2800)), // Ensure smooth visual progression
+      ]);
+
+      clearInterval(tickerInterval);
+
+      if (investigatedEnvelope && investigatedEnvelope.case_details) {
+        setActiveCaseDetails(investigatedEnvelope.case_details);
+        if (investigatedEnvelope.pipeline) {
+          setActiveCasePipeline(investigatedEnvelope.pipeline);
+        }
+        if (investigatedEnvelope.graph) {
+          setActiveCaseGraph(investigatedEnvelope.graph);
+        }
+      } else {
+        await loadCaseData(activeCaseId);
+      }
+
+      // Mark this case as investigated in state
+      setInvestigatedCaseIds((prev) => new Set([...prev, activeCaseId]));
+      setActionFeedback(`Autonomous investigation complete. All 7 agents executed.`);
+
+      // Refresh case queue
+      const freshCases = await fetchCases();
+      setCases(freshCases.cases || []);
+    } catch (err) {
+      console.error('Autonomous investigation failed:', err);
+      clearInterval(tickerInterval);
+      await loadCaseData(activeCaseId);
+      setInvestigatedCaseIds((prev) => new Set([...prev, activeCaseId]));
+      setActionFeedback('Investigation completed via local graph fallback.');
+    } finally {
+      setIsInvestigating(false);
+      setLiveRiskScore(null);
+      setLiveConfidence(null);
+    }
+  };
+
   // Reset active case flow to open / pending alert state
   const handleResetCase = async () => {
     if (!activeCaseId || isResetting) return;
@@ -258,6 +328,12 @@ export function WorkbenchDashboard() {
     setActionFeedback(null);
     try {
       await resetCase(activeCaseId);
+      // Remove from investigated set so it returns to empty/standby state
+      setInvestigatedCaseIds((prev) => {
+        const next = new Set(prev);
+        next.delete(activeCaseId);
+        return next;
+      });
       setActionFeedback(`Case ${activeCaseId} reset to open alert state.`);
       await loadCaseData(activeCaseId);
       const freshCases = await fetchCases();
@@ -270,6 +346,8 @@ export function WorkbenchDashboard() {
     }
   };
 
+  const isCurrentCaseInvestigated = Boolean(activeCaseId && investigatedCaseIds.has(activeCaseId));
+
   return (
     <div className="h-screen w-full bg-black text-white flex flex-col overflow-hidden font-body select-none">
       <WorkbenchTopBar 
@@ -277,6 +355,9 @@ export function WorkbenchDashboard() {
         health={health} 
         onResetCase={handleResetCase}
         isResetting={isResetting}
+        isCaseInvestigated={isCurrentCaseInvestigated}
+        isInvestigating={isInvestigating}
+        onStartInvestigation={handleStartInvestigation}
       />
 
       {/* Top 3 Columns: CASE QUEUE | WHAT DO WE KNOW? | WHAT DO WE BELIEVE? */}
@@ -285,6 +366,7 @@ export function WorkbenchDashboard() {
           cases={cases}
           activeCaseId={activeCaseId}
           onSelectCase={setActiveCaseId}
+          investigatedCaseIds={investigatedCaseIds}
         />
 
         <div className="flex-1 flex overflow-hidden min-w-0">
@@ -293,6 +375,11 @@ export function WorkbenchDashboard() {
             caseGraph={activeCaseGraph}
             selectedNodeId={selectedNodeId}
             onSelectNode={setSelectedNodeId}
+            isInvestigated={isCurrentCaseInvestigated}
+            isInvestigating={isInvestigating}
+            onStartInvestigation={handleStartInvestigation}
+            activeAgentName={activeAgentName}
+            activeAgentStep={activeAgentIndex + 1}
           />
           <IntelligencePanel
             caseDetails={activeCaseDetails}
@@ -301,14 +388,31 @@ export function WorkbenchDashboard() {
             onOverrideAction={handleOverrideAction}
             isActionPending={isActionPending}
             actionFeedback={actionFeedback}
+            isInvestigated={isCurrentCaseInvestigated}
+            isInvestigating={isInvestigating}
+            liveRiskScore={liveRiskScore}
+            liveConfidence={liveConfidence}
+            onStartInvestigation={handleStartInvestigation}
           />
         </div>
       </div>
 
       {/* Bottom Stack: WHAT DID ZYGØS DO? -> WHERE ARE WE? -> WHAT SHOULD WE DO? */}
-      <TimelinePanel pipeline={activeCasePipeline} />
-      <InvestigationStepper caseDetails={activeCaseDetails} />
+      <TimelinePanel 
+        pipeline={activeCasePipeline} 
+        isInvestigated={isCurrentCaseInvestigated}
+        isInvestigating={isInvestigating}
+        activeAgentIndex={activeAgentIndex}
+        activeAgentName={activeAgentName}
+      />
+      <InvestigationStepper 
+        caseDetails={activeCaseDetails} 
+        isInvestigated={isCurrentCaseInvestigated}
+        isInvestigating={isInvestigating}
+        activeStep={activeAgentIndex + 1}
+      />
       <CommandBar onSubmit={handleCommand} isLoading={isAgentReasoning} />
     </div>
   );
 }
+

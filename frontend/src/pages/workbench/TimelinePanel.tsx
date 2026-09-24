@@ -1,11 +1,25 @@
 import { useState } from 'react';
 import { StatusDot } from '../../components/ui/Micrographics';
-import { Activity, Clock, ChevronDown, ChevronUp, Cpu, Database, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { Activity, Clock, ChevronDown, ChevronUp, Cpu, Database, ShieldAlert, CheckCircle2, Loader2 } from 'lucide-react';
 import { MarkdownViewer } from '../../components/ui/MarkdownViewer';
 
 interface TimelinePanelProps {
   pipeline: any;
+  isInvestigated?: boolean;
+  isInvestigating?: boolean;
+  activeAgentIndex?: number;
+  activeAgentName?: string;
 }
+
+const AGENT_SEQUENCE = [
+  { name: 'ALERT SENTINEL', role: 'Telemetry Ingestion & Trigger Triage' },
+  { name: 'GRAPH SCOUT', role: 'TigerGraph Multi-Hop Subgraph Traversal' },
+  { name: 'EVIDENCE ASSESSOR', role: 'Defensibility Grading & Signal Weighting' },
+  { name: 'PATTERN STRATEGIST', role: 'Groq LPU Fraud Ring Synthesis' },
+  { name: 'POLICY GOVERNOR', role: 'Bank Policy v1.0 (R1-R10) & 2-Stage NBA' },
+  { name: 'COMPLIANCE OFFICER', role: 'FinCEN SAR Narrative Formulation' },
+  { name: 'MEMORY WEAVER', role: 'TigerGraph Episodic Memory Archival' },
+];
 
 interface ParsedTraceEvent {
   id: string;
@@ -39,7 +53,13 @@ function getAgentTheme(agentName: string) {
   };
 }
 
-export function TimelinePanel({ pipeline }: TimelinePanelProps) {
+export function TimelinePanel({
+  pipeline,
+  isInvestigated = true,
+  isInvestigating = false,
+  activeAgentIndex = 0,
+  activeAgentName = 'Alert Sentinel',
+}: TimelinePanelProps) {
   const [expandedReasoningIds, setExpandedReasoningIds] = useState<Record<string, boolean>>({});
 
   const toggleReasoning = (id: string) => {
@@ -122,15 +142,76 @@ export function TimelinePanel({ pipeline }: TimelinePanelProps) {
           <span className="text-zinc-600">/</span>
           <span className="text-zinc-400">AGENT • EVIDENCE • TIMELINE</span>
         </div>
-        <div className="flex items-center gap-1.5 text-zinc-500 text-[8px]">
+        <div className="flex items-center gap-1.5 text-zinc-400 text-[8px]">
           <Clock size={10} />
-          <span>{events.length} chronological actions</span>
+          <span>
+            {!isInvestigated && !isInvestigating
+              ? '0 / 7 AGENTS EXECUTED (STANDBY)'
+              : isInvestigating
+              ? `RUNNING: ${activeAgentName.toUpperCase()} (${Math.min(activeAgentIndex + 1, 7)} OF 7)`
+              : `${events.length} chronological actions`}
+          </span>
         </div>
       </div>
 
       {/* Scrollable Forensic Events Trace */}
-      <div className="flex-1 px-6 py-3 overflow-y-auto space-y-2.5 bg-[#0c0c10]">
-        {events.length > 0 ? (
+      <div className="flex-1 px-6 py-3 overflow-y-auto space-y-2 bg-[#0c0c10]">
+        {!isInvestigated && !isInvestigating ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 h-full items-center">
+            {AGENT_SEQUENCE.map((agent, i) => (
+              <div
+                key={agent.name}
+                className="p-2.5 rounded border border-zinc-800/80 bg-[#111116] flex flex-col justify-between h-28 font-mono text-left"
+              >
+                <div>
+                  <div className="text-[8px] text-zinc-500 font-bold mb-1">0{i + 1} // STANDBY</div>
+                  <div className="text-white font-bold text-[10px] tracking-tight uppercase leading-tight">
+                    {agent.name}
+                  </div>
+                </div>
+                <div className="text-zinc-500 text-[8px] line-clamp-2 leading-tight">
+                  {agent.role}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : isInvestigating ? (
+          <div className="space-y-2">
+            {AGENT_SEQUENCE.slice(0, activeAgentIndex + 1).map((agent, i) => {
+              const isCurrent = i === activeAgentIndex;
+              return (
+                <div
+                  key={agent.name}
+                  className={`p-3 rounded border font-mono transition-all ${
+                    isCurrent
+                      ? 'bg-[#181824] border-white shadow-[0_0_12px_rgba(255,255,255,0.12)]'
+                      : 'bg-[#111116] border-zinc-800 text-zinc-400'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-zinc-500 text-[9px]">0{i + 1}</span>
+                      <span className={`text-xs font-bold uppercase tracking-wider ${isCurrent ? 'text-white' : 'text-zinc-300'}`}>
+                        {agent.name}
+                      </span>
+                      <span className="text-zinc-500 text-[9px]">— {agent.role}</span>
+                    </div>
+                    {isCurrent ? (
+                      <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white bg-white text-black font-bold text-[9px] uppercase">
+                        <Loader2 size={10} className="animate-spin text-black" />
+                        Running...
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-zinc-400 uppercase font-bold">
+                        Completed ✓
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : events.length > 0 ? (
           events.map((e, idx) => {
             const theme = getAgentTheme(e.agentName);
             const Icon = theme.icon;
@@ -209,3 +290,4 @@ export function TimelinePanel({ pipeline }: TimelinePanelProps) {
     </footer>
   );
 }
+
