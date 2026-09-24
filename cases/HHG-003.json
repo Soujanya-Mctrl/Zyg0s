@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-003",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.72,
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.95,
     "pattern": "none",
     "pattern_description": "",
     "affected_txn_ids": [],
@@ -25,34 +25,29 @@
         "weight": -0.8
       },
       {
-        "claim": "Step-Up authentication (SMS_OTP) returned FAIL.",
-        "source": "customer_step_up",
-        "grade": "DIRECT",
-        "ref": "auth_gateway:sms_otp_result"
-      },
-      {
-        "claim": "Human analyst discretionary override: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.",
-        "source": "human_investigator_override",
-        "grade": "DIRECT",
-        "ref": "analyst_session:override_HHG-003"
+        "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3530164"
+        ],
+        "grade": "CONTRADICTORY",
+        "weight": -0.9
       }
     ],
     "similar_prior_cases": [
       "HHG-002",
       "HHG-001"
     ],
-    "summary": "Case HHG-003 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 353016... Initial fraud risk scored at 0.72. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-003 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-003"
   },
   "evidence_requests": [
     {
       "type": "customer_validation",
-      "channel": "SMS_OTP",
       "asked_after_step": 4,
-      "status": "COMPLETED",
-      "result": "FAIL",
-      "assumed_response": "Cardholder challenge failed / OTP expired without validation."
+      "assumed_response": "Customer confirms they made this purchase and activity is authorized."
     }
   ],
   "next_best_actions": {
@@ -73,7 +68,14 @@
         "reason": "R7: send informational reminder regarding subscription billing"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "BLOCK_CARD",
+        "route": "L1",
+        "reason": "Step-Up authentication (SMS_OTP) FAIL. Customer challenge failed to resolve identity possession; uncertainty collapsed from 0.65 to 0.05. Risk escalated to confirmed fraud under Policy R1/R2."
+      }
+    ],
+    "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
   },
   "sar": {
     "file": false,
@@ -289,50 +291,39 @@
       "timestamp": "2026-09-22T19:30:41.618084"
     },
     {
-      "agent_id": "human_approval",
-      "agent_name": "Human Approval",
-      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
-      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
-      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
-      "status": "safe",
-      "latency_ms": 115.0
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
+      "status": "danger"
     },
     {
-      "agent_id": "uncertainty_reassessment",
-      "agent_name": "Evidence Assessor (Reassessment)",
-      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
-      "hand_off_summary": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.65 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD (Route: auto).",
-      "action": "Received cardholder challenge response (PASS). Epistemic uncertainty collapsed 0.65 -> 0.04. Committed Stage 2 NBA: CLOSE_NO_FRAUD.",
-      "status": "safe",
-      "latency_ms": 175.0
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
+      "status": "danger"
     },
     {
-      "agent_id": "human_approval",
-      "agent_name": "Human Approval",
-      "role": "Analyst Authorization & Step-Up Authentication Dispatch",
-      "hand_off_summary": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder. Status: Awaiting response.",
-      "action": "Approved Stage 1 NBA: Dispatched Step-Up Challenge (SMS_OTP) to cardholder.",
-      "status": "safe",
-      "latency_ms": 115.0
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> PASS. Final Action: CLOSE_NO_FRAUD. Uncertainty collapsed to 0.04.",
+      "status": "safe"
     },
     {
-      "agent_id": "uncertainty_reassessment",
-      "agent_name": "Evidence Assessor (Reassessment)",
-      "role": "Epistemic Uncertainty Collapse & Stage 2 Commitment",
-      "hand_off_summary": "Received cardholder challenge response (FAIL). Epistemic uncertainty collapsed 0.04 -> 0.05. Committed Stage 2 NBA: BLOCK_CARD (Route: L1).",
-      "action": "Received cardholder challenge response (FAIL). Epistemic uncertainty collapsed 0.04 -> 0.05. Committed Stage 2 NBA: BLOCK_CARD.",
-      "status": "danger",
-      "latency_ms": 175.0
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> PASS. Final Action: CLOSE_NO_FRAUD. Uncertainty collapsed to 0.04.",
+      "status": "safe"
     },
     {
-      "agent_id": "human_cognitive_override",
-      "agent_name": "Human Cognitive Override",
-      "role": "Analyst Discretionary Override & Executive Enforcement",
-      "hand_off_summary": "Analyst overrode agent recommendation. Reason: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.. Enforced Action: BLOCK_ALL_CARDS (Route: L2).",
-      "action": "Analyst overrode agent recommendation. Reason: Analyst discretionary override: elevated graph velocity and suspicious cross-merchant hops.. Enforced Action: BLOCK_ALL_CARDS (Route: L2).",
-      "status": "danger",
-      "latency_ms": 45.0
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
+      "status": "danger"
+    },
+    {
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> PASS. Final Action: CLOSE_NO_FRAUD. Uncertainty collapsed to 0.04.",
+      "status": "safe"
+    },
+    {
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
+      "status": "danger"
     }
-  ],
-  "uncertainty_score": 0.56
+  ]
 }

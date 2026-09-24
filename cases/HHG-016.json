@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-016",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.74,
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.99,
     "pattern": "card_not_present_new_device",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -40,6 +40,16 @@
         ],
         "grade": "CIRCUMSTANTIAL",
         "weight": 0.6
+      },
+      {
+        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3534820"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
       }
     ],
     "similar_prior_cases": [
@@ -47,7 +57,7 @@
       "HHG-010",
       "HHG-005"
     ],
-    "summary": "Case HHG-016 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 353482... Initial fraud risk scored at 0.74. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-016 concluded with verdict 'FRAUD' (P=0.99, U=0.000). Pattern: 'card_not_present_new_device'. Total financial exposure: $59.67. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-016"
   },
@@ -71,12 +81,34 @@
         "reason": "R1: verify card possession and transaction details with customer"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "BLOCK_ALL_CARDS",
+        "route": "L2",
+        "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: create internal fraud case with evidence attached and persist to graph"
+      },
+      {
+        "action": "FILE_REPORT",
+        "route": "L2",
+        "reason": "R2 and R6: shared device/network links to other cards"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "route": "auto",
+        "reason": "R6: shared device profile / entity links across multiple cards"
+      }
+    ],
+    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
   },
   "sar": {
     "file": true,
     "reason": "R2: confirmed unauthorized use",
-    "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-016\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nBetween 2016-12-11 22:39:08 and 2016-12-11 22:39:08, the Institution identified suspicious transaction activity totaling $59.67 USD. This activity comprised 1 transaction(s) involving card C09988-K1, associated with customer profile C09988. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C09988\n*   **Primary Card Number Reference:** C09988-K1\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | edge 16.0\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-11 22:39:08\n*   **Latest Activity Timestamp:** 2016-12-11 22:39:08\n*   **Affected Transaction Record IDs:** 3534820\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nInvestigative analysis revealed that the device profile \"Windows\" was observed across 3 other distinct customer accounts within the TigerGraph network. The transaction was initiated from a newly observed device profile: \"Windows | edge 16.0\". The cardholder denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\nGraph analysis further indicated that the device profile (\"Windows | edge 16.0\") is shared across multiple cardholder profiles. This linkage suggests coordinated synthetic identity or card-not-present syndicate activity.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nThe Institution initiated immediate card control actions in accordance with Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access. Consequently, the card was permanently blocked and placed on fraud monitoring. This filing is submitted pursuant to BSA/AML compliance mandates.",
+    "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) — INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-016\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nBetween 2016-12-11 22:39:08 and 2016-12-11 22:39:08, the Institution identified suspicious transaction activity totaling $59.67 USD. This activity comprised 1 transaction(s) involving card C09988-K1, associated with customer profile C09988. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C09988\n*   **Primary Card Number Reference:** C09988-K1\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | edge 16.0\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-11 22:39:08\n*   **Latest Activity Timestamp:** 2016-12-11 22:39:08\n*   **Affected Transaction Record IDs:** 3534820\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nInvestigative analysis revealed that the device profile \"Windows\" was observed across 3 other distinct customer accounts within the TigerGraph network. The transaction was initiated from a newly observed device profile: \"Windows | edge 16.0\". The cardholder denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\nGraph analysis further indicated that the device profile (\"Windows | edge 16.0\") is shared across multiple cardholder profiles. This linkage suggests coordinated synthetic identity or card-not-present syndicate activity.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nThe Institution initiated immediate card control actions in accordance with Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access. Consequently, the card was permanently blocked and placed on fraud monitoring. This filing is submitted pursuant to BSA/AML compliance mandates.",
     "subjects": [
       "C09988",
       "C09988-K1",
@@ -263,7 +295,7 @@
         "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing.",
         "hand_off_summary": "Policy evaluated: Stage 1 [DECLINE_TRANSACTION] -> Stage 2 [BLOCK_ALL_CARDS] (L2). Exposure: $59.67."
       },
-      "ai_reasoning": "The initial Stage 1 actions strictly adhered to Rule R1 by limiting the response to transaction decline and customer verification, thereby avoiding a premature permanent block based solely on a single automated signal. The subsequent escalation to Stage 2 is fully defensible and proportionate, as the customer\u2019s explicit denial provided the requisite secondary confirmation to justify the permanent card block and SAR filing despite the financial exposure remaining below the $2,500 L2 threshold.",
+      "ai_reasoning": "The initial Stage 1 actions strictly adhered to Rule R1 by limiting the response to transaction decline and customer verification, thereby avoiding a premature permanent block based solely on a single automated signal. The subsequent escalation to Stage 2 is fully defensible and proportionate, as the customer’s explicit denial provided the requisite secondary confirmation to justify the permanent card block and SAR filing despite the financial exposure remaining below the $2,500 L2 threshold.",
       "evidence_generated": [],
       "hand_off_summary": "Policy evaluated: Stage 1 [DECLINE_TRANSACTION] -> Stage 2 [BLOCK_ALL_CARDS] (L2). Exposure: $59.67.",
       "latency_ms": 302.58,
@@ -292,7 +324,7 @@
         "filing_reason": "R2: confirmed unauthorized use",
         "hand_off_summary": "Compliance audit: SAR Filed=True (Exposure: $59.67, Reason: R2: confirmed unauthorized use)."
       },
-      "ai_reasoning": "Compliance Officer certified FinCEN SAR filing pursuant to 31 CFR 1020.320. Reported exposure is $59.67 across subjects ['C09988', 'C09988-K1', 'C11923', 'C13171', 'C02354']. Regulatory excerpt: **FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-016\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nBetween 2016-12-11 22:39:08 and 2016-12-11 22:39:08, the Institution identified suspicious transaction activity ...",
+      "ai_reasoning": "Compliance Officer certified FinCEN SAR filing pursuant to 31 CFR 1020.320. Reported exposure is $59.67 across subjects ['C09988', 'C09988-K1', 'C11923', 'C13171', 'C02354']. Regulatory excerpt: **FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) — INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-016\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nBetween 2016-12-11 22:39:08 and 2016-12-11 22:39:08, the Institution identified suspicious transaction activity ...",
       "evidence_generated": [],
       "hand_off_summary": "Compliance audit: SAR Filed=True (Exposure: $59.67, Reason: R2: confirmed unauthorized use).",
       "latency_ms": 15302.99,
@@ -321,6 +353,5 @@
       "latency_ms": 29077.78,
       "timestamp": "2026-09-22T19:45:53.615996"
     }
-  ],
-  "uncertainty_score": 0.52
+  ]
 }
