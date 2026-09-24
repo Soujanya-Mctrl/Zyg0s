@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
-  Controls,
   Panel,
   Handle,
   Position,
@@ -28,17 +27,9 @@ import {
 
 import { StatusDot } from '../../components/ui/Micrographics';
 import {
-  User,
-  Smartphone,
-  CreditCard,
-  AlertTriangle,
-  Database,
-  Layers,
-  ShieldAlert,
   RefreshCw,
   X,
-  Activity,
-  Compass,
+  Info,
 } from 'lucide-react';
 import { fetchGraphSchema, type CaseGraphData, type SchemaOntology } from '../../api/client';
 
@@ -60,51 +51,29 @@ interface ForensicNodeData {
 }
 
 function ForensicEntityNode({ data, selected }: NodeProps<Node<ForensicNodeData>>) {
-  const color = data.color || '#06b6d4';
   const isDanger = data.status === 'danger' || data.isThreatBeacon;
-
-  const renderIcon = () => {
-    switch (data.iconType) {
-      case 'user':
-        return <User size={14} className="text-[#3b82f6]" />;
-      case 'card':
-        return <CreditCard size={14} className="text-[#10b981]" />;
-      case 'device':
-        return <Smartphone size={14} className="text-[#f59e0b]" />;
-      case 'tx':
-        return <AlertTriangle size={14} className="text-[#ef4444]" />;
-      case 'precedent':
-        return <ShieldAlert size={14} className="text-[#ef4444]" />;
-      default:
-        return <Database size={14} className="text-[#06b6d4]" />;
-    }
-  };
 
   return (
     <div
-      style={{ borderLeftColor: color, borderLeftWidth: 3 }}
-      className={`relative min-w-[210px] max-w-[250px] bg-zinc-950/95 border rounded px-3.5 py-2.5 shadow-2xl backdrop-blur-md transition-all font-mono select-none ${
+      className={`relative min-w-[210px] max-w-[250px] bg-zinc-950 border rounded px-3.5 py-2.5 shadow-2xl backdrop-blur-md transition-all font-mono select-none ${
         selected
-          ? 'border-[#06b6d4] ring-2 ring-[#06b6d4]/50 shadow-[0_0_25px_rgba(6,182,212,0.35)] scale-105'
+          ? 'border-white ring-2 ring-white/40 shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-105'
           : isDanger
-          ? 'border-[#ef4444]/60 hover:border-[#ef4444] shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+          ? 'border-white/40 hover:border-white shadow-[0_0_15px_rgba(255,255,255,0.08)]'
           : 'border-white/10 hover:border-white/30'
       }`}
     >
       {/* Handles on all 4 boundaries for collision-free routing */}
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-[#06b6d4] !border-none opacity-60" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-[#06b6d4] !border-none opacity-60" />
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-[#06b6d4] !border-none opacity-60" />
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-[#06b6d4] !border-none opacity-60" />
+      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-white !border-none opacity-60" />
+      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-white !border-none opacity-60" />
+      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-white !border-none opacity-60" />
+      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-white !border-none opacity-60" />
 
-      {/* Top Bar: Icon, Entity Type, Status */}
-      <div className="flex items-center justify-between gap-2 pb-1.5 mb-1.5 border-b border-white/[0.06]">
-        <div className="flex items-center gap-1.5">
-          {renderIcon()}
-          <span className="text-[9px] uppercase tracking-wider text-zinc-400 font-bold truncate max-w-[125px]">
-            {data.type}
-          </span>
-        </div>
+      {/* Top Bar: Entity Type, Status */}
+      <div className="flex items-center justify-between gap-2 pb-1.5 mb-1.5 border-b border-white/[0.08]">
+        <span className="text-[9px] uppercase tracking-wider text-zinc-400 font-bold truncate max-w-[150px]">
+          {data.type}
+        </span>
         <StatusDot status={data.status || 'safe'} />
       </div>
 
@@ -117,11 +86,7 @@ function ForensicEntityNode({ data, selected }: NodeProps<Node<ForensicNodeData>
       <div className="text-[10px] text-zinc-400 flex items-center justify-between pt-1">
         <span className="truncate max-w-[130px]">{data.sublabel || 'Forensic Entity'}</span>
         {data.risk !== undefined && (
-          <span
-            className={`font-bold ml-1 text-[9px] ${
-              data.risk > 0.7 ? 'text-[#ef4444]' : data.risk > 0.4 ? 'text-[#f59e0b]' : 'text-[#10b981]'
-            }`}
-          >
+          <span className="font-bold ml-1 text-[9px] text-white">
             {Math.round(data.risk * 100)}% RISK
           </span>
         )}
@@ -129,7 +94,7 @@ function ForensicEntityNode({ data, selected }: NodeProps<Node<ForensicNodeData>
 
       {/* Amount or Threat Beacon Highlight */}
       {data.amount && (
-        <div className="mt-1 text-[11px] font-bold text-[#ef4444] bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20 text-center">
+        <div className="mt-1 text-[11px] font-bold text-white bg-white/10 px-1.5 py-0.5 rounded border border-white/20 text-center">
           {typeof data.amount === 'number' ? `$${data.amount.toLocaleString()}` : data.amount}
         </div>
       )}
@@ -151,24 +116,21 @@ interface SchemaNodeData {
 }
 
 function SchemaVertexNode({ data, selected }: NodeProps<Node<SchemaNodeData>>) {
-  const color = data.color || '#06b6d4';
-
   return (
     <div
-      style={{ borderTopColor: color, borderTopWidth: 3 }}
-      className={`min-w-[190px] bg-black/90 border rounded-md p-3 shadow-xl backdrop-blur-md font-mono select-none transition-all ${
-        selected ? 'border-[#06b6d4] ring-2 ring-[#06b6d4]/40 scale-105' : 'border-white/10 hover:border-white/30'
+      className={`min-w-[190px] bg-black border rounded-md p-3 shadow-xl backdrop-blur-md font-mono select-none transition-all ${
+        selected ? 'border-white ring-2 ring-white/40 scale-105' : 'border-white/15 hover:border-white/30'
       }`}
     >
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-[#06b6d4] opacity-70" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-[#06b6d4] opacity-70" />
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-[#06b6d4] opacity-70" />
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-[#06b6d4] opacity-70" />
+      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-white opacity-70" />
+      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-white opacity-70" />
+      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-white opacity-70" />
+      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-white opacity-70" />
 
       {/* Schema Header */}
       <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-white/[0.08]">
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+          <div className="w-2 h-2 rounded-full bg-white" />
           <span className="text-[10px] font-bold text-white uppercase tracking-wider">{data.label}</span>
         </div>
         <span className="text-[8px] text-zinc-500">{data.total_attributes || 0} fields</span>
@@ -177,7 +139,7 @@ function SchemaVertexNode({ data, selected }: NodeProps<Node<SchemaNodeData>>) {
       {/* Primary Key */}
       {data.primary_id && (
         <div className="text-[9px] text-zinc-400 mb-1 flex items-center gap-1">
-          <span className="text-[#06b6d4] font-bold">PK:</span>
+          <span className="text-white font-bold">PK:</span>
           <span className="text-zinc-300">{data.primary_id}</span>
         </div>
       )}
@@ -322,7 +284,7 @@ export function InvestigationCanvas({
           type: 'Party / Customer',
           iconType: 'user',
           status: 'safe',
-          color: '#3B82F6',
+          color: '#FFFFFF',
           sublabel: 'Account Holder',
           risk: 0.12,
         },
@@ -338,7 +300,7 @@ export function InvestigationCanvas({
           type: 'Account Card',
           iconType: 'card',
           status: 'safe',
-          color: '#10B981',
+          color: '#FFFFFF',
           sublabel: 'Issued Payment Card',
           risk: 0.28,
         },
@@ -354,7 +316,7 @@ export function InvestigationCanvas({
           type: 'Payment Txn',
           iconType: 'tx',
           status: 'danger',
-          color: '#EF4444',
+          color: '#FFFFFF',
           sublabel: 'Flagged Anomaly',
           amount: exposure,
           risk: caseDetails?.risk_score ?? 0.85,
@@ -371,7 +333,7 @@ export function InvestigationCanvas({
           type: 'Device Profile',
           iconType: 'device',
           status: 'pending',
-          color: '#F59E0B',
+          color: '#FFFFFF',
           sublabel: 'Browser / OS Fingerprint',
           risk: 0.65,
         },
@@ -390,7 +352,7 @@ export function InvestigationCanvas({
           type: 'Precedent Memory',
           iconType: 'precedent',
           status: 'danger',
-          color: '#EF4444',
+          color: '#FFFFFF',
           sublabel: 'Closed Fraud Case',
           isThreatBeacon: true,
           risk: 0.94,
@@ -409,7 +371,7 @@ export function InvestigationCanvas({
         type: 'TigerGraph GraphRAG',
         iconType: 'database',
         status: 'safe',
-        color: '#06B6D4',
+        color: '#FFFFFF',
         sublabel: 'Transaction_Fraud',
       },
     });
@@ -433,24 +395,24 @@ export function InvestigationCanvas({
         target: `tx_${txId}`,
         label: 'MADE_TXN',
         animated: true,
-        labelStyle: { fill: '#ef4444', fontSize: 9, fontFamily: 'monospace', fontWeight: 'bold' },
-        labelBgStyle: { fill: 'rgba(20, 0, 0, 0.9)', stroke: '#ef4444', strokeWidth: 1 },
+        labelStyle: { fill: '#ffffff', fontSize: 9, fontFamily: 'monospace', fontWeight: 'bold' },
+        labelBgStyle: { fill: 'rgba(0, 0, 0, 0.9)', stroke: 'rgba(255, 255, 255, 0.3)', strokeWidth: 1 },
         labelBgPadding: [4, 2] as [number, number],
         labelBgBorderRadius: 2,
-        style: { stroke: '#EF4444', strokeWidth: 2 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#EF4444' },
+        style: { stroke: 'rgba(255, 255, 255, 0.5)', strokeWidth: 1.5 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
       },
       {
         id: 'e_dev_card',
         source: 'node_device',
         target: `card_${cardId}`,
         label: 'USED_DEVICE',
-        labelStyle: { fill: '#f59e0b', fontSize: 9, fontFamily: 'monospace' },
-        labelBgStyle: { fill: 'rgba(20, 15, 0, 0.85)', stroke: '#f59e0b', strokeWidth: 1 },
+        labelStyle: { fill: '#a1a1aa', fontSize: 9, fontFamily: 'monospace' },
+        labelBgStyle: { fill: 'rgba(0, 0, 0, 0.9)', stroke: 'rgba(255, 255, 255, 0.2)', strokeWidth: 1 },
         labelBgPadding: [4, 2] as [number, number],
         labelBgBorderRadius: 2,
-        style: { stroke: '#F59E0B', strokeWidth: 1.5, strokeDasharray: '4 4' },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#F59E0B' },
+        style: { stroke: 'rgba(255, 255, 255, 0.3)', strokeWidth: 1.5, strokeDasharray: '4 4' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
       },
     ];
 
@@ -461,12 +423,12 @@ export function InvestigationCanvas({
         target: `cc_${precedents[0]}`,
         label: 'MATCHED_PRECEDENT',
         animated: true,
-        labelStyle: { fill: '#ef4444', fontSize: 9, fontFamily: 'monospace' },
-        labelBgStyle: { fill: 'rgba(20, 0, 0, 0.9)', stroke: '#ef4444', strokeWidth: 1 },
+        labelStyle: { fill: '#ffffff', fontSize: 9, fontFamily: 'monospace' },
+        labelBgStyle: { fill: 'rgba(0, 0, 0, 0.9)', stroke: 'rgba(255, 255, 255, 0.2)', strokeWidth: 1 },
         labelBgPadding: [4, 2] as [number, number],
         labelBgBorderRadius: 2,
-        style: { stroke: '#EF4444', strokeWidth: 1.5, strokeDasharray: '3 3' },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#EF4444' },
+        style: { stroke: 'rgba(255, 255, 255, 0.3)', strokeWidth: 1.5, strokeDasharray: '3 3' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
       });
     }
 
@@ -475,12 +437,12 @@ export function InvestigationCanvas({
       source: `tx_${txId}`,
       target: 'node_tg_savanna',
       label: 'INDEXED_IN_GRAPH',
-      labelStyle: { fill: '#06b6d4', fontSize: 9, fontFamily: 'monospace' },
-      labelBgStyle: { fill: 'rgba(0, 20, 25, 0.85)', stroke: '#06b6d4', strokeWidth: 1 },
+      labelStyle: { fill: '#ffffff', fontSize: 9, fontFamily: 'monospace' },
+      labelBgStyle: { fill: 'rgba(0, 0, 0, 0.9)', stroke: 'rgba(255, 255, 255, 0.2)', strokeWidth: 1 },
       labelBgPadding: [4, 2] as [number, number],
       labelBgBorderRadius: 2,
-      style: { stroke: '#06B6D4', strokeWidth: 1.5, strokeDasharray: '4 4' },
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#06B6D4' },
+      style: { stroke: 'rgba(255, 255, 255, 0.3)', strokeWidth: 1.5, strokeDasharray: '4 4' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
     });
 
     // Run D3-Force physics simulation to establish organic positions
@@ -527,8 +489,8 @@ export function InvestigationCanvas({
         labelBgStyle: { fill: 'rgba(0, 0, 0, 0.75)', stroke: 'rgba(255, 255, 255, 0.1)', strokeWidth: 1 },
         labelBgPadding: [4, 2] as [number, number],
         labelBgBorderRadius: 2,
-        style: { stroke: 'rgba(6,182,212,0.4)', strokeWidth: 1.2 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#06b6d4' },
+        style: { stroke: 'rgba(255, 255, 255, 0.25)', strokeWidth: 1.2 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#ffffff' },
       }));
 
     return { schemaNodes: nodes, schemaEdges: edges };
@@ -537,6 +499,7 @@ export function InvestigationCanvas({
   // State management for React Flow
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<any>>(initialCaseNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialCaseEdges);
+  const [isLegendHovered, setIsLegendHovered] = useState(false);
 
   // Update nodes/edges on view mode or case changes
   useEffect(() => {
@@ -566,7 +529,7 @@ export function InvestigationCanvas({
   const threatDensity = caseGraph?.metrics?.threat_density ?? (caseDetails?.risk_score ?? 0.8);
 
   return (
-    <div className="flex-1 relative flex flex-col overflow-hidden select-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/30 via-black to-black">
+    <div className="flex-1 relative flex flex-col overflow-hidden select-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#0c0c12] via-[#050507] to-black">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -589,23 +552,23 @@ export function InvestigationCanvas({
         {/* Top-Left Panel: Region 02 Header + Canvas Switcher & D3 Force Physics Trigger */}
         <Panel position="top-left" className="!m-4">
           <div className="flex flex-col gap-2">
-            <div className="bg-black/90 border border-white/10 px-3 py-1.5 rounded backdrop-blur-md shadow-xl flex items-center gap-3">
+            <div className="bg-[#121218]/95 border border-zinc-700/70 px-3 py-1.5 rounded backdrop-blur-md shadow-2xl flex items-center gap-3">
               <div>
-                <div className="font-mono text-[8px] text-[#06b6d4] uppercase tracking-[0.25em] font-bold">
-                  REGION 02 • WHAT DO WE KNOW?
+                <div className="font-mono text-[8px] text-zinc-400 uppercase tracking-[0.25em] font-bold">
+                  WHAT DO WE KNOW?
                 </div>
-                <div className="font-mono text-[11px] text-white font-bold tracking-wider uppercase flex items-center gap-2">
-                  <Database size={12} className="text-[#06b6d4]" /> TIGERGRAPH + EVIDENCE
+                <div className="font-mono text-[11px] text-white font-bold tracking-wider uppercase">
+                  TIGERGRAPH + EVIDENCE
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex items-center bg-black/85 border border-white/10 p-1 rounded font-mono text-[9px] tracking-widest uppercase backdrop-blur-md shadow-xl">
+              <div className="flex items-center bg-[#121218]/95 border border-zinc-700/70 p-1 rounded font-mono text-[9px] tracking-widest uppercase backdrop-blur-md shadow-2xl">
                 <button
                   onClick={() => setViewMode('subgraph')}
                   className={`px-3 py-1 rounded transition-colors ${
-                    viewMode === 'subgraph' ? 'bg-[#06b6d4] text-black font-bold' : 'text-zinc-400 hover:text-white'
+                    viewMode === 'subgraph' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40'
                   }`}
                 >
                   Case Subgraph
@@ -613,7 +576,7 @@ export function InvestigationCanvas({
                 <button
                   onClick={() => setViewMode('schema')}
                   className={`px-3 py-1 rounded transition-colors flex items-center gap-1.5 ${
-                    viewMode === 'schema' ? 'bg-[#06b6d4] text-black font-bold' : 'text-zinc-400 hover:text-white'
+                    viewMode === 'schema' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40'
                   }`}
                 >
                   {isLoadingSchema && <RefreshCw size={10} className="animate-spin" />}
@@ -623,63 +586,92 @@ export function InvestigationCanvas({
 
               {viewMode === 'subgraph' && (
                 <button
+                  type="button"
                   onClick={handleRelayout}
-                  className="px-2.5 py-1.5 bg-black/85 border border-white/10 hover:border-[#06b6d4] text-zinc-300 hover:text-white rounded font-mono text-[9px] tracking-widest uppercase backdrop-blur-md flex items-center gap-1.5 transition-colors shadow-xl"
+                  className="px-2.5 py-1.5 bg-[#121218]/95 border border-zinc-700/70 hover:border-zinc-400 text-zinc-300 hover:text-white rounded font-mono text-[9px] tracking-widest uppercase backdrop-blur-md flex items-center transition-colors shadow-2xl"
                   title="Run D3-Force physics relaxation simulation"
                 >
-                  <Compass size={11} className="text-[#06b6d4]" />
-                  <span>D3 Force Relax</span>
+                  D3 Force Relax
                 </button>
               )}
             </div>
           </div>
         </Panel>
 
-          {/* Top-Right Panel: Metrics & Proper Relationship Legend */}
-          <Panel position="top-right" className="!m-4">
-            <div className="bg-black/90 border border-white/10 p-3 rounded-md font-mono text-[9px] tracking-wider text-zinc-400 backdrop-blur-md shadow-2xl space-y-2.5 max-w-[280px]">
-              {/* Telemetry Row */}
-              <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
-                <div className="flex items-center gap-1.5">
-                  <Layers size={11} className="text-[#06b6d4]" />
-                  <span>NODES: <strong className="text-white">{nodes.length}</strong></span>
-                </div>
-                <div className="w-px h-3 bg-white/20" />
-                <div>
-                  <span>EDGES: <strong className="text-white">{edges.length}</strong></span>
-                </div>
-                <div className="w-px h-3 bg-white/20" />
-                <div>
-                  <span>RISK: <strong className="text-[#ef4444]">{Math.round(threatDensity * 100)}%</strong></span>
-                </div>
-              </div>
+          {/* Top-Right Panel: Interactive 'i' Info Button that opens on hover */}
+          <Panel position="top-right" className="!m-4 z-40">
+            <div 
+              className="relative group"
+              onMouseEnter={() => setIsLegendHovered(true)}
+              onMouseLeave={() => setIsLegendHovered(false)}
+            >
+              {/* Trigger 'i' Button */}
+              <button
+                type="button"
+                onClick={() => setIsLegendHovered((prev) => !prev)}
+                className={`w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs font-bold transition-all shadow-2xl backdrop-blur-md cursor-pointer ${
+                  isLegendHovered 
+                    ? 'bg-white text-black border border-white scale-105 shadow-[0_0_14px_rgba(255,255,255,0.4)]' 
+                    : 'bg-[#121218]/95 border border-zinc-700/80 text-zinc-400 group-hover:text-white group-hover:border-zinc-400 group-hover:bg-zinc-800'
+                }`}
+                title="Relationship Topology Legend & Telemetry"
+                aria-label="Toggle Legend"
+              >
+                <Info size={13} strokeWidth={2.2} />
+              </button>
 
-              {/* Relationship Legend */}
-              <div className="space-y-1.5 pt-0.5">
-                <div className="text-[8px] uppercase tracking-widest text-zinc-500 font-bold mb-1">
-                  Relationship Topology Legend
-                </div>
-                <div className="flex items-center gap-2 text-zinc-300">
-                  <div className="w-4 h-[2px] bg-white/50" />
-                  <span>OWNS (Customer ➔ Card)</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#ef4444]">
-                  <div className="w-4 h-[2px] bg-[#ef4444] shadow-[0_0_8px_#ef4444]" />
-                  <span className="font-bold flex items-center gap-1">
-                    <Activity size={10} className="animate-pulse" /> MADE_TXN (Card ➔ Txn)
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-[#f59e0b]">
-                  <div className="w-4 h-[2px] border-b border-[#f59e0b] border-dashed" />
-                  <span>USED_DEVICE (Device ➔ Card)</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#ef4444]">
-                  <div className="w-4 h-[2px] border-b border-[#ef4444] border-dotted" />
-                  <span>MATCHED_PRECEDENT (Beacon)</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#06b6d4]">
-                  <div className="w-4 h-[2px] border-b border-[#06b6d4] border-dashed" />
-                  <span>INDEXED_IN_GRAPH (Savanna)</span>
+              {/* Legend Card: Smoothly visible on hover / toggle */}
+              <div
+                className={`absolute right-0 top-7 pt-2 transition-all duration-200 ease-out origin-top-right ${
+                  isLegendHovered
+                    ? 'opacity-100 scale-100 pointer-events-auto translate-y-0'
+                    : 'opacity-0 scale-95 pointer-events-none -translate-y-1 group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto group-hover:translate-y-0'
+                }`}
+              >
+                <div className="bg-[#121218]/98 border border-zinc-700/80 p-3.5 rounded-md font-mono text-[9px] tracking-wider text-zinc-400 backdrop-blur-xl shadow-2xl space-y-2.5 w-[270px]">
+                  {/* Telemetry Row */}
+                  <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                    <div>
+                      <span>NODES: <strong className="text-white">{nodes.length}</strong></span>
+                    </div>
+                    <div className="w-px h-3 bg-zinc-700" />
+                    <div>
+                      <span>EDGES: <strong className="text-white">{edges.length}</strong></span>
+                    </div>
+                    <div className="w-px h-3 bg-zinc-700" />
+                    <div>
+                      <span>RISK: <strong className="text-white">{Math.round(threatDensity * 100)}%</strong></span>
+                    </div>
+                  </div>
+
+                  {/* Relationship Legend */}
+                  <div className="space-y-1.5 pt-0.5">
+                    <div className="text-[8px] uppercase tracking-widest text-zinc-500 font-bold mb-1">
+                      Relationship Topology Legend
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-300">
+                      <div className="w-4 h-[2px] bg-white/50" />
+                      <span>OWNS (Customer ➔ Card)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white">
+                      <div className="w-4 h-[2px] bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
+                      <span className="font-bold">
+                        MADE_TXN (Card ➔ Txn)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-300">
+                      <div className="w-4 h-[2px] border-b border-white/60 border-dashed" />
+                      <span>USED_DEVICE (Device ➔ Card)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-400">
+                      <div className="w-4 h-[2px] border-b border-white/40 border-dotted" />
+                      <span>MATCHED_PRECEDENT (Beacon)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-300">
+                      <div className="w-4 h-[2px] border-b border-white/80 border-dashed" />
+                      <span>INDEXED_IN_GRAPH (Savanna)</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -688,10 +680,10 @@ export function InvestigationCanvas({
           {/* Bottom-Left Panel: Interactive Forensic Entity Inspector (On Node Click) */}
           {activeInspectorNode && (
             <Panel position="bottom-left" className="!m-4 !mb-6">
-              <div className="bg-zinc-950/95 border border-[#06b6d4]/50 p-4 rounded-md font-mono text-[10px] text-zinc-300 backdrop-blur-xl shadow-2xl max-w-[320px] ring-1 ring-[#06b6d4]/20 animate-in fade-in zoom-in-95 duration-150">
-                <div className="flex items-start justify-between pb-2 mb-2 border-b border-white/[0.08]">
+              <div className="bg-[#14141c]/98 border border-zinc-700 p-4 rounded-md font-mono text-[10px] text-zinc-300 backdrop-blur-xl shadow-2xl max-w-[320px] ring-1 ring-white/10 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-start justify-between pb-2 mb-2 border-b border-zinc-800">
                   <div>
-                    <span className="text-[9px] uppercase tracking-widest text-[#06b6d4] font-bold">
+                    <span className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold">
                       {activeInspectorNode.data.type || 'Entity Details'}
                     </span>
                     <div className="text-white text-sm font-bold truncate mt-0.5">
@@ -714,7 +706,7 @@ export function InvestigationCanvas({
                   {activeInspectorNode.data.risk !== undefined && (
                     <div className="flex justify-between">
                       <span>Threat Risk:</span>
-                      <span className={`font-bold ${activeInspectorNode.data.risk > 0.7 ? 'text-[#ef4444]' : 'text-[#10b981]'}`}>
+                      <span className="font-bold text-white">
                         {Math.round(activeInspectorNode.data.risk * 100)}%
                       </span>
                     </div>
@@ -722,7 +714,7 @@ export function InvestigationCanvas({
                   {activeInspectorNode.data.amount && (
                     <div className="flex justify-between">
                       <span>Exposure:</span>
-                      <span className="text-[#ef4444] font-bold">{activeInspectorNode.data.amount}</span>
+                      <span className="text-white font-bold">{activeInspectorNode.data.amount}</span>
                     </div>
                   )}
                   {activeInspectorNode.data.sublabel && (
@@ -733,20 +725,13 @@ export function InvestigationCanvas({
                   )}
                 </div>
 
-                <div className="mt-3 pt-2 border-t border-white/[0.06] text-[9px] text-[#06b6d4] flex items-center justify-between">
+                <div className="mt-3 pt-2 border-t border-zinc-800 text-[9px] text-zinc-400 flex items-center justify-between">
                   <span>TigerGraph Node Verified</span>
                   <span className="text-zinc-500">Drag to arrange</span>
                 </div>
               </div>
             </Panel>
           )}
-
-          {/* Bottom-Right Controls */}
-          <Controls
-            position="bottom-right"
-            className="!bg-black/85 !border-white/10 !rounded-sm !shadow-2xl [&>button]:!bg-transparent [&>button]:!border-white/10 [&>button]:!text-zinc-400 hover:[&>button]:!text-white"
-            showInteractive={false}
-          />
         </ReactFlow>
     </div>
   );

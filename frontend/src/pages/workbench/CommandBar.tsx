@@ -24,19 +24,17 @@ export function CommandBar({ onSubmit, isLoading }: CommandBarProps) {
   };
 
   return (
-    <div className="h-11 border-t border-white/[0.08] bg-black flex items-center px-6 shrink-0 select-none">
-      {/* Mental Model Title */}
-      <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500 mr-4 shrink-0">
-        <span className="text-[#06b6d4] font-bold">REGION 06</span>
-        <span className="text-zinc-700">|</span>
+    <div className="h-11 border-t border-zinc-800 bg-[#09090c] flex items-center px-6 shrink-0 select-none">
+      {/* Mental Model Title (Monochromatic) */}
+      <div className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.18em] mr-4 shrink-0">
         <span className="text-white font-bold flex items-center gap-1.5">
-          <Sparkles size={11} className="text-[#06b6d4]" /> WHAT SHOULD WE DO?
+          <Sparkles size={11} className="text-white" /> WHAT SHOULD WE DO?
         </span>
       </div>
 
-      <div className="flex items-center gap-2 flex-1 bg-white/[0.02] border border-white/10 rounded px-3 py-1">
-        <Terminal size={12} className="text-[#06b6d4] shrink-0" />
-        <span className="font-mono text-xs font-bold text-[#06b6d4] shrink-0">ZYGØS &gt;</span>
+      <div className="flex items-center gap-2 flex-1 bg-[#14141c] border border-zinc-700/80 rounded px-3 py-1 focus-within:border-zinc-500 transition-colors">
+        <Terminal size={12} className="text-white shrink-0" />
+        <span className="font-mono text-xs font-bold text-white shrink-0">ZYGOS &gt;</span>
         <input 
           type="text" 
           value={cmd}
@@ -44,12 +42,12 @@ export function CommandBar({ onSubmit, isLoading }: CommandBarProps) {
           onKeyDown={handleKeyDown}
           disabled={isLoading}
           placeholder={isLoading ? "Agent reasoning in progress..." : "Ask / investigate / request / explain (e.g. /investigate, 'explain card testing rule R5')..."} 
-          className="flex-1 bg-transparent border-none outline-none font-mono text-xs text-white placeholder:text-zinc-600 disabled:opacity-50"
+          className="flex-1 bg-transparent border-none outline-none font-mono text-xs text-white placeholder:text-zinc-500 disabled:opacity-50"
         />
         <button 
           onClick={handleSend}
           disabled={isLoading || !cmd.trim()}
-          className="font-mono text-[9px] tracking-widest uppercase text-zinc-400 hover:text-white flex items-center gap-1.5 disabled:opacity-30 shrink-0 px-2 py-0.5 border border-white/10 rounded hover:border-[#06b6d4] transition-colors"
+          className="font-mono text-[9px] tracking-widest uppercase text-zinc-300 hover:text-white flex items-center gap-1.5 disabled:opacity-30 shrink-0 px-2.5 py-0.5 border border-zinc-700 rounded bg-zinc-800/80 hover:bg-zinc-700 hover:border-zinc-500 transition-colors cursor-pointer"
         >
           Execute <Send size={10} />
         </button>

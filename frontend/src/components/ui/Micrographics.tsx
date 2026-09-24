@@ -16,10 +16,10 @@ export const SVGBracket = ({ className = "" }: { className?: string }) => (
 
 export const StatusDot = ({ status }: { status: 'safe' | 'pending' | 'danger' | 'info' }) => {
   let color = 'bg-zinc-500';
-  if (status === 'safe') color = 'bg-[#10b981]'; // Emerald
-  if (status === 'pending') color = 'bg-[#f59e0b]'; // Amber
-  if (status === 'danger') color = 'bg-[#ef4444]'; // Crimson
-  if (status === 'info') color = 'bg-[#06b6d4]'; // Cyan
+  if (status === 'safe') color = 'bg-zinc-300';
+  if (status === 'pending') color = 'bg-zinc-500';
+  if (status === 'danger') color = 'bg-white';
+  if (status === 'info') color = 'bg-zinc-400';
 
   return (
     <span className="relative flex h-2 w-2">

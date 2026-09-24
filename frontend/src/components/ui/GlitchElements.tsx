@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 
 export function GlitchText({ text, active = false }: { text: string; active?: boolean }) {
   const [displayText, setDisplayText] = useState(text);
+  const [isGlitching, setIsGlitching] = useState(false);
   const chars = '01#%&*+=-<>~_[]{}XØ';
 
   useEffect(() => {
     if (active) {
+      setIsGlitching(true);
       let iteration = 0;
-      const maxIterations = 8;
+      const maxIterations = 5;
       const interval = setInterval(() => {
         setDisplayText(
           text
@@ -24,34 +26,26 @@ export function GlitchText({ text, active = false }: { text: string; active?: bo
         if (iteration > maxIterations) {
           clearInterval(interval);
           setDisplayText(text);
+          setIsGlitching(false);
         }
-      }, 30);
+      }, 25);
       return () => clearInterval(interval);
     } else {
       setDisplayText(text);
+      setIsGlitching(false);
     }
   }, [active, text]);
 
   return (
-    <span className={`relative inline-block ${active ? 'animate-glitch-skew font-bold' : ''}`}>
+    <span className="relative inline-block font-mono">
       <span className="relative z-10">{displayText}</span>
-      {active && (
-        <>
-          <span
-            className="absolute top-0 left-0 -translate-x-[2px] w-full h-full text-[#06b6d4] opacity-70 z-0 mix-blend-screen"
-            style={{ animation: 'glitch-layer-1 2s infinite linear alternate-reverse' }}
-            aria-hidden="true"
-          >
-            {displayText}
-          </span>
-          <span
-            className="absolute top-0 left-0 translate-x-[2px] w-full h-full text-[#f43f5e] opacity-70 z-0 mix-blend-screen"
-            style={{ animation: 'glitch-layer-2 3s infinite linear alternate-reverse' }}
-            aria-hidden="true"
-          >
-            {displayText}
-          </span>
-        </>
+      {isGlitching && (
+        <span
+          className="absolute top-0 left-0 translate-x-[1px] w-full h-full text-zinc-400 opacity-60 z-0 select-none pointer-events-none"
+          aria-hidden="true"
+        >
+          {displayText}
+        </span>
       )}
     </span>
   );

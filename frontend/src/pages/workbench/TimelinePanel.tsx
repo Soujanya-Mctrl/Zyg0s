@@ -21,73 +21,21 @@ interface ParsedTraceEvent {
 
 function getAgentTheme(agentName: string) {
   const upper = agentName.toUpperCase();
-  if (upper.includes('ALERT') || upper.includes('SENTINEL') || upper.includes('TRIAGE')) {
-    return {
-      text: 'text-amber-400',
-      badge: 'border-amber-500/40 bg-amber-500/10 text-amber-300',
-      icon: ShieldAlert,
-    };
+  let icon = Activity;
+  if (upper.includes('ALERT') || upper.includes('SENTINEL') || upper.includes('TRIAGE') || upper.includes('OVERRIDE')) {
+    icon = ShieldAlert;
+  } else if (upper.includes('GRAPH') || upper.includes('SCOUT') || upper.includes('MEMORY') || upper.includes('WEAVER')) {
+    icon = Database;
+  } else if (upper.includes('PATTERN') || upper.includes('STRATEGIST') || upper.includes('COPILOT')) {
+    icon = Cpu;
+  } else if (upper.includes('POLICY') || upper.includes('GOVERNOR') || upper.includes('APPROVAL')) {
+    icon = CheckCircle2;
   }
-  if (upper.includes('GRAPH') || upper.includes('SCOUT') || upper.includes('DETECTIVE')) {
-    return {
-      text: 'text-cyan-400',
-      badge: 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300',
-      icon: Database,
-    };
-  }
-  if (upper.includes('EVIDENCE') || upper.includes('ASSESSOR')) {
-    return {
-      text: 'text-purple-400',
-      badge: 'border-purple-500/40 bg-purple-500/10 text-purple-300',
-      icon: Activity,
-    };
-  }
-  if (upper.includes('PATTERN') || upper.includes('STRATEGIST')) {
-    return {
-      text: 'text-blue-400',
-      badge: 'border-blue-500/40 bg-blue-500/10 text-blue-300',
-      icon: Cpu,
-    };
-  }
-  if (upper.includes('POLICY') || upper.includes('GOVERNOR')) {
-    return {
-      text: 'text-emerald-400',
-      badge: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
-      icon: CheckCircle2,
-    };
-  }
-  if (upper.includes('COMPLIANCE') || upper.includes('OFFICER') || upper.includes('SAR')) {
-    return {
-      text: 'text-rose-400',
-      badge: 'border-rose-500/40 bg-rose-500/10 text-rose-300',
-      icon: ShieldAlert,
-    };
-  }
-  if (upper.includes('MEMORY') || upper.includes('WEAVER')) {
-    return {
-      text: 'text-indigo-400',
-      badge: 'border-indigo-500/40 bg-indigo-500/10 text-indigo-300',
-      icon: Database,
-    };
-  }
-  if (upper.includes('OVERRIDE')) {
-    return {
-      text: 'text-red-400',
-      badge: 'border-red-500/50 bg-red-500/10 text-red-300',
-      icon: ShieldAlert,
-    };
-  }
-  if (upper.includes('APPROVAL')) {
-    return {
-      text: 'text-cyan-300',
-      badge: 'border-cyan-400/40 bg-cyan-400/10 text-cyan-200',
-      icon: CheckCircle2,
-    };
-  }
+
   return {
-    text: 'text-teal-400',
-    badge: 'border-teal-500/40 bg-teal-500/10 text-teal-300',
-    icon: Cpu,
+    text: 'text-white',
+    badge: 'border-white/20 bg-white/[0.04] text-white',
+    icon,
   };
 }
 
@@ -164,14 +112,12 @@ export function TimelinePanel({ pipeline }: TimelinePanelProps) {
   });
 
   return (
-    <footer className="h-56 border-t border-white/[0.08] bg-black flex flex-col shrink-0 w-full overflow-hidden select-none">
-      {/* Region 04 Header: WHAT DID ZYGØS DO? */}
-      <div className="h-7 border-b border-white/[0.04] flex items-center justify-between px-6 bg-white/[0.02] shrink-0 font-mono text-[9px] uppercase tracking-[0.18em]">
+    <footer className="h-56 border-t border-zinc-800 bg-[#0c0c10] flex flex-col shrink-0 w-full overflow-hidden select-none">
+      {/* Region 04 Header: WHAT DID ZYGØS DO? (Pure Monochrome) */}
+      <div className="h-7 border-b border-zinc-800/80 flex items-center justify-between px-6 bg-[#121217] shrink-0 font-mono text-[9px] uppercase tracking-[0.18em]">
         <div className="flex items-center gap-3">
-          <span className="text-[#06b6d4] font-bold">REGION 04</span>
-          <span className="text-zinc-700">|</span>
           <span className="text-white font-bold flex items-center gap-1.5">
-            <Activity size={12} className="text-[#06b6d4]" /> WHAT DID ZYGØS DO?
+            <Activity size={12} className="text-white" /> WHAT DID ZYGØS DO?
           </span>
           <span className="text-zinc-600">/</span>
           <span className="text-zinc-400">AGENT • EVIDENCE • TIMELINE</span>
@@ -183,7 +129,7 @@ export function TimelinePanel({ pipeline }: TimelinePanelProps) {
       </div>
 
       {/* Scrollable Forensic Events Trace */}
-      <div className="flex-1 px-6 py-3 overflow-y-auto space-y-2.5">
+      <div className="flex-1 px-6 py-3 overflow-y-auto space-y-2.5 bg-[#0c0c10]">
         {events.length > 0 ? (
           events.map((e, idx) => {
             const theme = getAgentTheme(e.agentName);
@@ -196,8 +142,8 @@ export function TimelinePanel({ pipeline }: TimelinePanelProps) {
                 key={e.id}
                 className={`p-3 rounded border transition-all ${
                   e.active
-                    ? 'bg-zinc-950/90 border-[#06b6d4]/40 shadow-[0_0_12px_rgba(6,182,212,0.12)]'
-                    : 'bg-zinc-950/40 border-white/[0.06] hover:border-white/15'
+                    ? 'bg-[#1a1a24] border-zinc-500 shadow-[0_0_12px_rgba(255,255,255,0.06)]'
+                    : 'bg-[#121218] border-zinc-800/80 hover:border-zinc-700 hover:bg-[#161620]'
                 }`}
               >
                 {/* Header Row: Timestamp • Agent Pill • Role • Latency */}
@@ -220,14 +166,14 @@ export function TimelinePanel({ pipeline }: TimelinePanelProps) {
 
                   <div className="flex items-center gap-2">
                     {e.latency && (
-                      <span className="font-mono text-[9px] text-zinc-500 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.02]">
+                      <span className="font-mono text-[9px] text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-700 bg-zinc-800/70">
                         ⚡ {e.latency}
                       </span>
                     )}
                     {hasReasoning && (
                       <button
                         onClick={() => toggleReasoning(e.id)}
-                        className="font-mono text-[9px] uppercase tracking-wider text-zinc-400 hover:text-white px-1.5 py-0.5 rounded border border-white/10 flex items-center gap-1 bg-white/[0.02] hover:border-[#06b6d4] transition-colors"
+                        className="font-mono text-[9px] uppercase tracking-wider text-zinc-400 hover:text-white px-1.5 py-0.5 rounded border border-zinc-700 hover:border-zinc-500 flex items-center gap-1 bg-zinc-800/60 hover:bg-zinc-800 transition-colors cursor-pointer"
                       >
                         <span>{isExpanded ? 'Hide Rationale' : 'View Rationale'}</span>
                         {isExpanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
@@ -243,8 +189,8 @@ export function TimelinePanel({ pipeline }: TimelinePanelProps) {
 
                 {/* Cognitive Reasoning Narrative (Expandable) */}
                 {hasReasoning && isExpanded && (
-                  <div className="mt-2.5 ml-6 p-3 rounded bg-black/70 border-l-2 border-[#06b6d4] border-white/10 font-sans text-xs">
-                    <div className="font-mono text-[9px] uppercase tracking-wider text-[#06b6d4] font-bold mb-1.5 flex items-center gap-1.5">
+                  <div className="mt-2.5 ml-6 p-3 rounded bg-[#0b0b0f] border-l-2 border-white border border-zinc-800 font-sans text-xs">
+                    <div className="font-mono text-[9px] uppercase tracking-wider text-white font-bold mb-1.5 flex items-center gap-1.5">
                       <Cpu size={11} />
                       <span>Groq LPU Cognitive Reasoning Narrative:</span>
                     </div>
