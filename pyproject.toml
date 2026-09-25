@@ -1,0 +1,20 @@
+[project]
+name = "zyg0s"
+version = "1.0.0"
+description = "Autonomous Agentic Fraud Detection on TigerGraph Savanna Cloud"
+requires-python = ">=3.10"
+
+[tool.vercel]
+entrypoint = "src.api.server:app"
+
+[tool.vercel.scripts]
+build = "cd frontend && npm install && npm run build"
+
+[tool.pyright]
+extraPaths = ["."]
+executionEnvironments = [
+  { root = "." }
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

@@ -21,7 +21,8 @@ pandas>=3.0.0
 numpy>=2.0.0
 
 # Graph-Native Case Memory (Hybrid Vector + Structural Retrieval)
-sentence-transformers>=2.2.0
+# sentence-transformers>=2.2.0  # Optional: comment out to keep serverless function under Vercel 250MB limit (uses built-in fallback)
+
 
 # REST API & Telemetry Backend (For React Command Center)
 fastapi>=0.115.0
