@@ -5,7 +5,7 @@ description = "Autonomous Agentic Fraud Detection on TigerGraph Savanna Cloud"
 requires-python = ">=3.10"
 
 [tool.vercel]
-entrypoint = "src.api.server:app"
+entrypoint = "api.index:app"
 
 [tool.vercel.scripts]
 build = "cd frontend && npm install && npm run build"
