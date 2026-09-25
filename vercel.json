@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "src/api/server.py": {
+      "includeFiles": "cases/**,frontend/dist/**",
+      "maxDuration": 60
+    }
+  }
+}

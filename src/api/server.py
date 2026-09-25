@@ -14,6 +14,12 @@ sys.modules.setdefault("numexpr", None)
 import json
 import os
 from pathlib import Path
+
+# Root directory
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
 from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,8 +28,6 @@ from pydantic import BaseModel, Field
 from src.agent.llm_client import get_llm_client
 from src.agent.workflow import get_orchestrator
 
-# Root directory
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CASES_DIR = BASE_DIR / "cases"
 
 CASE_INITIAL_METRICS: Dict[str, Dict[str, Any]] = {
@@ -972,6 +976,39 @@ def case_ai_deep_dive(case_id: str):
     }
 
 
+# -------------------------------------------------------------------------
+# Static Frontend Serving (Vite React Build in frontend/dist) for Production
+# -------------------------------------------------------------------------
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+FRONTEND_DIST = BASE_DIR / "frontend" / "dist"
+if FRONTEND_DIST.exists():
+    assets_dir = FRONTEND_DIST / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    @app.get("/")
+    async def serve_root():
+        index_file = FRONTEND_DIST / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+        return {"status": "Zyg0s API Online", "docs": "/docs"}
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        if full_path.startswith("api") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
+            raise HTTPException(status_code=404, detail="API route not found")
+        file_path = FRONTEND_DIST / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        index_file = FRONTEND_DIST / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+        raise HTTPException(status_code=404, detail="Resource not found")
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
