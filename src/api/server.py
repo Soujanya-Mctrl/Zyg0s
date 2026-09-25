@@ -27,7 +27,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from src.agent.llm_client import get_llm_client
-from src.agent.workflow import get_orchestrator
+
+try:
+    from src.agent.workflow import get_orchestrator
+except Exception:
+    get_orchestrator = None  # type: ignore
 
 CASES_DIR = BASE_DIR / "cases"
 
@@ -313,11 +317,16 @@ def get_case_pipeline(case_id: str):
     if not trace:
         case_pack_path = BASE_DIR / "data" / "hhgoa_ieee" / "case_pack.csv"
         if case_pack_path.exists():
-            import pandas as pd
-            df_pack = pd.read_csv(case_pack_path)
-            matches = df_pack[df_pack["case_id"] == case_id]
-            if not matches.empty:
-                case_meta = matches.iloc[0].to_dict()
+            import csv
+            matches = []
+            try:
+                with open(case_pack_path, "r", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    matches = [row for row in reader if row.get("case_id") == case_id]
+            except Exception:
+                pass
+            if matches and get_orchestrator is not None:
+                case_meta = matches[0]
                 orch = get_orchestrator()
                 out = orch.run_investigation(case_meta)
                 trace = getattr(out, "orchestrator_pipeline_trace", [])
@@ -367,15 +376,19 @@ def investigate_case(case_id: str):
         except Exception as e:
             print(f"Warning: Failed to sync benchmark for {case_id}: {e}")
     else:
-        orch = get_orchestrator()
+        orch = get_orchestrator() if get_orchestrator is not None else None
         case_meta = {"case_id": case_id}
         case_pack_path = BASE_DIR / "data" / "hhgoa_ieee" / "case_pack.csv"
         if case_pack_path.exists():
-            import pandas as pd
-            df_pack = pd.read_csv(case_pack_path)
-            matches = df_pack[df_pack["case_id"] == case_id]
-            if not matches.empty:
-                case_meta = matches.iloc[0].to_dict()
+            import csv
+            try:
+                with open(case_pack_path, "r", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    matches = [row for row in reader if row.get("case_id") == case_id]
+                if matches:
+                    case_meta = matches[0]
+            except Exception:
+                pass
         if "case_id" not in case_meta or case_meta["case_id"] != case_id or "first_suspicious_txn_id" not in case_meta:
             cdata = load_case_json(case_id)
             case_inner = cdata.get("case", {})

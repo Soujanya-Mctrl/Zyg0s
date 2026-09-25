@@ -4,7 +4,7 @@
   "functions": {
     "api/index.py": {
       "includeFiles": "cases/**,src/**",
-      "maxDuration": 60
+      "excludeFiles": "{frontend/**,node_modules/**,tests/**,assets/**,data/**,.git/**}"
     }
   },
   "rewrites": [
