@@ -1,0 +1,19 @@
+# Ignore root backend source, Python dependencies, and datasets
+/api/
+/src/
+/data/
+/cases/
+/docs/
+/tests/
+/.pytest_cache/
+/.oxlintrc.json
+/.agents/
+/.claude/
+*.log
+*.pyc
+__pycache__/
+.env
+.env.local
+/requirements.txt
+node_modules/
+frontend/node_modules/

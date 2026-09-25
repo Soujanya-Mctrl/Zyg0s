@@ -50,20 +50,18 @@ def get_tg_connection(force_new: bool = False) -> tg.TigerGraphConnection:
         gsPort=restpp_port,
     )
 
-    # Acquire authentication token
-    if secret:
-        token_res = conn.getToken(secret)
-    else:
-        # Generate secret if not present
-        secret = conn.createSecret("agent_fraud_secret")
-        token_res = conn.getToken(secret)
-
-    # In pyTigerGraph 2.0+, getToken returns a tuple (token_str, expiry_str)
-    token_str = token_res[0] if isinstance(token_res, tuple) else str(token_res)
-    conn.apiToken = token_str
-    
-    # Crucial: update cached headers so requests use Bearer <token>
-    conn._refresh_auth_headers()
+    # Acquire authentication token if REST++ token auth is configured
+    try:
+        if secret:
+            token_res = conn.getToken(secret)
+        else:
+            token_res = conn.getToken(conn.createSecret("agent_fraud_secret"))
+        token_str = token_res[0] if isinstance(token_res, tuple) else str(token_res)
+        conn.apiToken = token_str
+        conn._refresh_auth_headers()
+    except Exception:
+        # Savanna Cloud instances using direct basic auth over HTTPS
+        pass
 
     _conn_instance = conn
     return _conn_instance

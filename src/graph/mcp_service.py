@@ -72,11 +72,11 @@ class TigerGraphMCPService:
             try:
                 from src.graph.client import get_tg_connection
                 sync_conn = get_tg_connection()
-                cls._token = sync_conn.apiToken
+                cls._token = getattr(sync_conn, "apiToken", None)
                 if cls._token:
                     os.environ["TG_API_TOKEN"] = cls._token
             except Exception as e:
-                logger.warning(f"Could not auto-acquire TigerGraph token for MCP: {e}")
+                logger.debug(f"TigerGraph token not pre-cached (using basic auth over SSL): {e}")
 
         # tigergraph-mcp AsyncTigerGraphConnection requires https:// prefix for Cloud
         if clean_host:
