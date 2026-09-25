@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-008",
   "case": {
-    "status": "closed_cleared",
-    "verdict": "cleared",
-    "fraud_probability": 0.05,
+    "status": "open",
+    "verdict": "uncertain",
+    "fraud_probability": 0.68,
     "pattern": "none",
     "pattern_description": "",
     "affected_txn_ids": [],
@@ -71,13 +71,7 @@
         "reason": "R7: send informational reminder regarding subscription billing"
       }
     ],
-    "final": [
-      {
-        "action": "CLOSE_NO_FRAUD",
-        "route": "auto",
-        "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
-      }
-    ],
+    "final": [],
     "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
   },
   "sar": {
@@ -288,11 +282,12 @@
         "graph_case_id": "CASE-SAVANNA-HHG-008",
         "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-003, HHG-002, HHG-001). Case persisted to TigerGraph (CASE-SAVANNA-HHG-008)."
       },
-      "ai_reasoning": "The cleared status of Case HHG-008 aligns with the benign transactional patterns established in precedents HHG-001 through HHG-003, confirming that the absence of high-risk indicators warrants a zero-exposure verdict. This consistency validates the current decision by demonstrating that the entity’s behavior remains within the historical baseline of compliant activity identified in the graph memory.",
+      "ai_reasoning": "The cleared status of Case HHG-008 aligns with the benign transactional patterns established in precedents HHG-001 through HHG-003, confirming that the absence of high-risk indicators warrants a zero-exposure verdict. This consistency validates the current decision by demonstrating that the entity\u2019s behavior remains within the historical baseline of compliant activity identified in the graph memory.",
       "evidence_generated": [],
       "hand_off_summary": "Memory integrated: Retrieved 3 precedents (HHG-003, HHG-002, HHG-001). Case persisted to TigerGraph (CASE-SAVANNA-HHG-008).",
       "latency_ms": 878.27,
       "timestamp": "2026-09-22T19:36:19.073652"
     }
-  ]
+  ],
+  "uncertainty_score": 0.64
 }

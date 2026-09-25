@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-011",
   "case": {
-    "status": "closed_cleared",
-    "verdict": "cleared",
-    "fraud_probability": 0.05,
+    "status": "open",
+    "verdict": "uncertain",
+    "fraud_probability": 0.7,
     "pattern": "none",
     "pattern_description": "",
     "affected_txn_ids": [],
@@ -81,13 +81,7 @@
         "reason": "R7: send informational reminder regarding subscription billing"
       }
     ],
-    "final": [
-      {
-        "action": "CLOSE_NO_FRAUD",
-        "route": "auto",
-        "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
-      }
-    ],
+    "final": [],
     "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
   },
   "sar": {
@@ -314,5 +308,6 @@
       "latency_ms": 989.6,
       "timestamp": "2026-09-22T19:40:22.141554"
     }
-  ]
+  ],
+  "uncertainty_score": 0.6
 }
