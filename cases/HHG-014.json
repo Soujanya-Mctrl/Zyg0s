@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-014",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.65,
+    "status": "closed_fraud",
+    "verdict": "fraud",
+    "fraud_probability": 0.99,
     "pattern": "card_not_present_new_device",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -49,6 +49,16 @@
         ],
         "grade": "CIRCUMSTANTIAL",
         "weight": 0.6
+      },
+      {
+        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3478561"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
       }
     ],
     "similar_prior_cases": [
@@ -56,7 +66,7 @@
       "HHG-005",
       "HHG-004"
     ],
-    "summary": "Case HHG-014 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Analyst request: several cards this month show purchases from the same unusual device profile. Revie... Initial fraud risk scored at 0.65. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-014 concluded with verdict 'FRAUD' (P=0.99, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $74.96. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-014"
   },
@@ -85,12 +95,34 @@
         "reason": "R6: shared origin detected across cards; raise monitoring sensitivity"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "BLOCK_ALL_CARDS",
+        "route": "L2",
+        "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
+      },
+      {
+        "action": "CREATE_CASE",
+        "route": "auto",
+        "reason": "R2: create internal fraud case with evidence attached and persist to graph"
+      },
+      {
+        "action": "FILE_REPORT",
+        "route": "L2",
+        "reason": "R2 and R6: shared device/network links to other cards"
+      },
+      {
+        "action": "MONITOR_CONNECTED_CARDS",
+        "route": "auto",
+        "reason": "R6: shared device profile / entity links across multiple cards"
+      }
+    ],
+    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
   },
   "sar": {
     "file": true,
     "reason": "R2: confirmed unauthorized use",
-    "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-014\n\n**I. SUMMARY OF ACTIVITY**\nDuring the period from 2016-11-22 16:11:00 to 2016-11-22 16:11:00, the Institution identified suspicious transaction activity totaling $74.96 USD. This activity comprised 1 transaction(s) processed on card C13487-K1, associated with customer profile C13487. The primary indicator of suspicious activity was the detection of a 'card_not_present_new_device' pattern.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C13487\n*   **Primary Card Number Reference:** C13487-K1\n*   **Connected / Correlated Cards:** C11923, C13171\n*   **Associated Device Telemetry:** SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-11-22 16:11:00\n*   **Latest Activity Timestamp:** 2016-11-22 16:11:00\n*   **Affected Transaction Record IDs:** 3478561\n\n**IV. METHOD OF OPERATION AND EVIDENTIARY BASIS**\nThe Institution\u2019s fraud detection systems flagged the transaction based on the following evidentiary factors:\n1.  The transaction occurred within established billing region 191.0, which aligns with the customer\u2019s historical profile.\n2.  The transaction was initiated from a newly observed device profile: SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080.\n3.  Graph analysis via TigerGraph revealed that the device profile (SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080) is shared across 2 other distinct customer accounts.\n4.  The cardholder explicitly denied authorizing the transaction and confirmed that the physical card remains in their possession.\n\n**Multi-Entity Syndicate Linkage:**\nAdvanced graph analysis indicates that the device profile (SM-G935F Build/NRD90M | Android 7.0 | chrome 6",
+    "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) — INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-014\n\n**I. SUMMARY OF ACTIVITY**\nDuring the period from 2016-11-22 16:11:00 to 2016-11-22 16:11:00, the Institution identified suspicious transaction activity totaling $74.96 USD. This activity comprised 1 transaction(s) processed on card C13487-K1, associated with customer profile C13487. The primary indicator of suspicious activity was the detection of a 'card_not_present_new_device' pattern.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C13487\n*   **Primary Card Number Reference:** C13487-K1\n*   **Connected / Correlated Cards:** C11923, C13171\n*   **Associated Device Telemetry:** SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-11-22 16:11:00\n*   **Latest Activity Timestamp:** 2016-11-22 16:11:00\n*   **Affected Transaction Record IDs:** 3478561\n\n**IV. METHOD OF OPERATION AND EVIDENTIARY BASIS**\nThe Institution’s fraud detection systems flagged the transaction based on the following evidentiary factors:\n1.  The transaction occurred within established billing region 191.0, which aligns with the customer’s historical profile.\n2.  The transaction was initiated from a newly observed device profile: SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080.\n3.  Graph analysis via TigerGraph revealed that the device profile (SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080) is shared across 2 other distinct customer accounts.\n4.  The cardholder explicitly denied authorizing the transaction and confirmed that the physical card remains in their possession.\n\n**Multi-Entity Syndicate Linkage:**\nAdvanced graph analysis indicates that the device profile (SM-G935F Build/NRD90M | Android 7.0 | chrome 6",
     "subjects": [
       "C13487",
       "C13487-K1",
@@ -314,7 +346,7 @@
         "filing_reason": "R2: confirmed unauthorized use",
         "hand_off_summary": "Compliance audit: SAR Filed=True (Exposure: $74.96, Reason: R2: confirmed unauthorized use)."
       },
-      "ai_reasoning": "Compliance Officer certified FinCEN SAR filing pursuant to 31 CFR 1020.320. Reported exposure is $74.96 across subjects ['C13487', 'C13487-K1', 'C11923', 'C13171']. Regulatory excerpt: **FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-014\n\n**I. SUMMARY OF ACTIVITY**\nDuring the period from 2016-11-22 16:11:00 to 2016-11-22 16:11:00, the Institution identified suspicious transaction activi...",
+      "ai_reasoning": "Compliance Officer certified FinCEN SAR filing pursuant to 31 CFR 1020.320. Reported exposure is $74.96 across subjects ['C13487', 'C13487-K1', 'C11923', 'C13171']. Regulatory excerpt: **FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) — INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-014\n\n**I. SUMMARY OF ACTIVITY**\nDuring the period from 2016-11-22 16:11:00 to 2016-11-22 16:11:00, the Institution identified suspicious transaction activi...",
       "evidence_generated": [],
       "hand_off_summary": "Compliance audit: SAR Filed=True (Exposure: $74.96, Reason: R2: confirmed unauthorized use).",
       "latency_ms": 1413.34,

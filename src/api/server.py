@@ -6,6 +6,11 @@ step-up auth simulation endpoints to power the React command center UI.
 
 from __future__ import annotations
 
+import sys
+# Shield against legacy NumPy 1.x C-extension collisions with NumPy 2.x
+sys.modules.setdefault("bottleneck", None)
+sys.modules.setdefault("numexpr", None)
+
 import json
 import os
 from pathlib import Path
@@ -20,6 +25,46 @@ from src.agent.workflow import get_orchestrator
 # Root directory
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CASES_DIR = BASE_DIR / "cases"
+
+CASE_INITIAL_METRICS: Dict[str, Dict[str, Any]] = {
+    "HHG-001": {"risk_score": 0.61, "uncertainty": 0.78, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-002": {"risk_score": 0.79, "uncertainty": 0.58, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-003": {"risk_score": 0.72, "uncertainty": 0.56, "verdict": "uncertain", "trigger_type": "customer_report"},
+    "HHG-004": {"risk_score": 0.75, "uncertainty": 0.50, "verdict": "uncertain", "trigger_type": "customer_report"},
+    "HHG-005": {"risk_score": 0.54, "uncertainty": 0.92, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-006": {"risk_score": 0.78, "uncertainty": 0.56, "verdict": "uncertain", "trigger_type": "customer_report"},
+    "HHG-007": {"risk_score": 0.87, "uncertainty": 0.26, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-008": {"risk_score": 0.68, "uncertainty": 0.64, "verdict": "uncertain", "trigger_type": "customer_report"},
+    "HHG-009": {"risk_score": 0.62, "uncertainty": 0.76, "verdict": "uncertain", "trigger_type": "customer_report"},
+    "HHG-010": {"risk_score": 0.90, "uncertainty": 0.20, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-011": {"risk_score": 0.70, "uncertainty": 0.60, "verdict": "uncertain", "trigger_type": "customer_report"},
+    "HHG-012": {"risk_score": 0.55, "uncertainty": 0.90, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-013": {"risk_score": 0.76, "uncertainty": 0.52, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-014": {"risk_score": 0.82, "uncertainty": 0.36, "verdict": "uncertain", "trigger_type": "analyst_request"},
+    "HHG-015": {"risk_score": 0.77, "uncertainty": 0.54, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-016": {"risk_score": 0.74, "uncertainty": 0.52, "verdict": "uncertain", "trigger_type": "customer_report"},
+    "HHG-017": {"risk_score": 0.57, "uncertainty": 0.86, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-018": {"risk_score": 0.66, "uncertainty": 0.68, "verdict": "uncertain", "trigger_type": "customer_report"},
+    "HHG-019": {"risk_score": 0.90, "uncertainty": 0.20, "verdict": "uncertain", "trigger_type": "risk_score"},
+    "HHG-020": {"risk_score": 0.52, "uncertainty": 0.96, "verdict": "uncertain", "trigger_type": "risk_score"},
+}
+
+
+def extract_case_uncertainty(cdata: Dict[str, Any], fraud_prob: float) -> float:
+    # 1. Direct uncertainty_score at top level if not default 0.65
+    u = cdata.get("uncertainty_score")
+    if u is not None and u != 0.65:
+        return float(u)
+    
+    # 2. Check orchestrator pipeline trace
+    trace = cdata.get("orchestrator_pipeline_trace", [])
+    for step in reversed(trace):
+        mm = step.get("math_metrics", {})
+        if "epistemic_uncertainty_U" in mm:
+            return float(mm["epistemic_uncertainty_U"])
+            
+    # 3. Default mathematical formula U = 1.0 - abs(2*P - 1.0)
+    return round(1.0 - abs(2.0 * fraud_prob - 1.0), 3)
 
 app = FastAPI(
     title="Zyg0s - Telemetry & Reasoning API",
@@ -181,8 +226,8 @@ def list_cases():
             customer_id = primary_card.split("-")[0] if "-" in primary_card else primary_card
             
             fraud_prob = case_inner.get("fraud_probability", 0.5)
-            # Uncertainty formula U = 1.0 - abs(2*prob - 1)
-            uncertainty = round(1.0 - abs(2.0 * fraud_prob - 1.0), 3)
+            uncertainty = extract_case_uncertainty(cdata, fraud_prob)
+            confidence_score = max(0, min(100, round((1.0 - uncertainty) * 100)))
 
             summaries.append({
                 "case_id": cdata.get("case_id", cf.stem),
@@ -194,6 +239,7 @@ def list_cases():
                 "verdict": case_inner.get("verdict", "uncertain"),
                 "risk_score": fraud_prob,
                 "uncertainty_score": uncertainty,
+                "confidence_score": confidence_score,
                 "fraud_pattern": case_inner.get("pattern", "Unknown"),
                 "evidence_count": len(case_inner.get("evidence", [])),
                 "similar_prior_cases": case_inner.get("similar_prior_cases", []),
@@ -216,7 +262,8 @@ def get_case(case_id: str):
     primary_card = card_ids[0] if card_ids else "N/A"
     customer_id = primary_card.split("-")[0] if "-" in primary_card else primary_card
     fraud_prob = case_inner.get("fraud_probability", 0.5)
-    uncertainty = round(1.0 - abs(2.0 * fraud_prob - 1.0), 3)
+    uncertainty = extract_case_uncertainty(cdata, fraud_prob)
+    confidence_score = max(0, min(100, round((1.0 - uncertainty) * 100)))
 
     return {
         "case_id": cdata.get("case_id", case_id),
@@ -228,6 +275,7 @@ def get_case(case_id: str):
         "verdict": case_inner.get("verdict", "uncertain"),
         "risk_score": fraud_prob,
         "uncertainty_score": uncertainty,
+        "confidence_score": confidence_score,
         "pattern": case_inner.get("pattern", "unknown"),
         "summary": case_inner.get("summary", ""),
         "evidence": case_inner.get("evidence", []),
@@ -299,64 +347,69 @@ def get_case_explanation(case_id: str):
 @app.post("/api/cases/{case_id}/investigate")
 def investigate_case(case_id: str):
     """
-    Executes the 7-agent neuro-symbolic pipeline live for the specified case_id.
-    Loads case metadata from case_pack.csv or existing case, runs the full investigation,
-    commits to TigerGraph memory, and returns the live evaluated result.
+    Executes or loads the 7-agent neuro-symbolic pipeline evaluation for the specified case_id.
+    Persists evaluated state to cases/{case_id}.json and returns complete case_details, pipeline, and graph.
     """
-    orch = get_orchestrator()
-    case_meta = {"case_id": case_id}
-    
-    case_pack_path = BASE_DIR / "data" / "hhgoa_ieee" / "case_pack.csv"
-    if case_pack_path.exists():
-        import pandas as pd
-        df_pack = pd.read_csv(case_pack_path)
-        matches = df_pack[df_pack["case_id"] == case_id]
-        if not matches.empty:
-            case_meta = matches.iloc[0].to_dict()
-    
-    if "case_id" not in case_meta or case_meta["case_id"] != case_id or "first_suspicious_txn_id" not in case_meta:
-        # Fallback to existing case file data
-        cdata = load_case_json(case_id)
-        case_inner = cdata.get("case", {})
-        case_meta = {
-            "case_id": case_id,
-            "first_suspicious_txn_id": case_inner.get("first_suspicious_txn_id"),
-            "exposure_usd": case_inner.get("exposure_usd", 100.0),
-            "connected_card_ids": case_inner.get("connected_card_ids", []),
-            "pattern": case_inner.get("pattern", "CARD_VELOCITY_BURST"),
-            "trigger_type": "analyst_investigate_trigger",
-            "trigger_text": case_inner.get("summary", "Transaction alert dispatched to orchestrator.")
+    bench_path = CASES_DIR / "evaluated_benchmarks" / f"{case_id}.json"
+    active_path = CASES_DIR / f"{case_id}.json"
+
+    if bench_path.exists():
+        try:
+            with open(bench_path, "r", encoding="utf-8") as f:
+                bench_data = json.load(f)
+            with open(active_path, "w", encoding="utf-8") as f:
+                json.dump(bench_data, f, indent=2)
+        except Exception as e:
+            print(f"Warning: Failed to sync benchmark for {case_id}: {e}")
+    else:
+        orch = get_orchestrator()
+        case_meta = {"case_id": case_id}
+        case_pack_path = BASE_DIR / "data" / "hhgoa_ieee" / "case_pack.csv"
+        if case_pack_path.exists():
+            import pandas as pd
+            df_pack = pd.read_csv(case_pack_path)
+            matches = df_pack[df_pack["case_id"] == case_id]
+            if not matches.empty:
+                case_meta = matches.iloc[0].to_dict()
+        if "case_id" not in case_meta or case_meta["case_id"] != case_id or "first_suspicious_txn_id" not in case_meta:
+            cdata = load_case_json(case_id)
+            case_inner = cdata.get("case", {})
+            case_meta = {
+                "case_id": case_id,
+                "first_suspicious_txn_id": case_inner.get("first_suspicious_txn_id"),
+                "exposure_usd": case_inner.get("exposure_usd", 100.0),
+                "connected_card_ids": case_inner.get("connected_card_ids", []),
+                "pattern": case_inner.get("pattern", "CARD_VELOCITY_BURST"),
+                "trigger_type": "analyst_investigate_trigger",
+                "trigger_text": case_inner.get("summary", "Transaction alert dispatched to orchestrator.")
+            }
+        out = orch.run_investigation(case_meta)
+        case_dict = {
+            "case_id": out.case_id,
+            "case": out.case.model_dump(),
+            "evidence_requests": [e.model_dump() for e in out.evidence_requests],
+            "next_best_actions": out.next_best_actions.model_dump(),
+            "sar": out.sar.model_dump(),
+            "stop_reason": out.stop_reason,
+            "latency_s": out.latency_s,
+            "orchestrator_pipeline_trace": getattr(out, "orchestrator_pipeline_trace", [])
         }
-        
-    out = orch.run_investigation(case_meta)
-    
-    # Save the updated investigated case
-    case_dict = {
-        "case_id": out.case_id,
-        "case": out.case.model_dump(),
-        "evidence_requests": [e.model_dump() for e in out.evidence_requests],
-        "next_best_actions": out.next_best_actions.model_dump(),
-        "sar": out.sar.model_dump(),
-        "stop_reason": out.stop_reason,
-        "latency_s": out.latency_s,
-        "orchestrator_pipeline_trace": getattr(out, "orchestrator_pipeline_trace", [])
-    }
-    file_path = CASES_DIR / f"{out.case_id}.json"
-    try:
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(case_dict, f, indent=2)
-    except Exception as e:
-        print(f"Warning: Failed to persist investigated case {out.case_id}: {e}")
-        
+        try:
+            with open(active_path, "w", encoding="utf-8") as f:
+                json.dump(case_dict, f, indent=2)
+        except Exception as e:
+            print(f"Warning: Failed to persist investigated case {out.case_id}: {e}")
+
+    case_details = get_case(case_id)
+    pipeline_data = get_case_pipeline(case_id)
+    graph_data = get_case_graph(case_id)
+
     return {
-        "case_id": out.case_id,
-        "case": out.case.model_dump(),
-        "evidence_requests": [e.model_dump() for e in out.evidence_requests],
-        "next_best_actions": out.next_best_actions.model_dump(),
-        "sar": out.sar.model_dump(),
-        "stop_reason": out.stop_reason,
-        "latency_s": out.latency_s,
-        "orchestrator_pipeline_trace": getattr(out, "orchestrator_pipeline_trace", [])
+        "status": "SUCCESS",
+        "case_id": case_id,
+        "case_details": case_details,
+        "pipeline": pipeline_data,
+        "graph": graph_data,
     }
 
 
@@ -785,7 +838,10 @@ def reset_case(case_id: str):
     cdata = load_case_json(case_id)
     case_inner = cdata.get("case", {})
 
-    init_risk = 0.65
+    meta = CASE_INITIAL_METRICS.get(case_id, {"risk_score": 0.65, "uncertainty": 0.65})
+    init_risk = meta["risk_score"]
+    init_uncertainty = meta["uncertainty"]
+
     case_inner["status"] = "open"
     case_inner["verdict"] = "uncertain"
     case_inner["fraud_probability"] = init_risk
@@ -798,7 +854,7 @@ def reset_case(case_id: str):
     ]
 
     cdata["case"] = case_inner
-    cdata["uncertainty_score"] = 0.65
+    cdata["uncertainty_score"] = init_uncertainty
     if "next_best_actions" in cdata:
         cdata["next_best_actions"]["final"] = []
 
@@ -819,47 +875,9 @@ def reset_case(case_id: str):
         "case_id": case_id,
         "message": f"Case {case_id} reset to active open alert state.",
         "verdict": "uncertain",
-        "uncertainty": 0.65
-    }
-
-
-@app.post("/api/cases/{case_id}/investigate")
-def investigate_case_endpoint(case_id: str):
-    """
-    Triggers the autonomous 7-agent pipeline (Alert Sentinel -> Graph Scout -> 
-    Evidence Assessor -> Pattern Strategist -> Policy Governor -> Compliance Officer -> 
-    Memory Weaver) against TigerGraph Savanna Cloud for the specified case.
-    """
-    cdata = load_case_json(case_id)
-    case_inner = cdata.get("case", {})
-
-    orchestrator = get_orchestrator()
-    case_meta = {
-        "case_id": case_id,
-        "flagged_txn_id": case_inner.get("first_suspicious_txn_id", 3530164),
-        "card_id": case_inner.get("connected_card_ids", ["C08623-K2"])[0] if case_inner.get("connected_card_ids") else "C08623-K2",
-        "customer_id": case_inner.get("customer_id", "C08623"),
-        "trigger_type": case_inner.get("trigger_type", "unusual_velocity"),
-        "trigger_text": case_inner.get("trigger_narrative", "Real-time velocity anomaly flagged."),
-        "risk_score": case_inner.get("fraud_probability", 0.65),
-    }
-
-    try:
-        orchestrator.run_investigation(case_meta)
-    except Exception as e:
-        # Graceful fallback: continue with existing graph analysis if remote connection has jitter
-        pass
-
-    case_details = get_case_details(case_id)
-    pipeline_data = get_case_pipeline(case_id)
-    graph_data = get_case_graph(case_id)
-
-    return {
-        "status": "SUCCESS",
-        "case_id": case_id,
-        "case_details": case_details,
-        "pipeline": pipeline_data,
-        "graph": graph_data,
+        "risk_score": init_risk,
+        "uncertainty": init_uncertainty,
+        "confidence": max(0, min(100, round((1.0 - init_uncertainty) * 100)))
     }
 
 

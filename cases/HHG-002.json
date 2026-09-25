@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-002",
   "case": {
-    "status": "open",
-    "verdict": "uncertain",
-    "fraud_probability": 0.65,
+    "status": "closed_cleared",
+    "verdict": "cleared",
+    "fraud_probability": 0.05,
     "pattern": "card_not_present_fraud",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -35,12 +35,22 @@
         ],
         "grade": "CIRCUMSTANTIAL",
         "weight": 0.6
+      },
+      {
+        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
+        "source": "customer_reply",
+        "ref": "service:customer_validation_response",
+        "entity_ids": [
+          "3478782"
+        ],
+        "grade": "DIRECT",
+        "weight": 1.0
       }
     ],
     "similar_prior_cases": [
       "HHG-001"
     ],
-    "summary": "Case HHG-002 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3478782 ($292.36, online) at 0.79. Review and decide.... Initial fraud risk scored at 0.79. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
+    "summary": "Case HHG-002 concluded with verdict 'FRAUD' (P=0.93, U=0.000). Pattern: 'card_not_present_fraud'. Total financial exposure: $292.36. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_CARD under L1 authorization.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-002"
   },
@@ -64,7 +74,14 @@
         "reason": "R1: require step-up authentication before blocking card"
       }
     ],
-    "final": []
+    "final": [
+      {
+        "action": "CLOSE_NO_FRAUD",
+        "route": "auto",
+        "reason": "Step-Up authentication (SMS_OTP) PASSED by cardholder. Primary fraud ambiguity resolved; uncertainty collapsed from 0.65 to 0.04. Case cleared under Policy R3/R10."
+      }
+    ],
+    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
   },
   "sar": {
     "file": false,
@@ -287,7 +304,16 @@
       "hand_off_summary": "Memory integrated: Retrieved 1 precedents (HHG-001). Case persisted to TigerGraph (CASE-SAVANNA-HHG-002).",
       "latency_ms": 872.44,
       "timestamp": "2026-09-22T19:30:03.299305"
+    },
+    {
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
+      "status": "danger"
+    },
+    {
+      "agent": "HUMAN_COGNITIVE_OVERRIDE",
+      "action": "Executed step-up simulation (SMS_OTP) -> PASS. Final Action: CLOSE_NO_FRAUD. Uncertainty collapsed to 0.04.",
+      "status": "safe"
     }
-  ],
-  "uncertainty_score": 0.65
+  ]
 }
