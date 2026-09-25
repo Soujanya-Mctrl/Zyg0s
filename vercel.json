@@ -3,7 +3,8 @@
   "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.py": {
-      "includeFiles": "cases/**,src/**"
+      "includeFiles": "cases/**,src/**",
+      "maxDuration": 60
     }
   },
   "rewrites": [

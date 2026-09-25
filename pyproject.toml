@@ -7,6 +7,9 @@ requires-python = ">=3.10"
 [tool.vercel]
 entrypoint = "api.index:app"
 
+[tool.vercel.scripts]
+build = "cd frontend && npm install && npm run build"
+
 [tool.pyright]
 extraPaths = ["."]
 executionEnvironments = [
