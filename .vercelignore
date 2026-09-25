@@ -1,7 +1,6 @@
 # Exclude heavy folders from Vercel deployment bundle
-assets/
-tests/
-data/
+/assets/
+/tests/
 .git/
 .venv/
 .pytest_cache/
