@@ -21,24 +21,26 @@ interface SidebarQueueProps {
 
 type QueueFilter = 'ALL' | 'ACTIVE' | 'EVIDENCE' | 'REVIEW' | 'APPROVAL' | 'CLOSED';
 
+const isClosedStatus = (s?: string) => Boolean(s && (s.startsWith('closed') || s === 'cleared' || s === 'resolved'));
+
 export function SidebarQueue({ cases, activeCaseId, onSelectCase, investigatedCaseIds }: SidebarQueueProps) {
-  const [selectedFilter, setSelectedFilter] = useState<QueueFilter>('ACTIVE');
+  const [selectedFilter, setSelectedFilter] = useState<QueueFilter>('ALL');
 
   const counts = useMemo(() => {
     return {
       ALL: cases.length,
-      ACTIVE: cases.filter(c => c.status !== 'closed' && c.status !== 'cleared').length,
+      ACTIVE: cases.filter(c => !isClosedStatus(c.status)).length,
       EVIDENCE: cases.filter(c => (c.uncertainty_score ?? 0) > 0.40 || (c.risk_score > 0.35 && c.risk_score < 0.70)).length,
       REVIEW: cases.filter(c => (c.risk_score >= 0.40 && c.risk_score < 0.75) || c.stage_1_action?.includes('REVIEW') || c.stage_1_action?.includes('STEP_UP')).length,
       APPROVAL: cases.filter(c => c.risk_score >= 0.75 || c.stage_1_action?.includes('BLOCK') || c.stage_1_action?.includes('SAR') || c.stage_1_action?.includes('FREEZE')).length,
-      CLOSED: cases.filter(c => c.status === 'closed' || c.status === 'cleared').length,
+      CLOSED: cases.filter(c => isClosedStatus(c.status)).length,
     };
   }, [cases]);
 
   const filteredCases = useMemo(() => {
     switch (selectedFilter) {
       case 'ACTIVE':
-        return cases.filter(c => c.status !== 'closed' && c.status !== 'cleared');
+        return cases.filter(c => !isClosedStatus(c.status));
       case 'EVIDENCE':
         return cases.filter(c => (c.uncertainty_score ?? 0) > 0.40 || (c.risk_score > 0.35 && c.risk_score < 0.70));
       case 'REVIEW':
@@ -46,7 +48,7 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase, investigatedCa
       case 'APPROVAL':
         return cases.filter(c => c.risk_score >= 0.75 || c.stage_1_action?.includes('BLOCK') || c.stage_1_action?.includes('SAR') || c.stage_1_action?.includes('FREEZE'));
       case 'CLOSED':
-        return cases.filter(c => c.status === 'closed' || c.status === 'cleared');
+        return cases.filter(c => isClosedStatus(c.status));
       case 'ALL':
       default:
         return cases;

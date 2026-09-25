@@ -333,13 +333,29 @@ export function WorkbenchDashboard() {
     setIsResetting(true);
     setActionFeedback(null);
     try {
-      await resetCase(activeCaseId);
+      const resetResult = await resetCase(activeCaseId);
+      
+      // Immediately reset local case details in state
+      setActiveCaseDetails((prev: any) => ({
+        ...prev,
+        status: 'open',
+        verdict: 'uncertain',
+        risk_score: resetResult.risk_score ?? 0.65,
+        uncertainty_score: resetResult.uncertainty ?? 0.65,
+        confidence_score: resetResult.confidence ?? 35,
+        next_best_actions: {
+          ...(prev?.next_best_actions || {}),
+          final: []
+        }
+      }));
+
       // Remove from investigated set so it returns to empty/standby state
       setInvestigatedCaseIds((prev) => {
         const next = new Set(prev);
         next.delete(activeCaseId);
         return next;
       });
+
       setActionFeedback(`Case ${activeCaseId} reset to open alert state.`);
       await loadCaseData(activeCaseId);
       const freshCases = await fetchCases();

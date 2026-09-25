@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: zygos-fraud-api
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install --no-cache-dir -r requirements.txt
+    startCommand: python -m uvicorn src.api.server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: TG_HOST
+        sync: false
+      - key: TG_PASSWORD
+        sync: false
+      - key: TG_SECRET
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TG_GRAPHNAME
+        value: Transaction_Fraud
+      - key: TG_PORT
+        value: "14240"
+      - key: TG_USERNAME
+        value: claudemcp
