@@ -1,14 +1,11 @@
-# Vercel Serverless Function Dependencies (Lightweight, excludes torch to remain well under 250MB limit)
+# Ultra-lightweight dependencies for Vercel Serverless Function (~45MB, well below 225MB limit)
 fastapi>=0.115.0
 uvicorn>=0.34.0
 pydantic>=2.10.0
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
 requests>=2.31.0
+httpx>=0.27.0
 networkx>=3.0.0
-pandas>=2.0.0
-numpy>=1.26.0
 pyTigerGraph>=1.5.0
 groq>=0.9.0
-langchain>=0.2.0
-langgraph>=0.2.0
