@@ -128,7 +128,24 @@ def load_case_json(case_id: str) -> Dict[str, Any]:
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+@app.get("/")
+@app.head("/")
+def root_index():
+    """Root status endpoint for uptime checks, Render health pings, and service discovery."""
+    return {
+        "platform": "Zyg0s - Autonomous Agentic Fraud Defense",
+        "status": "ONLINE",
+        "endpoints": {
+            "health": "/api/health",
+            "cases": "/api/cases",
+            "swagger_docs": "/docs",
+            "redoc": "/redoc"
+        }
+    }
 
+
+@app.get("/health")
+@app.head("/health")
 @app.get("/api/health")
 def health_check():
     llm = get_llm_client()
