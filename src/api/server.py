@@ -22,7 +22,8 @@ if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 from typing import Any, Dict, List, Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -130,8 +131,47 @@ def load_case_json(case_id: str) -> Dict[str, Any]:
 
 @app.get("/")
 @app.head("/")
-def root_index():
+def root_index(request: Request):
     """Root status endpoint for uptime checks, Render health pings, and service discovery."""
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZYGØS • Autonomous Fraud Defense API</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #07090e; color: #f1f5f9; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .card { max-width: 600px; width: 100%; background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; }
+        h1 { margin: 16px 0 8px; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+        p { color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 0 0 24px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn { display: flex; flex-direction: column; padding: 14px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+        .btn:hover { background: #334155; border-color: #64748b; transform: translateY(-1px); }
+        .btn span { color: #94a3b8; font-size: 11px; margin-top: 4px; font-weight: 400; }
+        .footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #1e293b; font-size: 12px; color: #64748b; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="badge"><div class="dot"></div> Backend Online</div>
+        <h1>ZYGØS Defense Engine</h1>
+        <p>TigerGraph Savanna Cloud & LangGraph Neuro-Symbolic Agent API is operational.</p>
+        <div class="grid">
+            <a href="/docs" class="btn">🚀 Interactive Swagger API<span>/docs (Test all endpoints)</span></a>
+            <a href="/api/health" class="btn">🩺 System Health Status<span>/api/health (TigerGraph & Groq)</span></a>
+            <a href="/api/cases" class="btn">📊 Evaluated Cases Benchmark<span>/api/cases (All 20 Cases)</span></a>
+            <a href="/redoc" class="btn">📖 ReDoc OpenAPI Specs<span>/redoc (Detailed documentation)</span></a>
+        </div>
+        <div class="footer">Engineered for TigerGraph HHGOA Hackathon 2026</div>
+    </div>
+</body>
+</html>"""
+        return HTMLResponse(content=html_content, status_code=200)
+
     return {
         "platform": "Zyg0s - Autonomous Agentic Fraud Defense",
         "status": "ONLINE",
