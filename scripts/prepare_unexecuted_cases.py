@@ -8,11 +8,12 @@ import csv
 import json
 import shutil
 import sys
+import typing
 from pathlib import Path
 
 # Shield against legacy NumPy 1.x C-extension collisions
-sys.modules.setdefault("bottleneck", None)
-sys.modules.setdefault("numexpr", None)
+typing.cast(dict[str, typing.Any], sys.modules).setdefault("bottleneck", None)
+typing.cast(dict[str, typing.Any], sys.modules).setdefault("numexpr", None)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 CASES_DIR = BASE_DIR / "cases"

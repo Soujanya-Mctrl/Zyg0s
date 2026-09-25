@@ -7,9 +7,10 @@ step-up auth simulation endpoints to power the React command center UI.
 from __future__ import annotations
 
 import sys
+import typing
 # Shield against legacy NumPy 1.x C-extension collisions with NumPy 2.x
-sys.modules.setdefault("bottleneck", None)
-sys.modules.setdefault("numexpr", None)
+typing.cast(dict[str, typing.Any], sys.modules).setdefault("bottleneck", None)
+typing.cast(dict[str, typing.Any], sys.modules).setdefault("numexpr", None)
 
 import json
 import os
