@@ -60,11 +60,11 @@ export interface CaseGraphData {
  * If backend is unavailable, times out, or returns HTML (e.g. SPA rewrites on static hosts),
  * it cleanly returns the provided fallback data without throwing unhandled exceptions.
  */
-async function safeFetchJson<T>(url: string, init?: RequestInit, fallback?: T): Promise<T> {
+async function safeFetchJson<T>(url: string, init?: RequestInit, fallback?: T, timeoutMs: number = 8000): Promise<T> {
   try {
     const res = await fetch(url, {
       ...init,
-      signal: AbortSignal.timeout(4000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     const contentType = res.headers.get('content-type') || '';
     if (res.ok && contentType.includes('application/json')) {
@@ -116,7 +116,8 @@ export async function investigateCase(caseId: string): Promise<any> {
   return safeFetchJson<any>(
     `${API_BASE}/cases/${encodeURIComponent(caseId)}/investigate`,
     { method: 'POST' },
-    fallback
+    fallback,
+    120000 // 120s timeout for genuine live multi-agent execution
   );
 }
 

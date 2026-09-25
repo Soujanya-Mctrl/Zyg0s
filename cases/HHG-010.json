@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-010",
   "case": {
-    "status": "closed_fraud",
-    "verdict": "fraud",
-    "fraud_probability": 0.85,
+    "status": "open",
+    "verdict": "uncertain",
+    "fraud_probability": 0.9,
     "pattern": "card_not_present_new_device",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -70,16 +70,6 @@
         ],
         "grade": "CIRCUMSTANTIAL",
         "weight": 0.6
-      },
-      {
-        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-        "source": "customer_reply",
-        "ref": "service:customer_validation_response",
-        "entity_ids": [
-          "3506725"
-        ],
-        "grade": "DIRECT",
-        "weight": 1.0
       }
     ],
     "similar_prior_cases": [
@@ -87,7 +77,7 @@
       "HHG-005",
       "HHG-004"
     ],
-    "summary": "Case HHG-010 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $1,000.03. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+    "summary": "Case HHG-010 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3506725 ($1,000.03, online) at 0.90. Review and decide.... Initial fraud risk scored at 0.90. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-010"
   },
@@ -116,46 +106,15 @@
         "reason": "R6: shared origin detected across cards; raise monitoring sensitivity"
       }
     ],
-    "final": [
-      {
-        "action": "BLOCK_ALL_CARDS",
-        "route": "L2",
-        "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-      },
-      {
-        "action": "CREATE_CASE",
-        "route": "auto",
-        "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-      },
-      {
-        "action": "FILE_REPORT",
-        "route": "L2",
-        "reason": "R2 and R6: shared device/network links to other cards"
-      },
-      {
-        "action": "MONITOR_CONNECTED_CARDS",
-        "route": "auto",
-        "reason": "R6: shared device profile / entity links across multiple cards"
-      }
-    ],
-    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+    "final": []
   },
   "sar": {
-    "file": true,
-    "reason": "R2: confirmed unauthorized use",
-    "narrative": "**SUSPICIOUS ACTIVITY REPORT (SAR) — INVESTIGATION NARRATIVE**\n**Case Reference:** HHG-010\n\n**I. SUMMARY OF ACTIVITY**\nBetween 2016-12-02 15:18:27 and 2016-12-02 15:18:27, the Institution identified suspicious transaction activity totaling $1,000.03 USD. This activity comprised 1 transaction(s) involving card C10434-K1, associated with customer profile C10434. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS & INSTRUMENTS**\n*   **Primary Customer Identifier:** C10434\n*   **Primary Card Number Reference:** C10434-K1\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | Windows 10 | edge 16.0 | 1366x768\n\n**III. TIMELINE & GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-02 15:18:27\n*   **Latest Activity Timestamp:** 2016-12-02 15:18:27\n*   **Affected Transaction Record IDs:** 3506725\n\n**IV. METHOD OF OPERATION & EVIDENCE**\nThe Institution’s upstream fraud detection model flagged the transaction with a high risk score of 0.90. The transaction amount of $1,000.03 represents a severe statistical outlier (Z=+4.90), exceeding 3.5 standard deviations from the customer’s baseline. Although the transaction originated in established billing region 469.0, matching the customer’s historical profile, it was initiated from a newly observed device profile: Windows | Windows 10 | edge 16.0 | 1366x768.\n\nGraph analysis revealed that this specific device profile is shared across 3 other distinct customer accounts within the TigerGraph network, indicating coordinated synthetic identity or card-not-present syndicate activity. Furthermore, the cardholder explicitly denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nUpon confirmation of unauthorized access via customer validation, the Institution initiated immediate card control actions pursuant to Bank Fraud Policy v1.0. The card was permanently blocked and placed on fraud monitoring. This filing is submitted in compliance with BSA/AML mandates.",
-    "subjects": [
-      "C10434",
-      "C10434-K1",
-      "C11923",
-      "C13171",
-      "C02354"
-    ],
-    "total_amount_usd": 1000.03,
-    "activity_dates": [
-      "2016-12-02",
-      "2016-12-02"
-    ]
+    "file": false,
+    "reason": "",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0.0,
+    "activity_dates": []
   },
   "stop_reason": "Customer denial confirmed fraud; pattern and network links identified. Further steps would not change action.",
   "tool_calls": 16,
@@ -391,7 +350,7 @@
         "filing_reason": "R2: confirmed unauthorized use",
         "hand_off_summary": "Compliance audit: SAR Filed=True (Exposure: $1,000.03, Reason: R2: confirmed unauthorized use)."
       },
-      "ai_reasoning": "Compliance Officer certified FinCEN SAR filing pursuant to 31 CFR 1020.320. Reported exposure is $1,000.03 across subjects ['C10434', 'C10434-K1', 'C11923', 'C13171', 'C02354']. Regulatory excerpt: **SUSPICIOUS ACTIVITY REPORT (SAR) — INVESTIGATION NARRATIVE**\n**Case Reference:** HHG-010\n\n**I. SUMMARY OF ACTIVITY**\nBetween 2016-12-02 15:18:27 and 2016-12-02 15:18:27, the Institution identified suspicious transaction activity totaling $1,000.03 ...",
+      "ai_reasoning": "Compliance Officer certified FinCEN SAR filing pursuant to 31 CFR 1020.320. Reported exposure is $1,000.03 across subjects ['C10434', 'C10434-K1', 'C11923', 'C13171', 'C02354']. Regulatory excerpt: **SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n**Case Reference:** HHG-010\n\n**I. SUMMARY OF ACTIVITY**\nBetween 2016-12-02 15:18:27 and 2016-12-02 15:18:27, the Institution identified suspicious transaction activity totaling $1,000.03 ...",
       "evidence_generated": [],
       "hand_off_summary": "Compliance audit: SAR Filed=True (Exposure: $1,000.03, Reason: R2: confirmed unauthorized use).",
       "latency_ms": 6491.22,
@@ -420,5 +379,6 @@
       "latency_ms": 34308.2,
       "timestamp": "2026-09-22T19:39:51.457126"
     }
-  ]
+  ],
+  "uncertainty_score": 0.2
 }

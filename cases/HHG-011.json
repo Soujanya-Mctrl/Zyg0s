@@ -35,16 +35,6 @@
         ],
         "grade": "CIRCUMSTANTIAL",
         "weight": 0.6
-      },
-      {
-        "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-        "source": "customer_reply",
-        "ref": "service:customer_validation_response",
-        "entity_ids": [
-          "3583368"
-        ],
-        "grade": "CONTRADICTORY",
-        "weight": -0.9
       }
     ],
     "similar_prior_cases": [
@@ -52,7 +42,7 @@
       "HHG-008",
       "HHG-009"
     ],
-    "summary": "Case HHG-011 concluded with verdict 'CLEARED' (P=0.05, U=0.550). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+    "summary": "Case HHG-011 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 35833... Initial fraud risk scored at 0.70. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-011"
   },
@@ -81,13 +71,12 @@
         "reason": "R7: send informational reminder regarding subscription billing"
       }
     ],
-    "final": [],
-    "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+    "final": []
   },
   "sar": {
     "file": false,
-    "reason": null,
-    "narrative": null,
+    "reason": "",
+    "narrative": "",
     "subjects": [],
     "total_amount_usd": 0.0,
     "activity_dates": []

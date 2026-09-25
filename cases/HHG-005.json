@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-005",
   "case": {
-    "status": "closed_fraud",
-    "verdict": "fraud",
-    "fraud_probability": 0.85,
+    "status": "open",
+    "verdict": "uncertain",
+    "fraud_probability": 0.54,
     "pattern": "card_not_present_new_device",
     "pattern_description": "",
     "affected_txn_ids": [
@@ -50,16 +50,6 @@
         ],
         "grade": "CIRCUMSTANTIAL",
         "weight": 0.6
-      },
-      {
-        "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-        "source": "customer_reply",
-        "ref": "service:customer_validation_response",
-        "entity_ids": [
-          "3523199"
-        ],
-        "grade": "DIRECT",
-        "weight": 1.0
       }
     ],
     "similar_prior_cases": [
@@ -67,7 +57,7 @@
       "HHG-002",
       "HHG-001"
     ],
-    "summary": "Case HHG-005 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $100.07. Initial Stage 1 action was VERIFY_WITH_CUSTOMER, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+    "summary": "Case HHG-005 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3523199 ($100.07, online) at 0.54. Review and decide.... Initial fraud risk scored at 0.54. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-005"
   },
@@ -91,46 +81,15 @@
         "reason": "R1: place card on 72-hour heightened monitoring pending response"
       }
     ],
-    "final": [
-      {
-        "action": "BLOCK_ALL_CARDS",
-        "route": "L2",
-        "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-      },
-      {
-        "action": "CREATE_CASE",
-        "route": "auto",
-        "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-      },
-      {
-        "action": "FILE_REPORT",
-        "route": "L2",
-        "reason": "R2 and R6: shared device/network links to other cards"
-      },
-      {
-        "action": "MONITOR_CONNECTED_CARDS",
-        "route": "auto",
-        "reason": "R6: shared device profile / entity links across multiple cards"
-      }
-    ],
-    "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+    "final": []
   },
   "sar": {
-    "file": true,
-    "reason": "R2: confirmed unauthorized use",
-    "narrative": "**FINANCIAL CRIMES ENFORCEMENT NETWORK (FINCEN) SUSPICIOUS ACTIVITY REPORT (SAR)**\n**INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-005\n\n**I. SUMMARY OF ACTIVITY**\nBetween 2016-12-07 21:38:37 and 2016-12-07 21:38:37, the Institution identified suspicious transaction activity totaling $100.07 USD. This activity comprised 1 transaction(s) involving card C02923-K1, associated with customer profile C02923. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C02923\n*   **Primary Card Number Reference:** C02923-K1\n*   **Connected / Correlated Cards:** C02354, C03042, C05876\n*   **Associated Device Telemetry:** iOS Device | iOS 9.3.5 | mobile safari 9.0 | 1024x768\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-07 21:38:37\n*   **Latest Activity Timestamp:** 2016-12-07 21:38:37\n*   **Affected Transaction Record IDs:** 3523199\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nThe Institution’s risk monitoring systems flagged the following indicators of fraud and potential money laundering:\n1.  The transaction occurred within established billing region 330.0, matching the customer’s historical profile.\n2.  The device profile (iOS Device | iOS 9.3.5 | mobile safari 9.0 | 1024x768) was observed across 3 other distinct customer accounts within the TigerGraph network.\n3.  The transaction was initiated from a newly observed device profile: iOS Device | iOS 9.3.5 | mobile safari 9.0 | 1024x768.\n4.  The cardholder denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\n**Multi-Entity Syndicate Linkage:**\nGraph analysis revealed that the device profile (iOS Device | iOS 9.3.5 | mobile safari 9.0 | 1024x768) is shared across multiple cardholder profiles. This linkage indicates coordinated synthetic identity or card-not-present syndicate activity.\n\n**V.",
-    "subjects": [
-      "C02923",
-      "C02923-K1",
-      "C02354",
-      "C03042",
-      "C05876"
-    ],
-    "total_amount_usd": 100.07,
-    "activity_dates": [
-      "2016-12-07",
-      "2016-12-07"
-    ]
+    "file": false,
+    "reason": "",
+    "narrative": "",
+    "subjects": [],
+    "total_amount_usd": 0.0,
+    "activity_dates": []
   },
   "stop_reason": "Customer denial confirmed fraud; pattern and network links identified. Further steps would not change action.",
   "tool_calls": 16,
@@ -373,5 +332,6 @@
       "latency_ms": 40140.17,
       "timestamp": "2026-09-22T19:32:23.646567"
     }
-  ]
+  ],
+  "uncertainty_score": 0.92
 }

@@ -88,6 +88,17 @@ app.add_middleware(
 )
 
 
+@app.on_event("startup")
+def startup_event():
+    """Ensure all 20 benchmark cases are in the clean unexecuted OPEN alert state on boot."""
+    try:
+        from scripts.prepare_unexecuted_cases import reset_all_cases
+        reset_all_cases()
+        print("[Startup] Verified all 20 cases initialized in clean UNEXECUTED state.")
+    except Exception as e:
+        print(f"[Startup] Warning during case initialization: {e}")
+
+
 class StepUpRequest(BaseModel):
     action_type: str = Field(default="SMS_OTP", description="Action type (SMS_OTP, BIOMETRIC, CALL)")
     outcome: str = Field(default="PASS", description="Outcome (PASS, FAIL, TIMEOUT)")
@@ -409,58 +420,50 @@ def get_case_explanation(case_id: str):
 @app.post("/api/cases/{case_id}/investigate")
 def investigate_case(case_id: str):
     """
-    Executes or loads the 7-agent neuro-symbolic pipeline evaluation for the specified case_id.
+    Executes the genuine 7-agent neuro-symbolic pipeline evaluation for the specified case_id.
+    Runs live Alert Sentinel, Graph Scout, Evidence Assessor, Pattern Strategist, Policy Governor,
+    Compliance Officer (Groq SAR), and Memory Weaver.
     Persists evaluated state to cases/{case_id}.json and returns complete case_details, pipeline, and graph.
     """
-    bench_path = CASES_DIR / "evaluated_benchmarks" / f"{case_id}.json"
     active_path = CASES_DIR / f"{case_id}.json"
 
-    if bench_path.exists():
-        try:
-            with open(bench_path, "r", encoding="utf-8") as f:
-                bench_data = json.load(f)
-            with open(active_path, "w", encoding="utf-8") as f:
-                json.dump(bench_data, f, indent=2)
-        except Exception as e:
-            print(f"Warning: Failed to sync benchmark for {case_id}: {e}")
-    else:
-        orch = get_orchestrator()
-        case_meta = {"case_id": case_id}
-        case_pack_path = BASE_DIR / "data" / "hhgoa_ieee" / "case_pack.csv"
-        if case_pack_path.exists():
-            import pandas as pd
-            df_pack = pd.read_csv(case_pack_path)
-            matches = df_pack[df_pack["case_id"] == case_id]
-            if not matches.empty:
-                case_meta = matches.iloc[0].to_dict()
-        if "case_id" not in case_meta or case_meta["case_id"] != case_id or "first_suspicious_txn_id" not in case_meta:
-            cdata = load_case_json(case_id)
-            case_inner = cdata.get("case", {})
-            case_meta = {
-                "case_id": case_id,
-                "first_suspicious_txn_id": case_inner.get("first_suspicious_txn_id"),
-                "exposure_usd": case_inner.get("exposure_usd", 100.0),
-                "connected_card_ids": case_inner.get("connected_card_ids", []),
-                "pattern": case_inner.get("pattern", "CARD_VELOCITY_BURST"),
-                "trigger_type": "analyst_investigate_trigger",
-                "trigger_text": case_inner.get("summary", "Transaction alert dispatched to orchestrator.")
-            }
-        out = orch.run_investigation(case_meta)
-        case_dict = {
-            "case_id": out.case_id,
-            "case": out.case.model_dump(),
-            "evidence_requests": [e.model_dump() for e in out.evidence_requests],
-            "next_best_actions": out.next_best_actions.model_dump(),
-            "sar": out.sar.model_dump(),
-            "stop_reason": out.stop_reason,
-            "latency_s": out.latency_s,
-            "orchestrator_pipeline_trace": getattr(out, "orchestrator_pipeline_trace", [])
+    orch = get_orchestrator()
+    case_meta = {"case_id": case_id}
+    case_pack_path = BASE_DIR / "data" / "hhgoa_ieee" / "case_pack.csv"
+    if case_pack_path.exists():
+        import pandas as pd
+        df_pack = pd.read_csv(case_pack_path)
+        matches = df_pack[df_pack["case_id"] == case_id]
+        if not matches.empty:
+            case_meta = matches.iloc[0].to_dict()
+    if "case_id" not in case_meta or case_meta["case_id"] != case_id or "first_suspicious_txn_id" not in case_meta:
+        cdata = load_case_json(case_id)
+        case_inner = cdata.get("case", {})
+        case_meta = {
+            "case_id": case_id,
+            "first_suspicious_txn_id": case_inner.get("first_suspicious_txn_id"),
+            "exposure_usd": case_inner.get("exposure_usd", 100.0),
+            "connected_card_ids": case_inner.get("connected_card_ids", []),
+            "pattern": case_inner.get("pattern", "CARD_VELOCITY_BURST"),
+            "trigger_type": "analyst_investigate_trigger",
+            "trigger_text": case_inner.get("summary", "Transaction alert dispatched to orchestrator.")
         }
-        try:
-            with open(active_path, "w", encoding="utf-8") as f:
-                json.dump(case_dict, f, indent=2)
-        except Exception as e:
-            print(f"Warning: Failed to persist investigated case {out.case_id}: {e}")
+    out = orch.run_investigation(case_meta)
+    case_dict = {
+        "case_id": out.case_id,
+        "case": out.case.model_dump(),
+        "evidence_requests": [e.model_dump() for e in out.evidence_requests],
+        "next_best_actions": out.next_best_actions.model_dump(),
+        "sar": out.sar.model_dump(),
+        "stop_reason": out.stop_reason,
+        "latency_s": out.latency_s,
+        "orchestrator_pipeline_trace": getattr(out, "orchestrator_pipeline_trace", [])
+    }
+    try:
+        with open(active_path, "w", encoding="utf-8") as f:
+            json.dump(case_dict, f, indent=2)
+    except Exception as e:
+        print(f"Warning: Failed to persist investigated case {out.case_id}: {e}")
 
     case_details = get_case(case_id)
     pipeline_data = get_case_pipeline(case_id)

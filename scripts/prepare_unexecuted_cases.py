@@ -153,6 +153,16 @@ def reset_all_cases():
             ]
         data["orchestrator_pipeline_trace"] = clean_trace
 
+        # 5. Reset SAR to unfiled state (no SAR filed on unexecuted alert)
+        data["sar"] = {
+            "file": False,
+            "reason": "",
+            "narrative": "",
+            "subjects": [],
+            "total_amount_usd": 0.0,
+            "activity_dates": []
+        }
+
         with open(cf, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
 

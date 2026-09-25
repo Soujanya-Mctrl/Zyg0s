@@ -1,9 +1,9 @@
 {
   "case_id": "HHG-018",
   "case": {
-    "status": "closed_cleared",
-    "verdict": "cleared",
-    "fraud_probability": 0.05,
+    "status": "open",
+    "verdict": "uncertain",
+    "fraud_probability": 0.66,
     "pattern": "none",
     "pattern_description": "",
     "affected_txn_ids": [],
@@ -23,16 +23,6 @@
         ],
         "grade": "CONTRADICTORY",
         "weight": -0.8
-      },
-      {
-        "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-        "source": "customer_reply",
-        "ref": "service:customer_validation_response",
-        "entity_ids": [
-          "3491361"
-        ],
-        "grade": "CONTRADICTORY",
-        "weight": -0.9
       }
     ],
     "similar_prior_cases": [
@@ -40,7 +30,7 @@
       "HHG-008",
       "HHG-009"
     ],
-    "summary": "Case HHG-018 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+    "summary": "Case HHG-018 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 349136... Initial fraud risk scored at 0.66. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
     "graph_case_id": "CASE-SAVANNA-HHG-018"
   },
@@ -69,19 +59,12 @@
         "reason": "R7: send informational reminder regarding subscription billing"
       }
     ],
-    "final": [
-      {
-        "action": "CLOSE_NO_FRAUD",
-        "route": "auto",
-        "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
-      }
-    ],
-    "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+    "final": []
   },
   "sar": {
     "file": false,
-    "reason": null,
-    "narrative": null,
+    "reason": "",
+    "narrative": "",
     "subjects": [],
     "total_amount_usd": 0.0,
     "activity_dates": []
@@ -243,7 +226,7 @@
         "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure.",
         "hand_off_summary": "Policy evaluated: Stage 1 [CREATE_CASE] -> Stage 2 [CLOSE_NO_FRAUD] (auto). Exposure: $0.00."
       },
-      "ai_reasoning": "The decision to close the case without imposing account restrictions strictly adheres to Rule R1 by ensuring that a single, unverified alert signal did not trigger a disproportionate or premature block, thereby preserving customer access rights. The final action is fully defensible as the customer’s explicit confirmation of legitimate activity provided the necessary evidentiary basis to downgrade the risk assessment and justify immediate clearance with zero financial exposure.",
+      "ai_reasoning": "The decision to close the case without imposing account restrictions strictly adheres to Rule R1 by ensuring that a single, unverified alert signal did not trigger a disproportionate or premature block, thereby preserving customer access rights. The final action is fully defensible as the customer\u2019s explicit confirmation of legitimate activity provided the necessary evidentiary basis to downgrade the risk assessment and justify immediate clearance with zero financial exposure.",
       "evidence_generated": [],
       "hand_off_summary": "Policy evaluated: Stage 1 [CREATE_CASE] -> Stage 2 [CLOSE_NO_FRAUD] (auto). Exposure: $0.00.",
       "latency_ms": 285.72,
@@ -292,5 +275,6 @@
       "latency_ms": 1030.1,
       "timestamp": "2026-09-22T19:47:31.410993"
     }
-  ]
+  ],
+  "uncertainty_score": 0.68
 }

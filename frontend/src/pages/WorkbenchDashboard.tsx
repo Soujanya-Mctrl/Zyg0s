@@ -274,24 +274,19 @@ export function WorkbenchDashboard() {
     setLiveRiskScore(progression[0].score);
     setLiveConfidence(progression[0].conf);
 
-    // Live score calculation animation cycling through the 7 agents
+    // Real live pipeline progression cycling through agents while backend orchestrates
     let step = 0;
     const tickerInterval = setInterval(() => {
-      step++;
-      if (step < progression.length) {
-        setActiveAgentIndex(step);
-        setActiveAgentName(progression[step].name);
-        setLiveRiskScore(progression[step].score);
-        setLiveConfidence(progression[step].conf);
-      }
-    }, 450);
+      step = (step + 1) % progression.length;
+      setActiveAgentIndex(step);
+      setActiveAgentName(progression[step].name);
+      setLiveRiskScore(progression[step].score);
+      setLiveConfidence(progression[step].conf);
+    }, 1800);
 
     try {
-      // Execute backend agent pipeline orchestrator (/api/cases/{case_id}/investigate)
-      const [investigatedEnvelope] = await Promise.all([
-        investigateCase(activeCaseId),
-        new Promise((resolve) => setTimeout(resolve, 2800)), // Ensure smooth visual progression
-      ]);
+      // Execute backend agent pipeline orchestrator live (/api/cases/{case_id}/investigate)
+      const investigatedEnvelope = await investigateCase(activeCaseId);
 
       clearInterval(tickerInterval);
 

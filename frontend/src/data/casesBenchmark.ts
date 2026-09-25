@@ -27,16 +27,16 @@ export const BENCHMARK_DATA: any = {
       "amount": 0.0,
       "customer_id": "C12382",
       "card_id": "C12382-K1",
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.61,
+      "uncertainty_score": 0.78,
+      "confidence_score": 22,
       "fraud_pattern": "none",
-      "evidence_count": 2,
+      "evidence_count": 1,
       "similar_prior_cases": [],
       "stage_1_action": "VERIFY_WITH_CUSTOMER",
-      "stage_2_action": "CLOSE_NO_FRAUD",
+      "stage_2_action": "MONITOR_CARD",
       "has_sar": false
     },
     {
@@ -45,18 +45,18 @@ export const BENCHMARK_DATA: any = {
       "amount": 292.36,
       "customer_id": "C11891",
       "card_id": "C11891-K1",
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.0,
-      "confidence_score": 100,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.79,
+      "uncertainty_score": 0.58,
+      "confidence_score": 42,
       "fraud_pattern": "card_not_present_fraud",
-      "evidence_count": 3,
+      "evidence_count": 2,
       "similar_prior_cases": [
         "HHG-001"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "CLOSE_NO_FRAUD",
+      "stage_2_action": "MONITOR_CARD",
       "has_sar": false
     },
     {
@@ -65,19 +65,19 @@ export const BENCHMARK_DATA: any = {
       "amount": 0.0,
       "customer_id": "C08623",
       "card_id": "C08623-K2",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.95,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.72,
+      "uncertainty_score": 0.56,
+      "confidence_score": 44,
       "fraud_pattern": "none",
-      "evidence_count": 2,
+      "evidence_count": 1,
       "similar_prior_cases": [
         "HHG-002",
         "HHG-001"
       ],
       "stage_1_action": "CREATE_CASE",
-      "stage_2_action": "BLOCK_CARD",
+      "stage_2_action": "MONITOR_CARD",
       "has_sar": false
     },
     {
@@ -86,20 +86,20 @@ export const BENCHMARK_DATA: any = {
       "amount": 128.33,
       "customer_id": "C08106",
       "card_id": "C08106-K1",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.99,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.75,
+      "uncertainty_score": 0.5,
+      "confidence_score": 50,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 2,
+      "evidence_count": 1,
       "similar_prior_cases": [
         "HHG-002",
         "HHG-001",
         "HHG-003"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_CARD",
+      "stage_2_action": "MONITOR_CARD",
       "has_sar": false
     },
     {
@@ -108,21 +108,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 100.07,
       "customer_id": "C02923",
       "card_id": "C02923-K1",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.54,
+      "uncertainty_score": 0.92,
+      "confidence_score": 8,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 4,
+      "evidence_count": 3,
       "similar_prior_cases": [
         "HHG-004",
         "HHG-002",
         "HHG-001"
       ],
       "stage_1_action": "VERIFY_WITH_CUSTOMER",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-006",
@@ -130,21 +130,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 482.12,
       "customer_id": "C07297",
       "card_id": "C07297-K1",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.99,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.78,
+      "uncertainty_score": 0.56,
+      "confidence_score": 44,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 4,
+      "evidence_count": 3,
       "similar_prior_cases": [
         "HHG-005",
         "HHG-004",
         "HHG-001"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-007",
@@ -152,20 +152,20 @@ export const BENCHMARK_DATA: any = {
       "amount": 111.92,
       "customer_id": "C09933",
       "card_id": "C09933-K2",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.87,
+      "uncertainty_score": 0.26,
+      "confidence_score": 74,
       "fraud_pattern": "account_takeover",
-      "evidence_count": 3,
+      "evidence_count": 2,
       "similar_prior_cases": [
         "HHG-002",
         "HHG-006",
         "HHG-005"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_CARD",
+      "stage_2_action": "MONITOR_CARD",
       "has_sar": false
     },
     {
@@ -180,7 +180,7 @@ export const BENCHMARK_DATA: any = {
       "uncertainty_score": 0.64,
       "confidence_score": 36,
       "fraud_pattern": "none",
-      "evidence_count": 2,
+      "evidence_count": 1,
       "similar_prior_cases": [
         "HHG-003",
         "HHG-002",
@@ -196,20 +196,20 @@ export const BENCHMARK_DATA: any = {
       "amount": 0.0,
       "customer_id": "C08299",
       "card_id": "C08299-K1",
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.62,
+      "uncertainty_score": 0.76,
+      "confidence_score": 24,
       "fraud_pattern": "none",
-      "evidence_count": 2,
+      "evidence_count": 1,
       "similar_prior_cases": [
         "HHG-003",
         "HHG-008",
         "HHG-002"
       ],
       "stage_1_action": "CREATE_CASE",
-      "stage_2_action": "CLOSE_NO_FRAUD",
+      "stage_2_action": "MONITOR_CARD",
       "has_sar": false
     },
     {
@@ -218,21 +218,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 1000.03,
       "customer_id": "C10434",
       "card_id": "C10434-K1",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.9,
+      "uncertainty_score": 0.2,
+      "confidence_score": 80,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 6,
+      "evidence_count": 5,
       "similar_prior_cases": [
         "HHG-006",
         "HHG-005",
         "HHG-004"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-011",
@@ -246,7 +246,7 @@ export const BENCHMARK_DATA: any = {
       "uncertainty_score": 0.6,
       "confidence_score": 40,
       "fraud_pattern": "none",
-      "evidence_count": 3,
+      "evidence_count": 2,
       "similar_prior_cases": [
         "HHG-003",
         "HHG-008",
@@ -262,20 +262,20 @@ export const BENCHMARK_DATA: any = {
       "amount": 0.0,
       "customer_id": "C05876",
       "card_id": "C05876-K2",
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.55,
+      "uncertainty_score": 0.9,
+      "confidence_score": 10,
       "fraud_pattern": "none",
-      "evidence_count": 2,
+      "evidence_count": 1,
       "similar_prior_cases": [
         "HHG-002",
         "HHG-001",
         "HHG-007"
       ],
       "stage_1_action": "VERIFY_WITH_CUSTOMER",
-      "stage_2_action": "CLOSE_NO_FRAUD",
+      "stage_2_action": "MONITOR_CARD",
       "has_sar": false
     },
     {
@@ -284,21 +284,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 35.66,
       "customer_id": "C07671",
       "card_id": "C07671-K2",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.92,
-      "uncertainty_score": 0.0,
-      "confidence_score": 100,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.76,
+      "uncertainty_score": 0.52,
+      "confidence_score": 48,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 4,
+      "evidence_count": 3,
       "similar_prior_cases": [
         "HHG-010",
         "HHG-004",
         "HHG-005"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-014",
@@ -306,21 +306,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 74.96,
       "customer_id": "C13487",
       "card_id": "C13487-K1",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.99,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.82,
+      "uncertainty_score": 0.36,
+      "confidence_score": 64,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 4,
+      "evidence_count": 3,
       "similar_prior_cases": [
         "HHG-006",
         "HHG-005",
         "HHG-004"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-015",
@@ -328,21 +328,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 599.94,
       "customer_id": "C03042",
       "card_id": "C03042-K1",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.92,
-      "uncertainty_score": 0.0,
-      "confidence_score": 100,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.77,
+      "uncertainty_score": 0.54,
+      "confidence_score": 46,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 5,
+      "evidence_count": 4,
       "similar_prior_cases": [
         "HHG-010",
         "HHG-013",
         "HHG-006"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-016",
@@ -350,21 +350,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 59.67,
       "customer_id": "C09988",
       "card_id": "C09988-K1",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.99,
-      "uncertainty_score": 0.0,
-      "confidence_score": 100,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.74,
+      "uncertainty_score": 0.52,
+      "confidence_score": 48,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 3,
+      "evidence_count": 2,
       "similar_prior_cases": [
         "HHG-006",
         "HHG-010",
         "HHG-005"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-017",
@@ -372,21 +372,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 100.09,
       "customer_id": "C04570",
       "card_id": "C04570-K1",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.57,
+      "uncertainty_score": 0.86,
+      "confidence_score": 14,
       "fraud_pattern": "card_not_present_fraud",
-      "evidence_count": 3,
+      "evidence_count": 2,
       "similar_prior_cases": [
         "HHG-010",
         "HHG-002",
         "HHG-016"
       ],
       "stage_1_action": "VERIFY_WITH_CUSTOMER",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-018",
@@ -394,20 +394,20 @@ export const BENCHMARK_DATA: any = {
       "amount": 0.0,
       "customer_id": "C02354",
       "card_id": "C02354-K2",
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.66,
+      "uncertainty_score": 0.68,
+      "confidence_score": 32,
       "fraud_pattern": "none",
-      "evidence_count": 2,
+      "evidence_count": 1,
       "similar_prior_cases": [
         "HHG-003",
         "HHG-008",
         "HHG-009"
       ],
       "stage_1_action": "CREATE_CASE",
-      "stage_2_action": "CLOSE_NO_FRAUD",
+      "stage_2_action": "MONITOR_CARD",
       "has_sar": false
     },
     {
@@ -416,21 +416,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 99.92,
       "customer_id": "C07987",
       "card_id": "C07987-K2",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.9,
+      "uncertainty_score": 0.2,
+      "confidence_score": 80,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 5,
+      "evidence_count": 4,
       "similar_prior_cases": [
         "HHG-010",
         "HHG-013",
         "HHG-004"
       ],
       "stage_1_action": "DECLINE_TRANSACTION",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     },
     {
       "case_id": "HHG-020",
@@ -438,21 +438,21 @@ export const BENCHMARK_DATA: any = {
       "amount": 125.08,
       "customer_id": "C12265",
       "card_id": "C12265-K2",
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.52,
+      "uncertainty_score": 0.96,
+      "confidence_score": 4,
       "fraud_pattern": "card_not_present_new_device",
-      "evidence_count": 4,
+      "evidence_count": 3,
       "similar_prior_cases": [
         "HHG-010",
         "HHG-006",
         "HHG-013"
       ],
       "stage_1_action": "VERIFY_WITH_CUSTOMER",
-      "stage_2_action": "BLOCK_ALL_CARDS",
-      "has_sar": true
+      "stage_2_action": "MONITOR_CARD",
+      "has_sar": false
     }
   ],
   "details": {
@@ -462,13 +462,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C12382-K1",
       "first_suspicious_txn_id": "3514030",
       "exposure_usd": 0.0,
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.61,
+      "uncertainty_score": 0.78,
+      "confidence_score": 22,
       "pattern": "none",
-      "summary": "Case HHG-001 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was VERIFY_WITH_CUSTOMER, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+      "summary": "Case HHG-001 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3514030 ($77.07, in billing region 444.0) at 0.61. Review and dec... Initial fraud risk scored at 0.61. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Transaction in established billing region 444.0 matching customer historical profile.",
@@ -479,16 +479,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CONTRADICTORY",
           "weight": -0.7
-        },
-        {
-          "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3514030"
-          ],
-          "grade": "CONTRADICTORY",
-          "weight": -0.9
         }
       ],
       "connected_card_ids": [
@@ -516,19 +506,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: place card on 72-hour heightened monitoring pending response"
           }
         ],
-        "final": [
-          {
-            "action": "CLOSE_NO_FRAUD",
-            "route": "auto",
-            "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
-          }
-        ],
-        "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -745,13 +728,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C11891-K1",
       "first_suspicious_txn_id": "3478782",
       "exposure_usd": 292.36,
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.0,
-      "confidence_score": 100,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.79,
+      "uncertainty_score": 0.58,
+      "confidence_score": 42,
       "pattern": "card_not_present_fraud",
-      "summary": "Case HHG-002 concluded with verdict 'FRAUD' (P=0.93, U=0.000). Pattern: 'card_not_present_fraud'. Total financial exposure: $292.36. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_CARD under L1 authorization.",
+      "summary": "Case HHG-002 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3478782 ($292.36, online) at 0.79. Review and decide.... Initial fraud risk scored at 0.79. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Bank upstream fraud detection model flagged transaction with high risk score of 0.79.",
@@ -772,16 +755,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3478782"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -811,19 +784,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: require step-up authentication before blocking card"
           }
         ],
-        "final": [
-          {
-            "action": "CLOSE_NO_FRAUD",
-            "route": "auto",
-            "reason": "Step-Up authentication (SMS_OTP) PASSED by cardholder. Primary fraud ambiguity resolved; uncertainty collapsed from 0.65 to 0.04. Case cleared under Policy R3/R10."
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -1037,16 +1003,6 @@ export const BENCHMARK_DATA: any = {
           "hand_off_summary": "Memory integrated: Retrieved 1 precedents (HHG-001). Case persisted to TigerGraph (CASE-SAVANNA-HHG-002).",
           "latency_ms": 872.44,
           "timestamp": "2026-09-22T19:30:03.299305"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
-          "status": "danger"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> PASS. Final Action: CLOSE_NO_FRAUD. Uncertainty collapsed to 0.04.",
-          "status": "safe"
         }
       ],
       "telemetry": {
@@ -1063,13 +1019,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C08623-K2",
       "first_suspicious_txn_id": "3530164",
       "exposure_usd": 0.0,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.95,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.72,
+      "uncertainty_score": 0.56,
+      "confidence_score": 44,
       "pattern": "none",
-      "summary": "Case HHG-003 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+      "summary": "Case HHG-003 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C08623 message: 'I never made this $49.00 purchase. Please check my card.' Refers to 353016... Initial fraud risk scored at 0.72. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Disputed transaction of $49.00 matches customer recurring charge history (seen 62 prior times).",
@@ -1080,16 +1036,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CONTRADICTORY",
           "weight": -0.8
-        },
-        {
-          "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3530164"
-          ],
-          "grade": "CONTRADICTORY",
-          "weight": -0.9
         }
       ],
       "connected_card_ids": [
@@ -1125,19 +1071,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R7: send informational reminder regarding subscription billing"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_CARD",
-            "route": "L1",
-            "reason": "Step-Up authentication (SMS_OTP) FAIL. Customer challenge failed to resolve identity possession; uncertainty collapsed from 0.65 to 0.05. Risk escalated to confirmed fraud under Policy R1/R2."
-          }
-        ],
-        "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -1342,41 +1281,6 @@ export const BENCHMARK_DATA: any = {
           "hand_off_summary": "Memory integrated: Retrieved 2 precedents (HHG-002, HHG-001). Case persisted to TigerGraph (CASE-SAVANNA-HHG-003).",
           "latency_ms": 840.13,
           "timestamp": "2026-09-22T19:30:41.618084"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
-          "status": "danger"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
-          "status": "danger"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> PASS. Final Action: CLOSE_NO_FRAUD. Uncertainty collapsed to 0.04.",
-          "status": "safe"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> PASS. Final Action: CLOSE_NO_FRAUD. Uncertainty collapsed to 0.04.",
-          "status": "safe"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
-          "status": "danger"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> PASS. Final Action: CLOSE_NO_FRAUD. Uncertainty collapsed to 0.04.",
-          "status": "safe"
-        },
-        {
-          "agent": "HUMAN_COGNITIVE_OVERRIDE",
-          "action": "Executed step-up simulation (SMS_OTP) -> FAIL. Final Action: BLOCK_CARD. Uncertainty collapsed to 0.05.",
-          "status": "danger"
         }
       ],
       "telemetry": {
@@ -1393,13 +1297,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C08106-K1",
       "first_suspicious_txn_id": "3583227",
       "exposure_usd": 128.33,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.99,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.75,
+      "uncertainty_score": 0.5,
+      "confidence_score": 50,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-004 concluded with verdict 'FRAUD' (P=0.99, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $128.33. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_CARD under L1 authorization.",
+      "summary": "Case HHG-004 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C08106 message: 'I never made this $128.33 purchase. Please check my card.' Refers to 35832... Initial fraud risk scored at 0.75. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Transaction initiated from a newly observed device profile: firefox 47.0.",
@@ -1410,16 +1314,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3583227"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -1453,24 +1347,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: verify card possession and transaction details with customer"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_CARD",
-            "route": "L1",
-            "reason": "R2: customer denied unauthorized use; block card (exposure <= $2,500)"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -1692,13 +1574,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C02923-K1",
       "first_suspicious_txn_id": "3523199",
       "exposure_usd": 100.07,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.54,
+      "uncertainty_score": 0.92,
+      "confidence_score": 8,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-005 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $100.07. Initial Stage 1 action was VERIFY_WITH_CUSTOMER, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-005 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3523199 ($100.07, online) at 0.54. Review and decide.... Initial fraud risk scored at 0.54. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Transaction in established billing region 330.0 matching customer historical profile.",
@@ -1729,16 +1611,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3523199"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -1775,46 +1647,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: place card on 72-hour heightened monitoring pending response"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINANCIAL CRIMES ENFORCEMENT NETWORK (FINCEN) SUSPICIOUS ACTIVITY REPORT (SAR)**\n**INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-005\n\n**I. SUMMARY OF ACTIVITY**\nBetween 2016-12-07 21:38:37 and 2016-12-07 21:38:37, the Institution identified suspicious transaction activity totaling $100.07 USD. This activity comprised 1 transaction(s) involving card C02923-K1, associated with customer profile C02923. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C02923\n*   **Primary Card Number Reference:** C02923-K1\n*   **Connected / Correlated Cards:** C02354, C03042, C05876\n*   **Associated Device Telemetry:** iOS Device | iOS 9.3.5 | mobile safari 9.0 | 1024x768\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-07 21:38:37\n*   **Latest Activity Timestamp:** 2016-12-07 21:38:37\n*   **Affected Transaction Record IDs:** 3523199\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nThe Institution\u2019s risk monitoring systems flagged the following indicators of fraud and potential money laundering:\n1.  The transaction occurred within established billing region 330.0, matching the customer\u2019s historical profile.\n2.  The device profile (iOS Device | iOS 9.3.5 | mobile safari 9.0 | 1024x768) was observed across 3 other distinct customer accounts within the TigerGraph network.\n3.  The transaction was initiated from a newly observed device profile: iOS Device | iOS 9.3.5 | mobile safari 9.0 | 1024x768.\n4.  The cardholder denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\n**Multi-Entity Syndicate Linkage:**\nGraph analysis revealed that the device profile (iOS Device | iOS 9.3.5 | mobile safari 9.0 | 1024x768) is shared across multiple cardholder profiles. This linkage indicates coordinated synthetic identity or card-not-present syndicate activity.\n\n**V.",
-        "subjects": [
-          "C02923",
-          "C02923-K1",
-          "C02354",
-          "C03042",
-          "C05876"
-        ],
-        "total_amount_usd": 100.07,
-        "activity_dates": [
-          "2016-12-07",
-          "2016-12-07"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -2068,13 +1909,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C07297-K1",
       "first_suspicious_txn_id": "3476682",
       "exposure_usd": 482.12,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.99,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.78,
+      "uncertainty_score": 0.56,
+      "confidence_score": 44,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-006 concluded with verdict 'FRAUD' (P=0.99, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $482.12. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-006 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C07297 message: 'I never made this $482.12 purchase. Please check my card.' Refers to 34766... Initial fraud risk scored at 0.78. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Transaction in established billing region 264.0 matching customer historical profile.",
@@ -2105,16 +1946,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3476682"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -2151,46 +1982,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: verify card possession and transaction details with customer"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-006\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nDuring the period commencing and concluding on 2016-11-21 at 20:30:00, the Institution identified suspicious transaction activity totaling $482.12 USD. This activity comprised 1 transaction(s) processed via card C07297-K1, associated with customer profile C07297. The primary anomaly detected was classified as 'card_not_present_new_device,' indicating a potential unauthorized card-not-present (CNP) transaction executed from an unrecognized device environment.\n\n**II. SUBJECTS AND FINANCIAL INSTRUMENTS**\n*   **Primary Customer Identifier:** C07297\n*   **Primary Card Number Reference:** C07297-K1\n*   **Correlated Card Instruments:** C11923, C07987, C02354\n*   **Associated Device Telemetry:** Trident/7.0 | Windows 7 | ie 11.0 for desktop | 1920x1080\n\n**III. TEMPORAL AND GEOGRAPHIC PARAMETERS**\n*   **Earliest Flagged Transaction Timestamp:** 2016-11-21 20:30:00\n*   **Latest Activity Timestamp:** 2016-11-21 20:30:00\n*   **Affected Transaction Record ID:** 3476682\n\n**IV. METHOD OF OPERATION AND EVIDENTIARY BASIS**\nInvestigative analysis of Transaction ID 3476682 revealed the following indicators of fraud:\n\n1.  **Geographic Consistency:** The transaction originated from established billing region 264.0, which aligns with the customer\u2019s historical geographic profile, suggesting the use of stolen but valid billing information.\n2.  **Device Anomaly:** The transaction was initiated from a newly observed device profile: Trident/7.0 | Windows 7 | ie 11.0 for desktop | 1920x1080.\n3.  **Syndicate Linkage:** Graph analysis via TigerGraph identified that the specific device profile (Trident/7.0 | Windows 7 | ie 11.0 for desktop | 1920x1080) has been observed across three (3) other distinct customer accounts. This cross-account device sharing indicates coordinated synthetic identity or card-not-present syndicate activity.\n4.  **Customer Verification:** The cardholder explicitly denied authorizing the transaction and confirmed that the physical card remains in their possession,",
-        "subjects": [
-          "C07297",
-          "C07297-K1",
-          "C11923",
-          "C07987",
-          "C02354"
-        ],
-        "total_amount_usd": 482.12,
-        "activity_dates": [
-          "2016-11-21",
-          "2016-11-21"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -2444,13 +2244,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C09933-K2",
       "first_suspicious_txn_id": "3514948",
       "exposure_usd": 111.92,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.87,
+      "uncertainty_score": 0.26,
+      "confidence_score": 74,
       "pattern": "account_takeover",
-      "summary": "Case HHG-007 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'account_takeover'. Total financial exposure: $111.92. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_CARD under L1 authorization.",
+      "summary": "Case HHG-007 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3514948 ($111.92, in billing region 264.0) at 0.87. Review and de... Initial fraud risk scored at 0.87. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Bank upstream fraud detection model flagged transaction with high risk score of 0.87.",
@@ -2471,16 +2271,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CONTRADICTORY",
           "weight": -0.7
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3514948"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -2512,24 +2302,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: require step-up authentication before blocking card"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_CARD",
-            "route": "L1",
-            "reason": "R2: customer denied unauthorized use; block card (exposure <= $2,500)"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -2768,7 +2546,7 @@ export const BENCHMARK_DATA: any = {
       "uncertainty_score": 0.64,
       "confidence_score": 36,
       "pattern": "none",
-      "summary": "Case HHG-008 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+      "summary": "Case HHG-008 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C13171 message: 'I never made this $55.68 purchase. Please check my card.' Refers to 355805... Initial fraud risk scored at 0.68. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Disputed transaction of $55.68 matches customer recurring charge history (seen 14 prior times).",
@@ -2779,16 +2557,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CONTRADICTORY",
           "weight": -0.8
-        },
-        {
-          "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3558054"
-          ],
-          "grade": "CONTRADICTORY",
-          "weight": -0.9
         }
       ],
       "connected_card_ids": [
@@ -2827,13 +2595,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R7: send informational reminder regarding subscription billing"
           }
         ],
-        "final": [],
-        "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -3055,13 +2822,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C08299-K1",
       "first_suspicious_txn_id": "3581141",
       "exposure_usd": 0.0,
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.62,
+      "uncertainty_score": 0.76,
+      "confidence_score": 24,
       "pattern": "none",
-      "summary": "Case HHG-009 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+      "summary": "Case HHG-009 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C08299 message: 'I never made this $30.02 purchase. Please check my card.' Refers to 358114... Initial fraud risk scored at 0.62. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Disputed transaction of $30.02 matches customer recurring charge history (seen 4 prior times).",
@@ -3072,16 +2839,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CONTRADICTORY",
           "weight": -0.8
-        },
-        {
-          "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3581141"
-          ],
-          "grade": "CONTRADICTORY",
-          "weight": -0.9
         }
       ],
       "connected_card_ids": [
@@ -3118,19 +2875,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R7: send informational reminder regarding subscription billing"
           }
         ],
-        "final": [
-          {
-            "action": "CLOSE_NO_FRAUD",
-            "route": "auto",
-            "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
-          }
-        ],
-        "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -3352,13 +3102,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C10434-K1",
       "first_suspicious_txn_id": "3506725",
       "exposure_usd": 1000.03,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.9,
+      "uncertainty_score": 0.2,
+      "confidence_score": 80,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-010 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $1,000.03. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-010 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3506725 ($1,000.03, online) at 0.90. Review and decide.... Initial fraud risk scored at 0.90. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Bank upstream fraud detection model flagged transaction with high risk score of 0.90.",
@@ -3409,16 +3159,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3506725"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -3460,46 +3200,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R6: shared origin detected across cards; raise monitoring sensitivity"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n**Case Reference:** HHG-010\n\n**I. SUMMARY OF ACTIVITY**\nBetween 2016-12-02 15:18:27 and 2016-12-02 15:18:27, the Institution identified suspicious transaction activity totaling $1,000.03 USD. This activity comprised 1 transaction(s) involving card C10434-K1, associated with customer profile C10434. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS & INSTRUMENTS**\n*   **Primary Customer Identifier:** C10434\n*   **Primary Card Number Reference:** C10434-K1\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | Windows 10 | edge 16.0 | 1366x768\n\n**III. TIMELINE & GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-02 15:18:27\n*   **Latest Activity Timestamp:** 2016-12-02 15:18:27\n*   **Affected Transaction Record IDs:** 3506725\n\n**IV. METHOD OF OPERATION & EVIDENCE**\nThe Institution\u2019s upstream fraud detection model flagged the transaction with a high risk score of 0.90. The transaction amount of $1,000.03 represents a severe statistical outlier (Z=+4.90), exceeding 3.5 standard deviations from the customer\u2019s baseline. Although the transaction originated in established billing region 469.0, matching the customer\u2019s historical profile, it was initiated from a newly observed device profile: Windows | Windows 10 | edge 16.0 | 1366x768.\n\nGraph analysis revealed that this specific device profile is shared across 3 other distinct customer accounts within the TigerGraph network, indicating coordinated synthetic identity or card-not-present syndicate activity. Furthermore, the cardholder explicitly denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nUpon confirmation of unauthorized access via customer validation, the Institution initiated immediate card control actions pursuant to Bank Fraud Policy v1.0. The card was permanently blocked and placed on fraud monitoring. This filing is submitted in compliance with BSA/AML mandates.",
-        "subjects": [
-          "C10434",
-          "C10434-K1",
-          "C11923",
-          "C13171",
-          "C02354"
-        ],
-        "total_amount_usd": 1000.03,
-        "activity_dates": [
-          "2016-12-02",
-          "2016-12-02"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -3781,7 +3490,7 @@ export const BENCHMARK_DATA: any = {
       "uncertainty_score": 0.6,
       "confidence_score": 40,
       "pattern": "none",
-      "summary": "Case HHG-011 concluded with verdict 'CLEARED' (P=0.05, U=0.550). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+      "summary": "Case HHG-011 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C11923 message: 'I never made this $131.30 purchase. Please check my card.' Refers to 35833... Initial fraud risk scored at 0.70. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Disputed transaction of $131.30 matches customer recurring charge history (seen 11 prior times).",
@@ -3802,16 +3511,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3583368"
-          ],
-          "grade": "CONTRADICTORY",
-          "weight": -0.9
         }
       ],
       "connected_card_ids": [
@@ -3850,13 +3549,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R7: send informational reminder regarding subscription billing"
           }
         ],
-        "final": [],
-        "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -4088,13 +3786,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C05876-K2",
       "first_suspicious_txn_id": "3553342",
       "exposure_usd": 0.0,
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.55,
+      "uncertainty_score": 0.9,
+      "confidence_score": 10,
       "pattern": "none",
-      "summary": "Case HHG-012 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was VERIFY_WITH_CUSTOMER, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+      "summary": "Case HHG-012 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3553342 ($30.91, in billing region 494.0) at 0.55. Review and dec... Initial fraud risk scored at 0.55. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Transaction in established billing region 494.0 matching customer historical profile.",
@@ -4105,16 +3803,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CONTRADICTORY",
           "weight": -0.7
-        },
-        {
-          "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3553342"
-          ],
-          "grade": "CONTRADICTORY",
-          "weight": -0.9
         }
       ],
       "connected_card_ids": [
@@ -4146,19 +3834,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: place card on 72-hour heightened monitoring pending response"
           }
         ],
-        "final": [
-          {
-            "action": "CLOSE_NO_FRAUD",
-            "route": "auto",
-            "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
-          }
-        ],
-        "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -4379,13 +4060,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C07671-K2",
       "first_suspicious_txn_id": "3526826",
       "exposure_usd": 35.66,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.92,
-      "uncertainty_score": 0.0,
-      "confidence_score": 100,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.76,
+      "uncertainty_score": 0.52,
+      "confidence_score": 48,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-013 concluded with verdict 'FRAUD' (P=0.92, U=0.000). Pattern: 'card_not_present_new_device'. Total financial exposure: $35.66. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-013 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3526826 ($35.66, online) at 0.76. Review and decide.... Initial fraud risk scored at 0.76. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Bank upstream fraud detection model flagged transaction with high risk score of 0.76.",
@@ -4416,16 +4097,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3526826"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -4467,46 +4138,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R6: shared origin detected across cards; raise monitoring sensitivity"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-013\n\n**I. SUMMARY OF ACTIVITY**\nBetween **2016-12-09 02:39:29** and **2016-12-09 02:39:29**, suspicious transaction activity totaling **$35.66** USD was identified across **1** transaction(s) involving card **C07671-K2** associated with customer profile **C07671**. The primary suspicious pattern identified is **'card_not_present_new_device'**.\n\n**II. SUBJECTS & INSTRUMENTS**\n*   **Primary Customer Identifier:** **C07671**\n*   **Primary Card Number Reference:** **C07671-K2**\n*   **Connected / Correlated Cards:** **C11923**, **C13171**, **C02354**\n*   **Associated Device Telemetry:** **Windows | chrome 66.0**\n\n**III. TIMELINE & GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** **2016-12-09 02:39:29**\n*   **Latest Activity Timestamp:** **2016-12-09 02:39:29**\n*   **Affected Transaction Record IDs:** **3526826**\n\n**IV. METHOD OF OPERATION & EVIDENCE**\nThe bank\u2019s upstream fraud detection model flagged the transaction with a high risk score of **0.76**. Device profile **Windows** was observed across **3** other distinct customer accounts in **TigerGraph**. The transaction was initiated from a newly observed device profile: **Windows | chrome 66.0**. The cardholder denied authorizing the transaction and confirmed the card remains in physical possession.\n\n**Multi-Entity Syndicate Linkage:** Graph analysis revealed that the device profile (**Windows | chrome 66.0**) is shared across multiple cardholder profiles, indicating coordinated synthetic identity or card-not-present syndicate activity.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nThe bank initiated immediate card control actions under **Bank Fraud Policy v1.0**. Customer validation confirmed unauthorized access. The card was permanently blocked and placed on fraud monitoring. This filing is submitted pursuant to BSA/AML compliance mandates.",
-        "subjects": [
-          "C07671",
-          "C07671-K2",
-          "C11923",
-          "C13171",
-          "C02354"
-        ],
-        "total_amount_usd": 35.66,
-        "activity_dates": [
-          "2016-12-09",
-          "2016-12-09"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -4762,13 +4402,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C13487-K1",
       "first_suspicious_txn_id": "3478561",
       "exposure_usd": 74.96,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.99,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.82,
+      "uncertainty_score": 0.36,
+      "confidence_score": 64,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-014 concluded with verdict 'FRAUD' (P=0.99, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $74.96. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-014 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Analyst request: several cards this month show purchases from the same unusual device profile. Revie... Initial fraud risk scored at 0.82. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Transaction in established billing region 191.0 matching customer historical profile.",
@@ -4799,16 +4439,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3478561"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -4849,45 +4479,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R6: shared origin detected across cards; raise monitoring sensitivity"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-014\n\n**I. SUMMARY OF ACTIVITY**\nDuring the period from 2016-11-22 16:11:00 to 2016-11-22 16:11:00, the Institution identified suspicious transaction activity totaling $74.96 USD. This activity comprised 1 transaction(s) processed on card C13487-K1, associated with customer profile C13487. The primary indicator of suspicious activity was the detection of a 'card_not_present_new_device' pattern.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C13487\n*   **Primary Card Number Reference:** C13487-K1\n*   **Connected / Correlated Cards:** C11923, C13171\n*   **Associated Device Telemetry:** SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-11-22 16:11:00\n*   **Latest Activity Timestamp:** 2016-11-22 16:11:00\n*   **Affected Transaction Record IDs:** 3478561\n\n**IV. METHOD OF OPERATION AND EVIDENTIARY BASIS**\nThe Institution\u2019s fraud detection systems flagged the transaction based on the following evidentiary factors:\n1.  The transaction occurred within established billing region 191.0, which aligns with the customer\u2019s historical profile.\n2.  The transaction was initiated from a newly observed device profile: SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080.\n3.  Graph analysis via TigerGraph revealed that the device profile (SM-G935F Build/NRD90M | Android 7.0 | chrome 62.0 for android | 1920x1080) is shared across 2 other distinct customer accounts.\n4.  The cardholder explicitly denied authorizing the transaction and confirmed that the physical card remains in their possession.\n\n**Multi-Entity Syndicate Linkage:**\nAdvanced graph analysis indicates that the device profile (SM-G935F Build/NRD90M | Android 7.0 | chrome 6",
-        "subjects": [
-          "C13487",
-          "C13487-K1",
-          "C11923",
-          "C13171"
-        ],
-        "total_amount_usd": 74.96,
-        "activity_dates": [
-          "2016-11-22",
-          "2016-11-22"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -5140,13 +4740,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C03042-K1",
       "first_suspicious_txn_id": "3464869",
       "exposure_usd": 599.94,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.92,
-      "uncertainty_score": 0.0,
-      "confidence_score": 100,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.77,
+      "uncertainty_score": 0.54,
+      "confidence_score": 46,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-015 concluded with verdict 'FRAUD' (P=0.92, U=0.000). Pattern: 'card_not_present_new_device'. Total financial exposure: $599.94. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-015 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3464869 ($599.94, online) at 0.77. Review and decide.... Initial fraud risk scored at 0.77. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Bank upstream fraud detection model flagged transaction with high risk score of 0.77.",
@@ -5187,16 +4787,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3464869"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -5238,46 +4828,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R6: shared origin detected across cards; raise monitoring sensitivity"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 NARRATIVE**\n\n**Case Reference:** HHG-015\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nBetween 2016-11-17 14:03:36 and 2016-11-17 14:03:36, the Institution identified suspicious transaction activity totaling $599.94 USD. This activity comprised 1 transaction(s) involving card C03042-K1, associated with customer profile C03042. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C03042\n*   **Primary Card Number Reference:** C03042-K1\n*   **Connected / Correlated Cards:** C11923, C07987, C02354\n*   **Associated Device Telemetry:** Trident/7.0 | Windows 8.1 | ie 11.0 for desktop | 1680x1050\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-11-17 14:03:36\n*   **Latest Activity Timestamp:** 2016-11-17 14:03:36\n*   **Affected Transaction Record IDs:** 3464869\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nThe Institution\u2019s upstream fraud detection model flagged the transaction with a high risk score of 0.77. The transaction amount of $599.94 represents a severe statistical outlier (Z=+3.55), exceeding 3.5 standard deviations from the customer\u2019s baseline activity. Device telemetry analysis identified the profile \"Trident/7.0 | Windows 8.1 | ie 11.0 for desktop | 1680x1050\" as a newly observed device for this customer. Furthermore, graph analysis via TigerGraph revealed that this specific device profile is shared across three other distinct customer accounts, indicating coordinated synthetic identity or card-not-present syndicate activity. The cardholder denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nUpon identification of the suspicious activity, the Institution initiated immediate card control actions in accordance with Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access. Consequently, the card was permanently blocked and placed on fraud monitoring. This filing is submitted pursuant to the Bank Secrecy Act (BSA) and Anti-Money Launder",
-        "subjects": [
-          "C03042",
-          "C03042-K1",
-          "C11923",
-          "C07987",
-          "C02354"
-        ],
-        "total_amount_usd": 599.94,
-        "activity_dates": [
-          "2016-11-17",
-          "2016-11-17"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -5543,13 +5102,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C09988-K1",
       "first_suspicious_txn_id": "3534820",
       "exposure_usd": 59.67,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.99,
-      "uncertainty_score": 0.0,
-      "confidence_score": 100,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.74,
+      "uncertainty_score": 0.52,
+      "confidence_score": 48,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-016 concluded with verdict 'FRAUD' (P=0.99, U=0.000). Pattern: 'card_not_present_new_device'. Total financial exposure: $59.67. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-016 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C09988 message: 'I never made this $59.67 purchase. Please check my card.' Refers to 353482... Initial fraud risk scored at 0.74. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Device profile Windows observed across 3 other distinct customer accounts in TigerGraph.",
@@ -5570,16 +5129,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3534820"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -5616,46 +5165,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: verify card possession and transaction details with customer"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-016\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nBetween 2016-12-11 22:39:08 and 2016-12-11 22:39:08, the Institution identified suspicious transaction activity totaling $59.67 USD. This activity comprised 1 transaction(s) involving card C09988-K1, associated with customer profile C09988. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C09988\n*   **Primary Card Number Reference:** C09988-K1\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | edge 16.0\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-11 22:39:08\n*   **Latest Activity Timestamp:** 2016-12-11 22:39:08\n*   **Affected Transaction Record IDs:** 3534820\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nInvestigative analysis revealed that the device profile \"Windows\" was observed across 3 other distinct customer accounts within the TigerGraph network. The transaction was initiated from a newly observed device profile: \"Windows | edge 16.0\". The cardholder denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\nGraph analysis further indicated that the device profile (\"Windows | edge 16.0\") is shared across multiple cardholder profiles. This linkage suggests coordinated synthetic identity or card-not-present syndicate activity.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nThe Institution initiated immediate card control actions in accordance with Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access. Consequently, the card was permanently blocked and placed on fraud monitoring. This filing is submitted pursuant to BSA/AML compliance mandates.",
-        "subjects": [
-          "C09988",
-          "C09988-K1",
-          "C11923",
-          "C13171",
-          "C02354"
-        ],
-        "total_amount_usd": 59.67,
-        "activity_dates": [
-          "2016-12-11",
-          "2016-12-11"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -5899,13 +5417,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C04570-K1",
       "first_suspicious_txn_id": "3450629",
       "exposure_usd": 100.09,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.57,
+      "uncertainty_score": 0.86,
+      "confidence_score": 14,
       "pattern": "card_not_present_fraud",
-      "summary": "Case HHG-017 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'card_not_present_fraud'. Total financial exposure: $100.09. Initial Stage 1 action was VERIFY_WITH_CUSTOMER, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-017 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3450629 ($100.09, online) at 0.57. Review and decide.... Initial fraud risk scored at 0.57. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Transaction in established billing region 204.0 matching customer historical profile.",
@@ -5921,16 +5439,6 @@ export const BENCHMARK_DATA: any = {
           "claim": "Device profile Windows observed across 3 other distinct customer accounts in TigerGraph.",
           "source": "graph",
           "ref": "query:device_clustering(device_info=Windows)",
-          "entity_ids": [
-            "3450629"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
           "entity_ids": [
             "3450629"
           ],
@@ -5972,46 +5480,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: place card on 72-hour heightened monitoring pending response"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR)**\n**Case Reference:** HHG-017\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nDuring the period from 2016-11-11 23:46:24 to 2016-11-11 23:46:24, the Institution identified suspicious transaction activity totaling $100.09 USD. This activity comprised 1 transaction(s) associated with card C04570-K1, linked to customer profile C04570. The primary indicator of suspicious activity is classified as 'card_not_present_fraud'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C04570\n*   **Primary Card Number Reference:** C04570-K1\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | Windows 10 | chrome 65.0 | 1920x1080\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-11-11 23:46:24\n*   **Latest Activity Timestamp:** 2016-11-11 23:46:24\n*   **Affected Transaction Record IDs:** 3450629\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nThe transaction occurred within established billing region 204.0, which aligns with the customer\u2019s historical profile. However, device telemetry analysis identified the profile \"Windows | Windows 10 | chrome 65.0 | 1920x1080\" as being observed across 3 other distinct customer accounts within the TigerGraph network.\n\nThe cardholder explicitly denied authorizing the transaction and confirmed that the physical card remains in their possession. Multi-entity syndicate linkage analysis revealed that the aforementioned device profile is shared across multiple cardholder profiles. This pattern indicates coordinated synthetic identity or card-not-present syndicate activity.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nIn response to the identified fraud indicators, the Institution initiated immediate card control actions in accordance with Bank Fraud Policy v1.0. Customer validation confirmed unauthorized access to the account. Consequently, the card was permanently blocked and placed on fraud monitoring. This report is filed pursuant to Bank Secrecy Act (BSA) and Anti-Money Laundering (AML) compliance mandates.",
-        "subjects": [
-          "C04570",
-          "C04570-K1",
-          "C11923",
-          "C13171",
-          "C02354"
-        ],
-        "total_amount_usd": 100.09,
-        "activity_dates": [
-          "2016-11-11",
-          "2016-11-11"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -6255,13 +5732,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C02354-K2",
       "first_suspicious_txn_id": "3491361",
       "exposure_usd": 0.0,
-      "status": "closed_cleared",
-      "verdict": "cleared",
-      "risk_score": 0.05,
-      "uncertainty_score": 0.33,
-      "confidence_score": 67,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.66,
+      "uncertainty_score": 0.68,
+      "confidence_score": 32,
       "pattern": "none",
-      "summary": "Case HHG-018 concluded with verdict 'CLEARED' (P=0.05, U=0.330). Pattern: 'none'. Total financial exposure: $0.00. Initial Stage 1 action was CREATE_CASE, progressed to Stage 2 final action CLOSE_NO_FRAUD under auto authorization.",
+      "summary": "Case HHG-018 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 349136... Initial fraud risk scored at 0.66. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Disputed transaction of $39.08 matches customer recurring charge history (seen 160 prior times).",
@@ -6272,16 +5749,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CONTRADICTORY",
           "weight": -0.8
-        },
-        {
-          "claim": "Cardholder affirmatively verified authorized transaction upon security notification.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3491361"
-          ],
-          "grade": "CONTRADICTORY",
-          "weight": -0.9
         }
       ],
       "connected_card_ids": [
@@ -6318,19 +5785,12 @@ export const BENCHMARK_DATA: any = {
             "reason": "R7: send informational reminder regarding subscription billing"
           }
         ],
-        "final": [
-          {
-            "action": "CLOSE_NO_FRAUD",
-            "route": "auto",
-            "reason": "R3: customer confirmed transaction as authorized; close alert as legitimate"
-          }
-        ],
-        "what_changed": "Customer confirmation cleared the alert as legitimate, upgrading action to immediate case closure."
+        "final": []
       },
       "sar": {
         "file": false,
-        "reason": null,
-        "narrative": null,
+        "reason": "",
+        "narrative": "",
         "subjects": [],
         "total_amount_usd": 0.0,
         "activity_dates": []
@@ -6552,13 +6012,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C07987-K2",
       "first_suspicious_txn_id": "3503878",
       "exposure_usd": 99.92,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.9,
+      "uncertainty_score": 0.2,
+      "confidence_score": 80,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-019 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $99.92. Initial Stage 1 action was DECLINE_TRANSACTION, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-019 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3503878 ($99.92, online) at 0.90. Review and decide.... Initial fraud risk scored at 0.90. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Bank upstream fraud detection model flagged transaction with high risk score of 0.90.",
@@ -6599,16 +6059,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3503878"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -6650,46 +6100,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R6: shared origin detected across cards; raise monitoring sensitivity"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR)**\n**Case Reference:** HHG-019\n\n**I. SUMMARY OF ACTIVITY**\nBetween 2016-12-01 17:28:53 and 2016-12-01 17:28:53, the Institution identified suspicious transaction activity totaling $99.92 USD across 1 transaction(s) involving card C07987-K2, associated with customer profile C07987. The primary suspicious pattern identified is 'card_not_present_new_device'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C07987\n*   **Primary Card Number Reference:** C07987-K2\n*   **Connected / Correlated Cards:** C11923, C13171, C02354\n*   **Associated Device Telemetry:** Windows | other | chrome 61.0 | 1280x720\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-01 17:28:53\n*   **Latest Activity Timestamp:** 2016-12-01 17:28:53\n*   **Affected Transaction Record IDs:** 3503878\n\n**IV. METHOD OF OPERATION AND EVIDENCE**\nThe Institution\u2019s upstream fraud detection model flagged the transaction with a high risk score of 0.90. Although the transaction originated in established billing region 264.0, which matches the customer\u2019s historical profile, the activity was initiated from a newly observed device profile: Windows | other | chrome 61.0 | 1280x720.\n\nGraph analysis via TigerGraph revealed that this specific device profile is shared across 3 other distinct customer accounts, indicating coordinated synthetic identity or card-not-present syndicate activity. Furthermore, the cardholder explicitly denied authorizing the transaction and confirmed that the card remains in their physical possession.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nIn response to the identified fraud indicators, the Institution initiated immediate card control actions under Bank Fraud Policy v1.0. Following customer validation confirming unauthorized access, the card was permanently blocked and placed on fraud monitoring. This filing is submitted pursuant to BSA/AML compliance mandates.",
-        "subjects": [
-          "C07987",
-          "C07987-K2",
-          "C11923",
-          "C13171",
-          "C02354"
-        ],
-        "total_amount_usd": 99.92,
-        "activity_dates": [
-          "2016-12-01",
-          "2016-12-01"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
@@ -6955,13 +6374,13 @@ export const BENCHMARK_DATA: any = {
       "primary_card_id": "C12265-K2",
       "first_suspicious_txn_id": "3509359",
       "exposure_usd": 125.08,
-      "status": "closed_fraud",
-      "verdict": "fraud",
-      "risk_score": 0.85,
-      "uncertainty_score": 0.15,
-      "confidence_score": 85,
+      "status": "open",
+      "verdict": "uncertain",
+      "risk_score": 0.52,
+      "uncertainty_score": 0.96,
+      "confidence_score": 4,
       "pattern": "card_not_present_new_device",
-      "summary": "Case HHG-020 concluded with verdict 'FRAUD' (P=0.85, U=0.150). Pattern: 'card_not_present_new_device'. Total financial exposure: $125.08. Initial Stage 1 action was VERIFY_WITH_CUSTOMER, progressed to Stage 2 final action BLOCK_ALL_CARDS under L2 authorization.",
+      "summary": "Case HHG-020 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3509359 ($125.08, online) at 0.52. Review and decide.... Initial fraud risk scored at 0.52. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
       "evidence": [
         {
           "claim": "Transaction in established billing region 264.0 matching customer historical profile.",
@@ -6992,16 +6411,6 @@ export const BENCHMARK_DATA: any = {
           ],
           "grade": "CIRCUMSTANTIAL",
           "weight": 0.6
-        },
-        {
-          "claim": "Cardholder denied authorizing the transaction and confirmed card remains in physical possession.",
-          "source": "customer_reply",
-          "ref": "service:customer_validation_response",
-          "entity_ids": [
-            "3509359"
-          ],
-          "grade": "DIRECT",
-          "weight": 1.0
         }
       ],
       "connected_card_ids": [
@@ -7038,46 +6447,15 @@ export const BENCHMARK_DATA: any = {
             "reason": "R1: place card on 72-hour heightened monitoring pending response"
           }
         ],
-        "final": [
-          {
-            "action": "BLOCK_ALL_CARDS",
-            "route": "L2",
-            "reason": "R10: multiple customer cards confirmed compromised; block all customer cards"
-          },
-          {
-            "action": "CREATE_CASE",
-            "route": "auto",
-            "reason": "R2: create internal fraud case with evidence attached and persist to graph"
-          },
-          {
-            "action": "FILE_REPORT",
-            "route": "L2",
-            "reason": "R2 and R6: shared device/network links to other cards"
-          },
-          {
-            "action": "MONITOR_CONNECTED_CARDS",
-            "route": "auto",
-            "reason": "R6: shared device profile / entity links across multiple cards"
-          }
-        ],
-        "what_changed": "Customer denial confirmed fraud, upgrading action from verification to permanent card block and SAR filing."
+        "final": []
       },
       "sar": {
-        "file": true,
-        "reason": "R2: confirmed unauthorized use",
-        "narrative": "**FINCEN SUSPICIOUS ACTIVITY REPORT (SAR) \u2014 INVESTIGATION NARRATIVE**\n\n**Case Reference:** HHG-020\n\n**I. SUMMARY OF SUSPICIOUS ACTIVITY**\nBetween 2016-12-03 06:04:26 and 2016-12-03 06:04:26, the Institution identified suspicious transaction activity totaling $125.08 USD. This activity comprised 1 transaction(s) involving card C12265-K2, associated with customer profile C12265. The primary suspicious pattern identified was 'card_not_present_new_device'.\n\n**II. SUBJECTS AND INSTRUMENTS**\n*   **Primary Customer Identifier:** C12265\n*   **Primary Card Number Reference:** C12265-K2\n*   **Connected / Correlated Cards:** C11923, C07987, C02354\n*   **Associated Device Telemetry:** Trident/7.0 | Windows 10 | ie 11.0 for desktop | 1920x1080\n\n**III. TIMELINE AND GEOGRAPHIC PROFILE**\n*   **Earliest Flagged Transaction Date:** 2016-12-03 06:04:26\n*   **Latest Activity Timestamp:** 2016-12-03 06:04:26\n*   **Affected Transaction Record IDs:** 3509359\n\n**IV. METHOD OF OPERATION AND EVIDENTIARY BASIS**\nThe Institution\u2019s monitoring systems flagged the transaction based on the following indicators:\n1.  The transaction originated from a newly observed device profile: Trident/7.0 | Windows 10 | ie 11.0 for desktop | 1920x1080.\n2.  Graph analysis via TigerGraph revealed that this specific device profile (Trident/7.0 | Windows 10 | ie 11.0 for desktop | 1920x1080) is shared across 3 other distinct customer accounts, indicating potential coordinated synthetic identity or card-not-present syndicate activity.\n3.  Although the transaction occurred in established billing region 264.0, which matches the customer\u2019s historical profile, the device anomaly and multi-entity linkage triggered a fraud alert.\n4.  Subsequent customer validation confirmed that the cardholder did not authorize the transaction and confirmed that the physical card remains in their possession.\n\n**V. INSTITUTIONAL ACTION TAKEN**\nUpon identification of the suspicious activity, the Institution initiated immediate card control actions in accordance with Bank Fraud Policy v1.0. Following confirmation of",
-        "subjects": [
-          "C12265",
-          "C12265-K2",
-          "C11923",
-          "C07987",
-          "C02354"
-        ],
-        "total_amount_usd": 125.08,
-        "activity_dates": [
-          "2016-12-03",
-          "2016-12-03"
-        ]
+        "file": false,
+        "reason": "",
+        "narrative": "",
+        "subjects": [],
+        "total_amount_usd": 0.0,
+        "activity_dates": []
       },
       "orchestrator_pipeline_trace": [
         {
