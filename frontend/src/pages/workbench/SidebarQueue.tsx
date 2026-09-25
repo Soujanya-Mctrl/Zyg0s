@@ -30,9 +30,9 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase, investigatedCa
     return {
       ALL: cases.length,
       ACTIVE: cases.filter(c => !isClosedStatus(c.status)).length,
-      EVIDENCE: cases.filter(c => (c.uncertainty_score ?? 0) > 0.40 || (c.risk_score > 0.35 && c.risk_score < 0.70)).length,
-      REVIEW: cases.filter(c => (c.risk_score >= 0.40 && c.risk_score < 0.75) || c.stage_1_action?.includes('REVIEW') || c.stage_1_action?.includes('STEP_UP')).length,
-      APPROVAL: cases.filter(c => c.risk_score >= 0.75 || c.stage_1_action?.includes('BLOCK') || c.stage_1_action?.includes('SAR') || c.stage_1_action?.includes('FREEZE')).length,
+      EVIDENCE: cases.filter(c => !isClosedStatus(c.status) && ((c.uncertainty_score ?? 0) > 0.40 || (c.risk_score > 0.35 && c.risk_score < 0.70))).length,
+      REVIEW: cases.filter(c => !isClosedStatus(c.status) && ((c.risk_score >= 0.40 && c.risk_score < 0.75) || c.stage_1_action?.includes('REVIEW') || c.stage_1_action?.includes('STEP_UP'))).length,
+      APPROVAL: cases.filter(c => !isClosedStatus(c.status) && (c.risk_score >= 0.75 || c.stage_1_action?.includes('BLOCK') || c.stage_1_action?.includes('SAR') || c.stage_1_action?.includes('FREEZE'))).length,
       CLOSED: cases.filter(c => isClosedStatus(c.status)).length,
     };
   }, [cases]);
@@ -42,11 +42,11 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase, investigatedCa
       case 'ACTIVE':
         return cases.filter(c => !isClosedStatus(c.status));
       case 'EVIDENCE':
-        return cases.filter(c => (c.uncertainty_score ?? 0) > 0.40 || (c.risk_score > 0.35 && c.risk_score < 0.70));
+        return cases.filter(c => !isClosedStatus(c.status) && ((c.uncertainty_score ?? 0) > 0.40 || (c.risk_score > 0.35 && c.risk_score < 0.70)));
       case 'REVIEW':
-        return cases.filter(c => (c.risk_score >= 0.40 && c.risk_score < 0.75) || c.stage_1_action?.includes('REVIEW') || c.stage_1_action?.includes('STEP_UP'));
+        return cases.filter(c => !isClosedStatus(c.status) && ((c.risk_score >= 0.40 && c.risk_score < 0.75) || c.stage_1_action?.includes('REVIEW') || c.stage_1_action?.includes('STEP_UP')));
       case 'APPROVAL':
-        return cases.filter(c => c.risk_score >= 0.75 || c.stage_1_action?.includes('BLOCK') || c.stage_1_action?.includes('SAR') || c.stage_1_action?.includes('FREEZE'));
+        return cases.filter(c => !isClosedStatus(c.status) && (c.risk_score >= 0.75 || c.stage_1_action?.includes('BLOCK') || c.stage_1_action?.includes('SAR') || c.stage_1_action?.includes('FREEZE')));
       case 'CLOSED':
         return cases.filter(c => isClosedStatus(c.status));
       case 'ALL':
@@ -123,8 +123,15 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase, investigatedCa
         ) : (
           filteredCases.map((c) => {
             const isActive = c.case_id === activeCaseId;
-            const isCaseInvestigated = investigatedCaseIds ? investigatedCaseIds.has(c.case_id) : true;
-            const riskDisplay = isCaseInvestigated ? `${Math.round(c.risk_score * 100)}%` : '--';
+            const isCaseInvestigated = investigatedCaseIds ? investigatedCaseIds.has(c.case_id) : false;
+            const riskPercent = Math.round((c.risk_score || 0) * 100);
+            const riskDisplay = `${riskPercent}%`;
+            const statusLabel = !isCaseInvestigated
+              ? 'OPEN ALERT'
+              : c.status === 'open'
+                ? 'INVESTIGATED'
+                : c.status.toUpperCase();
+
             return (
               <div 
                 key={c.case_id}
@@ -138,8 +145,8 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase, investigatedCa
                     {isActive ? <GlitchText text={c.case_id} active={isActive} /> : c.case_id}
                   </span>
                   {!isCaseInvestigated && (
-                    <span className="text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-zinc-700 bg-zinc-800/90 text-zinc-300">
-                      STANDBY
+                    <span className="text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-300">
+                      PENDING
                     </span>
                   )}
                 </div>
@@ -151,15 +158,15 @@ export function SidebarQueue({ cases, activeCaseId, onSelectCase, investigatedCa
                 
                 <div className="flex justify-between items-end font-mono text-[10px] tracking-widest uppercase">
                   <div>
-                    <div className="text-zinc-600 mb-0.5 text-[9px]">RISK</div>
-                    <div className={`font-bold ${isCaseInvestigated ? 'text-white' : 'text-zinc-600'}`}>
+                    <div className="text-zinc-500 mb-0.5 text-[9px]">RISK</div>
+                    <div className={`font-bold ${isActive ? 'text-white' : 'text-zinc-300'}`}>
                       {riskDisplay}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${!isCaseInvestigated ? 'bg-zinc-600' : c.status === 'open' ? 'bg-white animate-pulse' : 'bg-zinc-400'}`} />
-                    <span className={!isCaseInvestigated ? 'text-zinc-500' : c.status === 'open' ? 'text-white font-bold' : 'text-zinc-400'}>
-                      {!isCaseInvestigated ? 'AWAITING' : c.status === 'open' ? 'INVESTIGATED' : c.status}
+                    <div className={`w-1.5 h-1.5 rounded-full ${!isCaseInvestigated ? 'bg-amber-400/80 animate-pulse' : c.status === 'open' ? 'bg-white animate-pulse' : 'bg-zinc-500'}`} />
+                    <span className={!isCaseInvestigated ? 'text-zinc-300 font-medium' : c.status === 'open' ? 'text-white font-bold' : 'text-zinc-400'}>
+                      {statusLabel}
                     </span>
                   </div>
                 </div>

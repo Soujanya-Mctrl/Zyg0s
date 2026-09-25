@@ -59,7 +59,8 @@
     ],
     "summary": "Case HHG-006 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C07297 message: 'I never made this $482.12 purchase. Please check my card.' Refers to 34766... Initial fraud risk scored at 0.78. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
-    "graph_case_id": "CASE-SAVANNA-HHG-006"
+    "graph_case_id": "CASE-SAVANNA-HHG-006",
+    "amount": 482.12
   },
   "evidence_requests": [
     {

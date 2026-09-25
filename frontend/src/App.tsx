@@ -7,6 +7,7 @@ import { FeaturesSection } from './components/FeaturesSection';
 import { FaqSection } from './components/FaqSection';
 import { WorkbenchDashboard } from './pages/WorkbenchDashboard';
 import { DocsPage } from './pages/DocsPage';
+import { SarRegistrationPage } from './pages/SarRegistrationPage';
 
 export function LandingPage() {
   const [currentTheme, setCurrentTheme] = useState<'dark' | 'light'>('dark');
@@ -125,6 +126,8 @@ export function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/workbench/*" element={<WorkbenchDashboard />} />
       <Route path="/docs" element={<DocsPage />} />
+      <Route path="/sar" element={<SarRegistrationPage />} />
+      <Route path="/fincen-sar" element={<SarRegistrationPage />} />
     </Routes>
   );
 }

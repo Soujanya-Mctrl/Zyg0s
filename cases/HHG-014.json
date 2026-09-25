@@ -58,7 +58,8 @@
     ],
     "summary": "Case HHG-014 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Analyst request: several cards this month show purchases from the same unusual device profile. Revie... Initial fraud risk scored at 0.82. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
-    "graph_case_id": "CASE-SAVANNA-HHG-014"
+    "graph_case_id": "CASE-SAVANNA-HHG-014",
+    "amount": 74.96
   },
   "evidence_requests": [
     {

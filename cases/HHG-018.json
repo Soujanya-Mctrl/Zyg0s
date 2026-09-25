@@ -12,7 +12,7 @@
       "C02354-K2"
     ],
     "connected_device_profiles": [],
-    "exposure_usd": 0.0,
+    "exposure_usd": 39.08,
     "evidence": [
       {
         "claim": "Disputed transaction of $39.08 matches customer recurring charge history (seen 160 prior times).",
@@ -32,7 +32,8 @@
     ],
     "summary": "Case HHG-018 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Customer C02354 message: 'I never made this $39.08 purchase. Please check my card.' Refers to 349136... Initial fraud risk scored at 0.66. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
-    "graph_case_id": "CASE-SAVANNA-HHG-018"
+    "graph_case_id": "CASE-SAVANNA-HHG-018",
+    "amount": 39.08
   },
   "evidence_requests": [
     {

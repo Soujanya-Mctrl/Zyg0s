@@ -1,4 +1,5 @@
-import { Crosshair, Fingerprint, Gavel, Loader2, CheckCircle2, ShieldAlert, Zap, AlertCircle } from 'lucide-react';
+import { Crosshair, Fingerprint, Gavel, Loader2, CheckCircle2, ShieldAlert, Zap, AlertCircle, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { MarkdownViewer } from '../../components/ui/MarkdownViewer';
 
 interface IntelligencePanelProps {
@@ -28,6 +29,8 @@ export function IntelligencePanel({
   liveConfidence = null,
   onStartInvestigation,
 }: IntelligencePanelProps) {
+  const navigate = useNavigate();
+
   if (!caseDetails) {
     return (
       <aside className="w-[380px] border-l border-white/[0.08] bg-black flex flex-col h-full overflow-y-auto shrink-0 p-6 items-center justify-center">
@@ -244,9 +247,16 @@ export function IntelligencePanel({
               </span>
             </div>
             {caseDetails.sar?.file && isInvestigated && (
-              <div className="flex items-start justify-between text-white font-bold">
-                <span className="mr-2 text-zinc-400">FinCEN SAR Generated</span>
-                <span>MANDATORY</span>
+              <div className="flex items-center justify-between text-white font-bold pt-1.5 border-t border-zinc-800/80">
+                <span className="text-zinc-400">FinCEN SAR Generated</span>
+                <button
+                  onClick={() => navigate(`/sar?caseId=${caseDetails.case_id}`)}
+                  className="px-2 py-0.5 rounded bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-[9px] font-mono flex items-center gap-1 cursor-pointer transition-colors"
+                  title="Inspect official FinCEN Form 111 electronic filing"
+                >
+                  <span>MANDATORY (FORM 111)</span>
+                  <ExternalLink size={10} />
+                </button>
               </div>
             )}
           </div>

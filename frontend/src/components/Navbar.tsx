@@ -172,6 +172,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <GlitchText text="DOCS" isActive={false} isLight={isLight} />
         </Link>
+
+        {/* Dedicated FinCEN SAR Page Link */}
+        <Link
+          to="/sar"
+          className={`relative py-1 text-[11px] lg:text-xs font-mono tracking-[0.22em] transition-all duration-200 flex items-center cursor-pointer group ${
+            isLight
+              ? 'text-zinc-500 hover:text-black font-normal'
+              : 'text-zinc-400 hover:text-white font-normal'
+          }`}
+        >
+          <GlitchText text="FINCEN SAR" isActive={false} isLight={isLight} />
+        </Link>
       </nav>
 
       {/* Right Controls */}

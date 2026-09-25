@@ -277,8 +277,13 @@ export function InvestigationCanvas({
     const customerId = caseDetails?.customer_id || 'C08623';
     const cardId = caseDetails?.primary_card_id || 'C08623-K2';
     const txId = caseDetails?.first_suspicious_txn_id || '3530164';
-    const exposure =
-      caseDetails?.exposure_usd !== undefined ? `$${Math.round(caseDetails.exposure_usd).toLocaleString()}` : '$0';
+    const rawAmt =
+      caseDetails?.exposure_usd !== undefined && caseDetails.exposure_usd > 0
+        ? caseDetails.exposure_usd
+        : caseDetails?.amount !== undefined && caseDetails.amount > 0
+          ? caseDetails.amount
+          : 77.07;
+    const exposure = `$${rawAmt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const deviceRaw = caseDetails?.connected_device_profiles?.[0] || 'Unknown Device';
     const precedents = caseDetails?.similar_prior_cases || [];
 
@@ -763,7 +768,7 @@ export function InvestigationCanvas({
                 <div className="flex justify-between items-center text-zinc-400">
                   <span>EXPOSURE AMOUNT</span>
                   <span className="text-white font-bold text-sm">
-                    ${(caseDetails?.exposure_usd || 1250.0).toLocaleString()}
+                    ${(caseDetails?.exposure_usd || caseDetails?.amount || 77.07).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-zinc-400">

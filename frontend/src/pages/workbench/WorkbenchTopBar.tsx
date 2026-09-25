@@ -1,5 +1,5 @@
 import { StatusDot } from '../../components/ui/Micrographics';
-import { ArrowLeft, Cpu, Database, RotateCcw, BookOpen, Zap, Loader2 } from 'lucide-react';
+import { ArrowLeft, Cpu, Database, RotateCcw, BookOpen, Zap, Loader2, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { HealthStatus } from '../../api/client';
 
@@ -98,6 +98,16 @@ export function WorkbenchTopBar({
         >
           <BookOpen size={11} className="text-white" />
           <span>Docs</span>
+        </button>
+
+        {/* FinCEN SAR Link Button */}
+        <button
+          onClick={() => navigate('/sar')}
+          className="px-2.5 py-1 border border-white/20 hover:border-white text-zinc-300 hover:text-white transition-colors rounded text-[9px] flex items-center gap-1.5 bg-white/[0.02] cursor-pointer"
+          title="Open FinCEN SAR Electronic Filing Registry"
+        >
+          <FileText size={11} className="text-white" />
+          <span>FinCEN SAR</span>
         </button>
 
         {/* TigerGraph MCP Status */}

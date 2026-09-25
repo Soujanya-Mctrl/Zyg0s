@@ -12,7 +12,7 @@
       "C12382-K1"
     ],
     "connected_device_profiles": [],
-    "exposure_usd": 0.0,
+    "exposure_usd": 77.07,
     "evidence": [
       {
         "claim": "Transaction in established billing region 444.0 matching customer historical profile.",
@@ -28,7 +28,8 @@
     "similar_prior_cases": [],
     "summary": "Case HHG-001 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3514030 ($77.07, in billing region 444.0) at 0.61. Review and dec... Initial fraud risk scored at 0.61. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
-    "graph_case_id": "CASE-SAVANNA-HHG-001"
+    "graph_case_id": "CASE-SAVANNA-HHG-001",
+    "amount": 77.07
   },
   "evidence_requests": [
     {

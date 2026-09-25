@@ -59,7 +59,8 @@
     ],
     "summary": "Case HHG-005 is ACTIVE and currently UNDER INVESTIGATION. Triggered by: Real-time model scored transaction 3523199 ($100.07, online) at 0.54. Review and decide.... Initial fraud risk scored at 0.54. Epistemic uncertainty exceeds policy threshold. Awaiting Step-Up Authentication challenge execution.",
     "written_to_graph": false,
-    "graph_case_id": "CASE-SAVANNA-HHG-005"
+    "graph_case_id": "CASE-SAVANNA-HHG-005",
+    "amount": 100.07
   },
   "evidence_requests": [
     {

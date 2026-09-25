@@ -43,6 +43,29 @@ CASE_INITIAL_METRICS = {
     "HHG-020": {"risk_score": 0.52, "uncertainty": 0.96, "verdict": "uncertain", "trigger_type": "risk_score"},
 }
 
+CASE_AMOUNTS = {
+    "HHG-001": 77.07,
+    "HHG-002": 292.36,
+    "HHG-003": 49.00,
+    "HHG-004": 128.33,
+    "HHG-005": 100.07,
+    "HHG-006": 482.12,
+    "HHG-007": 111.92,
+    "HHG-008": 55.68,
+    "HHG-009": 30.02,
+    "HHG-010": 1000.03,
+    "HHG-011": 131.30,
+    "HHG-012": 30.91,
+    "HHG-013": 35.66,
+    "HHG-014": 74.96,
+    "HHG-015": 599.94,
+    "HHG-016": 59.67,
+    "HHG-017": 100.09,
+    "HHG-018": 39.08,
+    "HHG-019": 99.92,
+    "HHG-020": 125.08,
+}
+
 
 def load_case_pack() -> dict:
     pack = {}
@@ -86,6 +109,8 @@ def reset_all_cases():
         # 2. Reset case state to OPEN / UNCERTAIN
         case_inner["status"] = "open"
         case_inner["verdict"] = "uncertain"
+        case_inner["exposure_usd"] = CASE_AMOUNTS.get(case_id, 0.0)
+        case_inner["amount"] = CASE_AMOUNTS.get(case_id, 0.0)
         case_inner["fraud_probability"] = round(init_risk, 3)
         case_inner["summary"] = (
             f"Case {case_id} is ACTIVE and currently UNDER INVESTIGATION. "
