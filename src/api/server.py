@@ -28,10 +28,12 @@ from pydantic import BaseModel, Field
 
 from src.agent.llm_client import get_llm_client
 
-try:
-    from src.agent.workflow import get_orchestrator
-except Exception:
-    get_orchestrator = None  # type: ignore
+def get_orchestrator() -> Any:
+    try:
+        from src.agent.workflow import get_orchestrator as _go
+        return _go()
+    except Exception:
+        return None
 
 CASES_DIR = BASE_DIR / "cases"
 
@@ -376,7 +378,9 @@ def investigate_case(case_id: str):
         except Exception as e:
             print(f"Warning: Failed to sync benchmark for {case_id}: {e}")
     else:
-        orch = get_orchestrator() if get_orchestrator is not None else None
+        orch = get_orchestrator()
+        if orch is None:
+            raise HTTPException(status_code=503, detail="Investigation orchestrator unavailable in serverless environment")
         case_meta = {"case_id": case_id}
         case_pack_path = BASE_DIR / "data" / "hhgoa_ieee" / "case_pack.csv"
         if case_pack_path.exists():
@@ -438,6 +442,8 @@ def run_custom_pipeline(req: RunPipelineRequest):
     deterministic + AI inference pipeline coordinated by the Master Orchestrator.
     """
     orch = get_orchestrator()
+    if orch is None:
+        raise HTTPException(status_code=503, detail="Investigation orchestrator unavailable in serverless environment")
     case_meta = req.model_dump()
     out = orch.run_investigation(case_meta)
     
